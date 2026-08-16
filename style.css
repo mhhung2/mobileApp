@@ -1092,3 +1092,78 @@ input[type="date"]::-webkit-date-and-time-value {
 .toast-success { border-left: 4px solid #34c759; }
 .toast-warning { border-left: 4px solid #ff9500; }
 .toast-danger  { border-left: 4px solid #ff3b30; }
+
+
+/* ==========================================
+   倒數更新模組 (Refresh Timer) 樣式
+   ========================================== */
+.refresh-timer-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e5ea);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.refresh-timer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #636366;
+  font-weight: 500;
+}
+
+/* 秒數高亮標籤 */
+.refresh-seconds-badge {
+  background-color: rgba(0, 122, 255, 0.1);
+  color: var(--primary-color, #007aff);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* 刷新按鈕 */
+.refresh-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border-color, #e5e5ea);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-color, #007aff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-action-btn:active {
+  background-color: rgba(0, 122, 255, 0.08);
+  transform: scale(0.96);
+}
+
+.refresh-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  transition: transform 0.5s ease;
+}
+
+/* 旋轉動畫 (刷新時觸發) */
+.refresh-icon.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
