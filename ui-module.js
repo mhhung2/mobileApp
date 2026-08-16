@@ -222,23 +222,82 @@ const UI = {
       const form = document.createElement('form');
 
       item.fields.forEach(field => {
+        // ------------------------------------------
+        // 1. 靜態裝飾與內文元件 (可在欄位之間自由插隊)
+        // ------------------------------------------
+        if (field.type === 'title') {
+          const titleEl = document.createElement('div');
+          titleEl.className = 'item-title';
+          titleEl.innerText = field.text || '';
+          form.appendChild(titleEl);
+          return;
+        }
+        else if (field.type === 'subtitle') {
+          const subEl = document.createElement('div');
+          subEl.className = 'item-subtitle';
+          subEl.innerText = field.text || '';
+          form.appendChild(subEl);
+          return;
+        }
+        else if (field.type === 'text') {
+          const textEl = document.createElement('div');
+          textEl.className = 'item-text';
+          textEl.innerText = field.text || '';
+          form.appendChild(textEl);
+          return;
+        }
+        else if (field.type === 'quote') {
+          const quoteEl = document.createElement('div');
+          quoteEl.className = 'item-quote';
+          quoteEl.innerText = field.text || '';
+          form.appendChild(quoteEl);
+          return;
+        }
+        else if (field.type === 'badge') {
+          const badgeEl = document.createElement('span');
+          badgeEl.className = `item-badge badge-${field.variant || 'info'}`;
+          badgeEl.innerText = field.text || '';
+          form.appendChild(badgeEl);
+          return;
+        }
+        else if (field.type === 'button') {
+          const btnEl = document.createElement('button');
+          btnEl.type = 'button'; // 避免觸發 form submit
+          btnEl.className = `btn btn-${field.variant || 'primary'}`;
+          btnEl.innerText = field.text || '按鈕';
+          if (field.disabled) btnEl.disabled = true;
+          if (field.onClick && typeof window[field.onClick] === 'function') {
+            btnEl.onclick = window[field.onClick];
+          }
+          form.appendChild(btnEl);
+          return;
+        }
+        else if (field.type === 'hidden') {
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = field.name;
+          hiddenInput.value = field.defaultValue !== undefined ? field.defaultValue : (field.value || '');
+          form.appendChild(hiddenInput);
+          return;
+        }
+
+        // ------------------------------------------
+        // 2. 表單輸入欄位容器 (.form-group)
+        // ------------------------------------------
         const group = document.createElement('div');
         group.className = 'form-group';
-        group.innerHTML = `<label>${field.label}${field.required ? ' <span style="color:#ff3b30">*</span>' : ''}</label>`;
+        group.innerHTML = `<label>${field.label || ''}${field.required ? ' <span style="color:#ff3b30">*</span>' : ''}</label>`;
 
-        // 1. Select 下拉選單
+        // Select 下拉選單
         if (field.type === 'select') {
           const select = document.createElement('select');
           select.className = 'form-control';
           select.name = field.name;
           if (field.required) select.required = true;
-
           field.options.forEach(opt => {
             const val = opt.value !== undefined ? opt.value : opt;
             const text = opt.label !== undefined ? opt.label : opt;
             const optionEl = new Option(text, val);
-            
-            // 匹配 defaultValue
             if (field.defaultValue !== undefined && String(val) === String(field.defaultValue)) {
               optionEl.selected = true;
             }
@@ -247,26 +306,21 @@ const UI = {
           group.appendChild(select);
         }
 
-        // 2. Textarea 多行文字框
+        // Textarea 多行文字框
         else if (field.type === 'textarea') {
           const textarea = document.createElement('textarea');
           textarea.className = 'form-control';
           textarea.name = field.name;
           textarea.rows = field.rows || 3;
           textarea.placeholder = field.placeholder || '';
-          
-          // 帶入 defaultValue
-          if (field.defaultValue !== undefined) {
-            textarea.value = field.defaultValue;
-          }
-
+          if (field.defaultValue !== undefined) textarea.value = field.defaultValue;
           if (field.maxLength) textarea.maxLength = field.maxLength;
           if (field.minLength) textarea.minLength = field.minLength;
           if (field.required) textarea.required = true;
           group.appendChild(textarea);
         }
 
-        // 3. Radio (單選) & Checkbox (複選)
+        // Radio & Checkbox
         else if (field.type === 'radio' || field.type === 'checkbox') {
           const optGroup = document.createElement('div');
           optGroup.className = `option-group ${field.inline ? 'inline' : ''}`;
@@ -275,7 +329,6 @@ const UI = {
             field.options.forEach((opt, idx) => {
               const val = opt.value !== undefined ? opt.value : opt;
               const labelText = opt.label !== undefined ? opt.label : opt;
-
               const labelEl = document.createElement('label');
               labelEl.className = 'option-label';
 
@@ -284,20 +337,15 @@ const UI = {
               inputEl.name = field.name;
               inputEl.value = val;
 
-              // 匹配 defaultValue (支援單一值或陣列，如 ["network", "software"])
               if (field.defaultValue !== undefined) {
                 if (Array.isArray(field.defaultValue)) {
-                  if (field.defaultValue.map(String).includes(String(val))) {
-                    inputEl.checked = true;
-                  }
+                  if (field.defaultValue.map(String).includes(String(val))) inputEl.checked = true;
                 } else if (String(val) === String(field.defaultValue)) {
                   inputEl.checked = true;
                 }
               }
 
-              if (field.required && field.type === 'radio' && idx === 0) {
-                inputEl.required = true;
-              }
+              if (field.required && field.type === 'radio' && idx === 0) inputEl.required = true;
 
               labelEl.appendChild(inputEl);
               labelEl.appendChild(document.createTextNode(labelText));
@@ -307,38 +355,23 @@ const UI = {
           group.appendChild(optGroup);
         }
 
-        // 4. File 檔案上傳 (註：瀏覽器基於安全性不支援設定 File value，僅支援宣告預設提示)
-        else if (field.type === 'file') {
-          const fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          fileInput.className = 'form-control';
-          fileInput.name = field.name;
-          if (field.accept) fileInput.accept = field.accept;
-          if (field.multiple) fileInput.multiple = true;
-          if (field.required) fileInput.required = true;
-          group.appendChild(fileInput);
-        }
-
-        //Switch (開關切換器)
+        // Switch 開關
         else if (field.type === 'switch') {
           const switchContainer = document.createElement('div');
           switchContainer.className = 'switch-group';
 
-          // 1. 左側標籤與提示文字
           const textSpan = document.createElement('span');
           textSpan.className = 'switch-label-text';
           textSpan.innerText = field.label || '';
 
-          // 2. 右側開關本體
           const switchLabel = document.createElement('label');
           switchLabel.className = 'switch-toggle';
 
           const inputEl = document.createElement('input');
           inputEl.type = 'checkbox';
           inputEl.name = field.name;
-          inputEl.value = field.value || 'true'; // 開啟時提交的值 (預設為 "true")
+          inputEl.value = field.value || 'true';
 
-          // 設定 defaultValue 預設開關狀態
           if (field.defaultValue === true || field.defaultValue === 'true' || field.defaultValue === 'ON') {
             inputEl.checked = true;
           }
@@ -352,21 +385,23 @@ const UI = {
           switchContainer.appendChild(textSpan);
           switchContainer.appendChild(switchLabel);
 
-          // 注意：Switch 自身已包含標籤，替換原本外層的 group HTML
           group.innerHTML = '';
           group.appendChild(switchContainer);
         }
-          
-        else if (field.type === 'hidden') {
-          const hiddenInput = document.createElement('input');
-          hiddenInput.type = 'hidden';
-          hiddenInput.name = field.name;
-          hiddenInput.value = field.defaultValue !== undefined ? field.defaultValue : (field.value || '');
-          form.appendChild(hiddenInput); // 直接掛載到 form，完全不佔用 UI 空間
-          return; // 跳過後續 group 的建立
+
+        // File 上傳
+        else if (field.type === 'file') {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.className = 'form-control';
+          fileInput.name = field.name;
+          if (field.accept) fileInput.accept = field.accept;
+          if (field.multiple) fileInput.multiple = true;
+          if (field.required) fileInput.required = true;
+          group.appendChild(fileInput);
         }
 
-        // 5. 一般文字、數字、日期欄位 (text, number_text, date, time 等)
+        // 一般輸入框 (text, number_text, date, time, datetime-local 等)
         else {
           const input = document.createElement('input');
           input.className = 'form-control';
@@ -384,11 +419,7 @@ const UI = {
             input.type = field.type || 'text';
           }
 
-          // 帶入 defaultValue
-          if (field.defaultValue !== undefined) {
-            input.value = field.defaultValue;
-          }
-
+          if (field.defaultValue !== undefined) input.value = field.defaultValue;
           if (field.maxLength) input.maxLength = field.maxLength;
           if (field.minLength) input.minLength = field.minLength;
           if (field.min) input.min = field.min;
@@ -401,33 +432,29 @@ const UI = {
         form.appendChild(group);
       });
 
-
+      // ------------------------------------------
+      // 3. 表單底部按鈕列 (提交 + 清除/重置)
+      // ------------------------------------------
       const btnGroup = document.createElement('div');
       btnGroup.className = 'btn-group align-left';
-      // 1. 提交按鈕
+
       const submitBtn = document.createElement('button');
       submitBtn.type = 'submit';
       submitBtn.className = 'btn btn-inline btn-primary';
       submitBtn.innerText = item.submitText || '提交';
       btnGroup.appendChild(submitBtn);
 
-      // 2. 清除 / 重置按鈕 (當 JSON 中設定 resetText 或 showReset: true 時顯示)
       if (item.showReset || item.resetText) {
         const resetBtn = document.createElement('button');
         resetBtn.type = 'reset';
         resetBtn.className = 'btn btn-inline btn-secondary';
         resetBtn.innerText = item.resetText || '清除重置';
-        
-        // 點擊重置時的動作
-        resetBtn.onclick = (e) => {
-          // 如果有自訂的 onReset 回調函式，則觸發它
-          if (item.onReset && typeof window[item.onReset] === 'function') {
-            window[item.onReset](form);
-          }
-        };
-
+        if (item.onReset && typeof window[item.onReset] === 'function') {
+          resetBtn.onclick = () => window[item.onReset](form);
+        }
         btnGroup.appendChild(resetBtn);
       }
+
       form.appendChild(btnGroup);
 
       // 表單提交處理
