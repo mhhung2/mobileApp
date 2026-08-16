@@ -117,6 +117,10 @@ body {
 
 /* 主題顏色：黃色/橘色 (Warning / Caution) */
 .btn-warning {
+  background-color: #ffd700;
+  color: #1c1c1e;
+}
+.btn-caution {
   background-color: #ff9500;
   color: #ffffff;
 }
