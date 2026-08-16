@@ -58,5 +58,30 @@ async function handleFormSubmit(formData) {
   }
 }
 
+function handleShowDetails() {
+  UI.showModal({
+    title: '勤務詳細補充說明',
+    position: 'bottom', // 'bottom' (BottomSheet) 或 'center' (Modal)
+    items: [
+      { type: 'text', text: '本次 HKR 勤務由 DC2/HB 主責應對，全體急救合格人員已抵達指定地點。' },
+      {
+        type: 'mediaPreview',
+        src: 'https://picsum.photos/500/250',
+        caption: '現場裝備與車輛巡檢照片'
+      },
+      {
+        type: 'button',
+        text: '確認知悉並關閉',
+        variant: 'primary',
+        onClick: 'UI.closeModal'
+      }
+    ]
+  });
+}
+
+function handleSendAlert() {
+  UI.showToast('已成功發送緊急通知給 Team B 成員！', 'success', 3000);
+}
+
 // 網頁載入完成後觸發
 document.addEventListener('DOMContentLoaded', loadFormSchema);
