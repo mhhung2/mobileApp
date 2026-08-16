@@ -201,3 +201,70 @@ body {
   margin-top: 8px;
   margin-bottom: 8px;
 }
+
+/* ==========================================
+   Card / Header 內部彈性元件樣式
+   ========================================== */
+
+/* 內文與引言 */
+.item-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: var(--text-color);
+}
+
+.item-subtitle {
+  font-size: 14px;
+  color: #8e8e93;
+  margin: 0 0 10px 0;
+}
+
+.item-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3a3a3c;
+  margin-bottom: 8px;
+}
+
+.item-quote {
+  font-size: 13px;
+  border-left: 3px solid var(--primary-color);
+  padding-left: 10px;
+  margin: 8px 0;
+  color: #636366;
+  background: #f8f8fb;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-radius: 0 6px 6px 0;
+}
+
+/* 狀態標籤 (Badge) */
+.item-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-right: 6px;
+  margin-bottom: 8px;
+}
+.badge-info { background: #e5f1ff; color: #007aff; }
+.badge-success { background: #e3f9e5; color: #34c759; }
+.badge-warning { background: #fff8e5; color: #ff9500; }
+.badge-danger { background: #ffe5e5; color: #ff3b30; }
+
+/* 按鈕樣式拓展 */
+.btn-secondary {
+  background-color: #e5e5ea;
+  color: var(--text-color);
+}
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+.btn-danger {
+  background-color: #ff3b30;
+  color: #ffffff;
+}
