@@ -41,6 +41,8 @@
       padding: 16px; margin-bottom: 16px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
+    .app-card h3 { margin: 0 0 8px 0; font-size: 16px; }
+    .app-text { font-size: 14px; color: #3a3a3c; line-height: 1.4; }
 
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #636366; }
@@ -59,7 +61,7 @@
 
     .loading-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       display: flex; align-items: center; justify-content: center;
       font-weight: bold; z-index: 999;
     }
@@ -70,26 +72,10 @@
   <div id="app" class="mobile-container"></div>
 
   <script>
-    // ⚠️ 請將下方的網址替換為你 GAS 部署取得的 Web App URL
+    // ⚠️ 請填入你的 GAS Web App URL
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1zD0KL6xRFbxXCxtyXUrwmggO-q1xkJRkkzH8er7cjcc9NhBRsiyga8BbNl_ZNkRc/exec";
 
-    // 頁面動態結構配置
-    const pageSchema = [
-      { type: 'header', title: '快速管理系統', subtitle: 'GitHub + GAS 串接範本' },
-      {
-        type: 'form',
-        id: 'mainForm',
-        fields: [
-          { type: 'text', name: 'userName', label: '姓名', placeholder: '請輸入姓名' },
-          { type: 'tel', name: 'userPhone', label: '電話', placeholder: '請輸入電話' },
-          { type: 'select', name: 'department', label: '部門/單位', options: ['單位 A', '單位 B', '單位 C'] }
-        ],
-        submitText: '確認提交',
-        onSubmit: 'handleFormSubmit'
-      }
-    ];
-
-    // 前端 UI 渲染引擎
+    // 前端 UI 動態生成器
     const UI = {
       render(containerId, schema) {
         const container = document.getElementById(containerId);
@@ -105,6 +91,13 @@
           const div = document.createElement('div');
           div.className = 'app-header';
           div.innerHTML = `<h1>${item.title}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
+          return div;
+        }
+
+        if (item.type === 'card') {
+          const div = document.createElement('div');
+          div.className = 'app-card';
+          div.innerHTML = `<h3>${item.title}</h3><div class="app-text">${item.content}</div>`;
           return div;
         }
 
@@ -152,56 +145,67 @@
         }
       },
 
-      showLoading(show) {
+      showLoading(show, message = '載入中...') {
         let loader = document.getElementById('app-loader');
         if (show) {
           if (!loader) {
             loader = document.createElement('div');
             loader.id = 'app-loader';
             loader.className = 'loading-overlay';
-            loader.innerText = '處理中，請稍候...';
             document.body.appendChild(loader);
           }
+          loader.innerText = message;
         } else if (loader) {
           loader.remove();
         }
       }
     };
 
-    // 透過 fetch 與 GAS API 串接
-    async function handleFormSubmit(formData) {
-      UI.showLoading(true);
-
+    // 1. 初始化：向 GAS 讀取 UI 結構並繪製畫面
+    async function loadFormSchema() {
+      UI.showLoading(true, '載入介面模组中...');
       try {
-        // 使用 text/plain 避免觸發複雜的 CORS 預檢請求
+        const response = await fetch(GAS_WEB_APP_URL);
+        const result = await response.json();
+        UI.showLoading(false);
+
+        if (result.success && result.schema) {
+          UI.render('app', result.schema);
+        } else {
+          alert('無法載入表單架構');
+        }
+      } catch (error) {
+        UI.showLoading(false);
+        alert('載入失敗：' + error);
+      }
+    }
+
+    // 2. 表單提交：將填寫內容送回 GAS
+    async function handleFormSubmit(formData) {
+      UI.showLoading(true, '提交中，請稍候...');
+      try {
         const response = await fetch(GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'submitForm',
-            data: formData
-          })
+          body: JSON.stringify({ data: formData })
         });
 
         const result = await response.json();
         UI.showLoading(false);
 
         if (result.success) {
-          alert('成功：' + result.message);
+          alert(result.message);
         } else {
-          alert('失敗：' + result.message);
+          alert('提交失敗：' + result.message);
         }
-
       } catch (error) {
         UI.showLoading(false);
-        alert('連線發生錯誤：' + error);
+        alert('連線失敗：' + error);
       }
     }
 
-    // 初始化渲染
-    document.addEventListener('DOMContentLoaded', () => {
-      UI.render('app', pageSchema);
-    });
+    // 頁面載入完成後觸發
+    document.addEventListener('DOMContentLoaded', loadFormSchema);
   </script>
 </body>
 </html>
