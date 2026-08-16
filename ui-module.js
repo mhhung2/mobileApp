@@ -356,6 +356,15 @@ const UI = {
           group.innerHTML = '';
           group.appendChild(switchContainer);
         }
+          
+        else if (field.type === 'hidden') {
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = field.name;
+          hiddenInput.value = field.defaultValue !== undefined ? field.defaultValue : (field.value || '');
+          form.appendChild(hiddenInput); // 直接掛載到 form，完全不佔用 UI 空間
+          return; // 跳過後續 group 的建立
+        }
 
         // 5. 一般文字、數字、日期欄位 (text, number_text, date, time 等)
         else {
