@@ -91,22 +91,42 @@ const UI = {
     return element;
   },
 
-  // 元件工廠
+// 核心元件繪製工廠
   createComponent(item) {
     let element = null;
-    
+
+    // 1. Header (支援傳統 title/subtitle 或 items 無限子項目)
     if (item.type === 'header') {
       element = document.createElement('div');
       element.className = 'app-header';
-      element.innerHTML = `<h1>${item.title}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
+
+      if (Array.isArray(item.items)) {
+        item.items.forEach(child => {
+          const childEl = this.createComponent(child);
+          if (childEl) element.appendChild(childEl);
+        });
+      } else {
+        element.innerHTML = `<h1>${item.title || ''}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
+      }
     }
 
+    // 2. Card (支援傳統 title/content 或 items 無限子項目)
     else if (item.type === 'card') {
       element = document.createElement('div');
       element.className = 'app-card';
-      element.innerHTML = `<h3>${item.title}</h3><div class="app-text">${item.content}</div>`;
+
+      if (Array.isArray(item.items)) {
+        item.items.forEach(child => {
+          const childEl = this.createComponent(child);
+          if (childEl) element.appendChild(childEl);
+        });
+      } else {
+        if (item.title) element.innerHTML += `<h3>${item.title}</h3>`;
+        if (item.content) element.innerHTML += `<div class="app-text">${item.content}</div>`;
+      }
     }
 
+    // 3. Card Group (內部可存放複數 Card)
     else if (item.type === 'cardGroup') {
       element = document.createElement('div');
       element.className = `card-group ${item.collapsed ? 'collapsed' : ''}`;
@@ -130,6 +150,44 @@ const UI = {
       element.appendChild(bodyDiv);
     }
 
+    // 4. 基礎內容元件：各式樣式文字與引言
+    else if (item.type === 'title') {
+      element = document.createElement('div');
+      element.className = 'item-title';
+      element.innerText = item.text || '';
+    }
+    else if (item.type === 'subtitle') {
+      element = document.createElement('div');
+      element.className = 'item-subtitle';
+      element.innerText = item.text || '';
+    }
+    else if (item.type === 'text') {
+      element = document.createElement('div');
+      element.className = 'item-text';
+      element.innerText = item.text || '';
+    }
+    else if (item.type === 'quote') {
+      element = document.createElement('div');
+      element.className = 'item-quote';
+      element.innerText = item.text || '';
+    }
+    else if (item.type === 'badge') {
+      element = document.createElement('span');
+      element.className = `item-badge badge-${item.variant || 'info'}`;
+      element.innerText = item.text || '';
+    }
+
+    // 5. 獨立按鈕元件
+    else if (item.type === 'button') {
+      element = document.createElement('button');
+      element.className = `btn btn-${item.variant || 'primary'}`;
+      element.innerText = item.text || '按鈕';
+      if (item.onClick && typeof window[item.onClick] === 'function') {
+        element.onclick = window[item.onClick];
+      }
+    }
+
+    // 6. Form 表單
     else if (item.type === 'form') {
       element = document.createElement('div');
       element.className = 'app-card';
@@ -174,7 +232,6 @@ const UI = {
       element.appendChild(form);
     }
 
-    // 統一為所有元件綁定 Tab 分類屬性
     if (element) {
       this.bindTabCategory(element, item);
     }
