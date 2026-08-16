@@ -241,6 +241,9 @@ createSearchBar(item) {
   },
 
   // Timeline 時間軸模組 (支援混搭 items 子元件)
+// ==========================================
+  // Timeline 時間軸模組 (支援 mediaPreview 與 items 子元件)
+  // ==========================================
   createTimeline(item) {
     const container = document.createElement('div');
     container.className = 'app-timeline';
@@ -251,7 +254,7 @@ createSearchBar(item) {
         const statusClass = evt.status ? `status-${evt.status}` : '';
         eventEl.className = `timeline-event ${statusClass}`;
 
-        // 1. 時間標籤 (有帶 time 屬性時繪製)
+        // 1. 時間標籤
         if (evt.time) {
           const timeEl = document.createElement('div');
           timeEl.className = 'timeline-time';
@@ -259,15 +262,23 @@ createSearchBar(item) {
           eventEl.appendChild(timeEl);
         }
 
-        // 2. 方式 A：如果傳入 items 陣列，動態繪製各式 UI 元件
+        // 2. 高級模式：如果傳入 items 陣列，動態繪製包含 mediaPreview 在內的所有 UI 元件
         if (Array.isArray(evt.items)) {
           evt.items.forEach(child => {
             const childEl = this.createComponent(child);
             if (childEl) eventEl.appendChild(childEl);
           });
         } 
-        // 3. 方式 B：向下相容傳統純文字欄位 (title, text, subtitle, badge)
+        // 3. 簡易模式：向下相容 direct 傳入 media (圖片 URL) 與文字屬性
         else {
+          if (evt.media) {
+            const mediaEl = this.createMediaPreview({
+              type: 'mediaPreview',
+              src: evt.media,
+              caption: evt.mediaCaption
+            });
+            if (mediaEl) eventEl.appendChild(mediaEl);
+          }
           if (evt.badge) {
             const badgeEl = document.createElement('span');
             badgeEl.className = `item-badge badge-${evt.badgeVariant || 'info'}`;
@@ -300,7 +311,7 @@ createSearchBar(item) {
 
     return container;
   },
-
+  
   // 建立媒體預覽元件
   createMediaPreview(item) {
     const container = document.createElement('div');
@@ -696,6 +707,11 @@ createSearchBar(item) {
         else if (field.type === 'timeline') {
           const timelineEl = this.createTimeline(field);
           if (timelineEl) form.appendChild(timelineEl);
+          return;
+        }
+        else if (field.type === 'mediaPreview') {
+          const mediaEl = this.createMediaPreview(field);
+          if (mediaEl) form.appendChild(mediaEl);
           return;
         }
         else if (field.type === 'hidden') {
