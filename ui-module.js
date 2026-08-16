@@ -187,7 +187,30 @@ const UI = {
       }
     }
 
-    // 6. Form 表單
+    // 6. Button Group (按鈕群組模組)
+    else if (item.type === 'buttonGroup') {
+      element = document.createElement('div');
+      
+      // 設定對齊方式：align-left (靠左), align-center (置中), align-right (靠右)
+      const alignClass = `align-${item.align || 'left'}`;
+      element.className = `btn-group ${alignClass}`;
+
+      if (Array.isArray(item.buttons)) {
+        item.buttons.forEach(btnData => {
+          const btnEl = document.createElement('button');
+          btnEl.className = `btn btn-inline btn-${btnData.variant || 'primary'}`;
+          btnEl.innerText = btnData.text || '按鈕';
+
+          if (btnData.onClick && typeof window[btnData.onClick] === 'function') {
+            btnEl.onclick = window[btnData.onClick];
+          }
+
+          element.appendChild(btnEl);
+        });
+      }
+    }
+
+    // 7. Form 表單
     else if (item.type === 'form') {
       element = document.createElement('div');
       element.className = 'app-card';
