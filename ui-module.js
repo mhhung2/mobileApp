@@ -82,6 +82,11 @@ const UI = {
         el.style.display = 'none';
       }
     });
+
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+      searchInput.dispatchEvent(new Event('input'));
+    }
   },
 
   createKPIGroup(item) {
@@ -149,15 +154,11 @@ const UI = {
     container.appendChild(wrapper);
 
     // 搜尋與篩選邏輯
+// 搜尋與篩選邏輯
     const filterCards = () => {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
 
-      // 1. 取得目前啟動中 (Active) 的 Tab Group ID
-      const activeTabBtn = document.querySelector('.tab-btn.active');
-      const activeGroupId = activeTabBtn ? activeTabBtn.getAttribute('data-tab-id') : null;
-
-      // 2. 決定搜尋目標範圍
       let targetSelector = '.app-card, .kpi-card';
       if (item.targetGroup) {
         targetSelector = `[data-group-id="${item.targetGroup}"] .app-card, [data-group-id="${item.targetGroup}"] .kpi-card`;
@@ -166,17 +167,15 @@ const UI = {
       const cards = document.querySelectorAll(targetSelector);
 
       cards.forEach(card => {
-        // 取得該卡片所屬的 Group 容器 (Tab 分組)
-        const groupParent = card.closest('[data-group-id]');
-        const cardGroupId = groupParent ? groupParent.getAttribute('data-group-id') : null;
-
-        // 關鍵判定 1：若該卡片隸屬於某個 Tab Group，且該 Group 目前不是 Active 狀態，則保持隱藏
-        if (cardGroupId && activeGroupId && cardGroupId !== activeGroupId) {
+        // 1. 檢查該卡片的父層（Group/CardGroup 等）是否被 Tab 隱藏
+        const groupParent = card.closest('[data-category]');
+        if (groupParent && groupParent.style.display === 'none') {
+          // 若所屬的 Tab 根本沒被選中，強制保持隱藏，跳過比對
           card.style.display = 'none';
-          return; // 跳過此卡片的文字比對
+          return;
         }
 
-        // 關鍵判定 2：在當前 Active 的 Tab 內進行關鍵字文字比對
+        // 2. 只對當前顯示中的 Tab 內的卡片進行關鍵字文字比對
         const cardText = card.innerText.toLowerCase();
         if (!query || cardText.includes(query)) {
           card.style.display = ''; // 匹配：顯示卡片
