@@ -154,39 +154,45 @@ const UI = {
     container.appendChild(wrapper);
 
     // 搜尋與篩選邏輯
-// 搜尋與篩選邏輯 (已修正清空搜尋無法還原卡片問題)
     const filterCards = () => {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
 
-      let targetSelector = '.app-card, .kpi-card';
-      if (item.targetGroup) {
-        targetSelector = `[data-group-id="${item.targetGroup}"] .app-card, [data-group-id="${item.targetGroup}"] .kpi-card`;
-      }
+      // 1. 找出所有帶有 data-category 的 Group 容器 (Tab 分頁內容容器)
+      const allCategoryGroups = document.querySelectorAll('[data-category]');
 
-      const cards = document.querySelectorAll(targetSelector);
+      allCategoryGroups.forEach(group => {
+        // 判定該 Group 容器是否為當前選中的 Tab (即 style.display 不為 'none')
+        const isCurrentActiveTab = group.style.display !== 'none';
 
-      cards.forEach(card => {
-        // 1. 檢查該卡片所屬的 Tab / Category 容器是否正處於被隱藏狀態
-        const groupParent = card.closest('[data-category]');
-        if (groupParent && groupParent.style.display === 'none') {
-          card.style.display = 'none'; // 屬於非目前 Tab 的卡片，保持隱藏
+        if (!isCurrentActiveTab) {
+          // 不在當前 Tab 內的 Group，維持隱藏
           return;
         }
 
-        // 2. 搜尋框清空 (query 為空) 時，強制恢復顯示當前 Tab 內的所有卡片
-        if (!query) {
-          card.style.display = 'block'; // 強制顯式指定為 block，確保還原
-          return;
-        }
+        // 2. 針對當前啟動中 (Active) 的 Tab 內尋找所有卡片
+        const cards = group.querySelectorAll('.app-card, .kpi-card');
 
-        // 3. 有輸入關鍵字時，進行文字比對
-        const cardText = card.innerText.toLowerCase();
-        if (cardText.includes(query)) {
-          card.style.display = 'block'; // 匹配：顯示
-        } else {
-          card.style.display = 'none';  // 不匹配：隱藏
-        }
+        cards.forEach(card => {
+          // 若搜尋框清空 (query 為空)，無條件全部顯示
+          if (!query) {
+            card.style.display = '';
+            // 若卡片外層有 CardGroup，確保 CardGroup 本身也顯示
+            const parentCardGroup = card.closest('.card-group');
+            if (parentCardGroup) parentCardGroup.style.display = '';
+            return;
+          }
+
+          // 若有關鍵字，進行比對
+          const cardText = card.innerText.toLowerCase();
+          if (cardText.includes(query)) {
+            card.style.display = '';
+            const parentCardGroup = card.closest('.card-group');
+            if (parentCardGroup) parentCardGroup.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
       });
     };
     // 事件監聽
