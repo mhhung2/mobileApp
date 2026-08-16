@@ -84,6 +84,40 @@ const UI = {
     });
   },
 
+  createKPIGroup(item) {
+    const groupEl = document.createElement('div');
+    const colsClass = item.cols ? `cols-${item.cols}` : 'cols-2'; // 預設 2 欄
+    groupEl.className = `kpi-group ${colsClass}`;
+
+    if (Array.isArray(item.items)) {
+      item.items.forEach(kpi => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'kpi-card';
+
+        let footerHTML = '';
+        if (kpi.statusText || kpi.change) {
+          const statusClass = kpi.status ? `status ${kpi.status}` : '';
+          footerHTML = `
+            <div class="kpi-footer">
+              ${kpi.statusText ? `<span class="kpi-status ${statusClass}">${kpi.statusText}</span>` : ''}
+              ${kpi.change ? `<span class="kpi-change">${kpi.change}</span>` : ''}
+            </div>
+          `;
+        }
+
+        cardEl.innerHTML = `
+          <div class="kpi-label">${kpi.label || ''}</div>
+          <div class="kpi-value" ${kpi.color ? `style="color:${kpi.color}"` : ''}>${kpi.value || '0'}</div>
+          ${footerHTML}
+        `;
+
+        groupEl.appendChild(cardEl);
+      });
+    }
+
+    return groupEl;
+  },
+
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
     if (item.category) element.dataset.category = item.category;
@@ -229,6 +263,10 @@ const UI = {
       }
     }
 
+    else if (item.type === 'kpiGroup') {
+      element = this.createKPIGroup(item);
+    }
+
     // 7. Form 表單模組
     else if (item.type === 'form') {
       element = document.createElement('div');
@@ -323,6 +361,11 @@ const UI = {
             });
           }
           form.appendChild(btnGroupEl);
+          return;
+        }
+        else if (field.type === 'kpiGroup') {
+          const kpiEl = this.createKPIGroup(field);
+          if (kpiEl) form.appendChild(kpiEl);
           return;
         }
         else if (field.type === 'hidden') {
