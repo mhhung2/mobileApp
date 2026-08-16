@@ -215,7 +215,9 @@ const UI = {
       }
     }
 
-    // 7. Form 表單
+// ==========================================
+    // Form 表單模組 (支援 textarea, radio, checkbox, file)
+    // ==========================================
     else if (item.type === 'form') {
       element = document.createElement('div');
       element.className = 'app-card';
@@ -224,46 +226,105 @@ const UI = {
       item.fields.forEach(field => {
         const group = document.createElement('div');
         group.className = 'form-group';
-        group.innerHTML = `<label>${field.label}</label>`;
+        group.innerHTML = `<label>${field.label}${field.required ? ' <span style="color:#ff3b30">*</span>' : ''}</label>`;
 
+        // 1. Select 下拉選單
         if (field.type === 'select') {
           const select = document.createElement('select');
           select.className = 'form-control';
           select.name = field.name;
-          field.options.forEach(opt => select.add(new Option(opt, opt)));
+          if (field.required) select.required = true;
+          field.options.forEach(opt => {
+            const val = opt.value !== undefined ? opt.value : opt;
+            const text = opt.label !== undefined ? opt.label : opt;
+            select.add(new Option(text, val));
+          });
           group.appendChild(select);
-        } else {
+        }
+
+        // 2. Textarea 多行文字框
+        else if (field.type === 'textarea') {
+          const textarea = document.createElement('textarea');
+          textarea.className = 'form-control';
+          textarea.name = field.name;
+          textarea.rows = field.rows || 3;
+          textarea.placeholder = field.placeholder || '';
+          if (field.maxLength) textarea.maxLength = field.maxLength;
+          if (field.minLength) textarea.minLength = field.minLength;
+          if (field.required) textarea.required = true;
+          group.appendChild(textarea);
+        }
+
+        // 3. Radio (單選) & Checkbox (複選)
+        else if (field.type === 'radio' || field.type === 'checkbox') {
+          const optGroup = document.createElement('div');
+          optGroup.className = `option-group ${field.inline ? 'inline' : ''}`;
+
+          if (Array.isArray(field.options)) {
+            field.options.forEach((opt, idx) => {
+              const val = opt.value !== undefined ? opt.value : opt;
+              const labelText = opt.label !== undefined ? opt.label : opt;
+
+              const labelEl = document.createElement('label');
+              labelEl.className = 'option-label';
+
+              const inputEl = document.createElement('input');
+              inputEl.type = field.type;
+              inputEl.name = field.name;
+              inputEl.value = val;
+
+              // 首個 Radio 設為必填
+              if (field.required && field.type === 'radio' && idx === 0) {
+                inputEl.required = true;
+              }
+
+              labelEl.appendChild(inputEl);
+              labelEl.appendChild(document.createTextNode(labelText));
+              optGroup.appendChild(labelEl);
+            });
+          }
+          group.appendChild(optGroup);
+        }
+
+        // 4. File 檔案 / 照片上傳
+        else if (field.type === 'file') {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.className = 'form-control';
+          fileInput.name = field.name;
+          if (field.accept) fileInput.accept = field.accept; // 例如 "image/*"
+          if (field.multiple) fileInput.multiple = true;
+          if (field.required) fileInput.required = true;
+          group.appendChild(fileInput);
+        }
+
+        // 5. 一般文字與數字欄位 (text, number_text, date, time 等)
+        else {
           const input = document.createElement('input');
           input.className = 'form-control';
           input.name = field.name;
           input.placeholder = field.placeholder || '';
 
-          // ==========================================
-          // 新增：數字限制與長度控制邏輯
-          // ==========================================
           if (field.type === 'number_text') {
             input.type = 'text';
-            input.inputMode = 'numeric'; // 手機端自動跳出純數字鍵盤
-            input.pattern = '[0-9]*';    // 限制只能輸入 0-9 數字
-
-            // 設定最大/最小字數長度限制
-            if (field.maxLength) input.maxLength = field.maxLength;
-            if (field.minLength) input.minLength = field.minLength;
-
-            // 即時過濾：若使用者輸入非數字字元，自動清除
+            input.inputMode = 'numeric';
+            input.pattern = '[0-9]*';
             input.oninput = (e) => {
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
             };
           } else {
             input.type = field.type || 'text';
-            if (field.maxLength) input.maxLength = field.maxLength;
-            if (field.minLength) input.minLength = field.minLength;
           }
 
+          if (field.maxLength) input.maxLength = field.maxLength;
+          if (field.minLength) input.minLength = field.minLength;
+          if (field.min) input.min = field.min;
+          if (field.max) input.max = field.max;
           if (field.required) input.required = true;
 
           group.appendChild(input);
         }
+
         form.appendChild(group);
       });
 
@@ -273,9 +334,22 @@ const UI = {
       btn.innerText = item.submitText || '提交';
       form.appendChild(btn);
 
+      // 表單提交處理
       form.onsubmit = (e) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(form));
+        const formData = new FormData(form);
+        const data = {};
+
+        // 處理多選 Checkbox 陣列轉成逗號分隔或陣列字串
+        for (let [key, val] of formData.entries()) {
+          if (data[key]) {
+            if (!Array.isArray(data[key])) data[key] = [data[key]];
+            data[key].push(val);
+          } else {
+            data[key] = val;
+          }
+        }
+
         if (window[item.onSubmit] && typeof window[item.onSubmit] === 'function') {
           window[item.onSubmit](data);
         }
@@ -283,7 +357,6 @@ const UI = {
 
       element.appendChild(form);
     }
-
     if (element) {
       this.bindTabCategory(element, item);
     }
