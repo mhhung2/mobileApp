@@ -503,3 +503,55 @@ input[type="date"]::-webkit-date-and-time-value {
   margin-bottom: 0;       /* 由 .btn-group 的 gap 統一控制間距 */
   flex-grow: 0;           /* 不強制撐滿 */
 }
+
+
+/* ==========================================
+   Badge Group & 擴充主題樣式 (12 款樣式)
+   ========================================== */
+
+/* 1. Badge Group 容器 (支援橫向排列與自動換行) */
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;       /* 超出寬度自動換行 */
+  gap: 6px 8px;          /* 上下間距 6px，左右間距 8px */
+  margin-bottom: 8px;    /* 下方間距 */
+  width: 100%;
+}
+
+.badge-group.align-left   { justify-content: flex-start; }
+.badge-group.align-center { justify-content: center; }
+.badge-group.align-right  { justify-content: flex-end; }
+
+/* 2. Badge 基礎樣式微調 */
+.item-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  line-height: 1.2;
+  white-space: nowrap;  /* 單個 Badge 文字不換行 */
+  margin-right: 0;      /* 由 .badge-group gap 統一控制 */
+  margin-bottom: 0;
+}
+
+/* 3. 新增與擴充 12 款 Badge 樣式 */
+
+/* 【經典高亮色系列】 */
+.badge-primary   { background: #e5f1ff; color: #007aff; }            /* 藍色 */
+.badge-secondary { background: #e5e5ea; color: #1c1c1e; }            /* 灰色 */
+.badge-success   { background: #e3f9e5; color: #28a745; }            /* 綠色 */
+.badge-warning   { background: #fff8d6; color: #8a6d00; }            /* 金黃色 */
+.badge-caution   { background: #ffeacc; color: #d97706; }            /* 橘色 */
+.badge-danger    { background: #ffe5e5; color: #dc3545; }            /* 紅色 */
+
+/* 【柔和粉彩與質感系列】 */
+.badge-purple    { background: #f3e8ff; color: #7e22ce; }            /* 紫色 */
+.badge-pink      { background: #fce7f3; color: #be185d; }            /* 粉紅 */
+.badge-teal      { background: #ccfbf1; color: #0f766e; }            /* 藍綠 / 蒂芬妮綠 */
+.badge-dark      { background: #2c2c2e; color: #ffffff; }            /* 深灰 / 墨黑 */
+
+/* 【外框線風格系列】 */
+.badge-outline-primary { background: transparent; border: 1px solid #007aff; color: #007aff; }
+.badge-outline-dark    { background: transparent; border: 1px solid #8e8e93; color: #3a3a3c; }
