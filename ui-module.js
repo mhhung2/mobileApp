@@ -319,6 +319,44 @@ const UI = {
           group.appendChild(fileInput);
         }
 
+        //Switch (開關切換器)
+        else if (field.type === 'switch') {
+          const switchContainer = document.createElement('div');
+          switchContainer.className = 'switch-group';
+
+          // 1. 左側標籤與提示文字
+          const textSpan = document.createElement('span');
+          textSpan.className = 'switch-label-text';
+          textSpan.innerText = field.label || '';
+
+          // 2. 右側開關本體
+          const switchLabel = document.createElement('label');
+          switchLabel.className = 'switch-toggle';
+
+          const inputEl = document.createElement('input');
+          inputEl.type = 'checkbox';
+          inputEl.name = field.name;
+          inputEl.value = field.value || 'true'; // 開啟時提交的值 (預設為 "true")
+
+          // 設定 defaultValue 預設開關狀態
+          if (field.defaultValue === true || field.defaultValue === 'true' || field.defaultValue === 'ON') {
+            inputEl.checked = true;
+          }
+
+          const sliderSpan = document.createElement('span');
+          sliderSpan.className = 'switch-slider';
+
+          switchLabel.appendChild(inputEl);
+          switchLabel.appendChild(sliderSpan);
+
+          switchContainer.appendChild(textSpan);
+          switchContainer.appendChild(switchLabel);
+
+          // 注意：Switch 自身已包含標籤，替換原本外層的 group HTML
+          group.innerHTML = '';
+          group.appendChild(switchContainer);
+        }
+
         // 5. 一般文字、數字、日期欄位 (text, number_text, date, time 等)
         else {
           const input = document.createElement('input');
