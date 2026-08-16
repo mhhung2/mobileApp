@@ -302,6 +302,110 @@ createSearchBar(item) {
 
     return container;
   },
+
+  // 建立媒體預覽元件
+  createMediaPreview(item) {
+    const container = document.createElement('div');
+    container.className = 'media-preview-container';
+
+    const img = document.createElement('img');
+    img.className = 'media-preview-image';
+    img.src = item.src || '';
+    img.alt = item.caption || 'Media';
+    container.appendChild(img);
+
+    if (item.caption) {
+      const caption = document.createElement('div');
+      caption.className = 'media-preview-caption';
+      caption.innerText = item.caption;
+      container.appendChild(caption);
+    }
+
+    return container;
+  },
+
+  // ==========================================
+  // 彈出式 Modal / BottomSheet 全域控制 API
+  // ==========================================
+  showModal(config = {}) {
+    let overlay = document.getElementById('app-modal-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'app-modal-overlay';
+      document.body.appendChild(overlay);
+    }
+
+    const isCenter = config.position === 'center';
+    overlay.className = `modal-overlay ${isCenter ? 'center' : ''}`;
+
+    const container = document.createElement('div');
+    container.className = 'modal-container';
+
+    let headerHTML = '';
+    if (!isCenter) {
+      headerHTML += `<div class="modal-handle"></div>`;
+    }
+
+    container.innerHTML = `
+      ${headerHTML}
+      <div class="modal-header">
+        <div class="modal-title">${config.title || ''}</div>
+        <button class="modal-close-btn" onclick="UI.closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body-content"></div>
+    `;
+
+    overlay.innerHTML = '';
+    overlay.appendChild(container);
+
+    // 動態繪製 Modal 內部的 items 元件
+    const bodyContent = container.querySelector('#modal-body-content');
+    if (Array.isArray(config.items)) {
+      config.items.forEach(item => {
+        const el = this.createComponent(item);
+        if (el) bodyContent.appendChild(el);
+      });
+    }
+
+    // 點擊背景遮罩關閉
+    overlay.onclick = (e) => {
+      if (e.target === overlay) this.closeModal();
+    };
+
+    // 顯示 Modal
+    requestAnimationFrame(() => overlay.classList.add('active'));
+  },
+
+  closeModal() {
+    const overlay = document.getElementById('app-modal-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
+  },
+
+  // ==========================================
+  // 頂部 Toast 即時通知橫幅 API
+  // ==========================================
+  showToast(message, variant = 'info', duration = 3000) {
+    let toast = document.getElementById('app-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'app-toast';
+      document.body.appendChild(toast);
+    }
+
+    toast.className = `toast-container toast-${variant} active`;
+    toast.innerHTML = `
+      <div class="toast-content">
+        <span>${message}</span>
+      </div>
+    `;
+
+    if (window.toastTimer) clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => {
+      toast.classList.remove('active');
+    }, duration);
+  }
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
@@ -487,6 +591,9 @@ createSearchBar(item) {
     }
     else if (item.type === 'timeline') {
       element = this.createTimeline(item);
+    }
+    else if (item.type === 'mediaPreview') {
+      element = this.createMediaPreview(item);
     }
 
     // 7. Form 表單模組
