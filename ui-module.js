@@ -4,15 +4,20 @@
 const UI = {
   // 記錄每個 category 當前選中的 Tab (例如 { team: 'all', device: 'all' })
   activeTabs: {},
-  refreshIntervalId: null, // 記錄倒數計時器 ID
-  remainingSeconds: 0,     // 當前剩餘秒數
+  refreshIntervalId: null,
+  remainingSeconds: 0,
+  totalIntervalSeconds: 60, // 預設週期
+  lastFetchTimestamp: 0,    // 記錄上次成功取得 Server 資料的時間戳 (ms)
+  lastUpdatedStr: '',       // 記錄格式化時間字串
+  onRefreshCallbackName: null,
+  visibilityListenersBound: false, // 避免重複綁定全域監聽器
 
   // 渲染頁面主入口
   render(containerId, schema) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // 清除先前可能存在的倒數計時器
+    // 清除舊計時器
     if (this.refreshIntervalId) {
       clearInterval(this.refreshIntervalId);
       this.refreshIntervalId = null;
@@ -473,23 +478,39 @@ createSearchBar(item) {
   },
 
   // 建立倒數更新元件
+// ==========================================
+  // 建立倒數更新元件 (含次要文字、上次更新時間與前後台智慧監聽)
+  // ==========================================
   createRefreshTimer(item) {
-    const totalSeconds = item.intervalSeconds || 60; // 預設 60 秒
-    this.remainingSeconds = totalSeconds;
+    this.totalIntervalSeconds = item.intervalSeconds || 60;
+    this.remainingSeconds = this.totalIntervalSeconds;
+    this.onRefreshCallbackName = item.onRefresh;
+
+    // 第一次載入時若無時間紀錄，則初始化為當前時間
+    if (!this.lastFetchTimestamp) {
+      this.lastFetchTimestamp = Date.now();
+      const now = new Date();
+      this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    }
 
     const container = document.createElement('div');
     container.className = 'refresh-timer-container';
 
     container.innerHTML = `
       <div class="refresh-timer-info">
-        <span>${item.label || '自動更新倒數'}</span>
-        <span class="refresh-seconds-badge" id="timer-seconds-display">${this.remainingSeconds}s</span>
+        <div class="refresh-timer-row">
+          <span>${item.label || '自動更新倒數'}</span>
+          <span class="refresh-seconds-badge" id="timer-seconds-display">${this.remainingSeconds}s</span>
+        </div>
+        <div class="refresh-last-updated" id="timer-last-updated">
+          上次更新：${this.lastUpdatedStr}
+        </div>
       </div>
       <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
         <svg class="refresh-icon" viewBox="0 0 24 24">
           <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
         </svg>
-        <span>${item.buttonText || '立即刷新'}</span>
+        <span>${item.buttonText || '刷新'}</span>
       </button>
     `;
 
@@ -497,18 +518,11 @@ createSearchBar(item) {
     const refreshBtn = container.querySelector('#timer-refresh-btn');
     const refreshIcon = container.querySelector('.refresh-icon');
 
-    // 啟動倒數：只有渲染了 refreshTimer 才會執行這段計時器
-    this.refreshIntervalId = setInterval(() => {
-      this.remainingSeconds--;
-      if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
+    // 啟動 1 秒計時器
+    this.startCountdownTimer(secondsDisplay, refreshIcon);
 
-      if (this.remainingSeconds <= 0) {
-        clearInterval(this.refreshIntervalId);
-        this.refreshIntervalId = null;
-        // 倒數歸零，才發動 Request 向 Server 取新資料
-        this.triggerRefresh(item.onRefresh, refreshIcon);
-      }
-    }, 1000);
+    // 綁定頁面切換/視窗獲得焦點監聽 (僅綁定一次)
+    this.bindVisibilityAndFocusEvents(secondsDisplay, refreshIcon);
 
     // 手動點擊刷新按鈕
     refreshBtn.onclick = () => {
@@ -516,28 +530,79 @@ createSearchBar(item) {
         clearInterval(this.refreshIntervalId);
         this.refreshIntervalId = null;
       }
-      // 手動觸發向 Server 取新資料
-      this.triggerRefresh(item.onRefresh, refreshIcon);
+      this.triggerRefresh(refreshIcon);
     };
 
     return container;
   },
 
-  // 執行對 Server 端 loadDashboardConfig 的呼叫
-  triggerRefresh(onRefreshCallback, iconEl) {
+  // 啟動倒數內部邏輯
+  startCountdownTimer(secondsDisplay, refreshIcon) {
+    if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
+
+    this.refreshIntervalId = setInterval(() => {
+      this.remainingSeconds--;
+      if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
+
+      if (this.remainingSeconds <= 0) {
+        clearInterval(this.refreshIntervalId);
+        this.refreshIntervalId = null;
+        this.triggerRefresh(refreshIcon);
+      }
+    }, 1000);
+  },
+
+  // 智慧監聽：視窗焦點/頁面從背景切回前台/解鎖
+  bindVisibilityAndFocusEvents(secondsDisplay, refreshIcon) {
+    if (this.visibilityListenersBound) return;
+    this.visibilityListenersBound = true;
+
+    const handleAppResume = () => {
+      // 僅當頁面處於可見狀態且獲焦點時才檢查
+      if (document.hidden) return;
+
+      const now = Date.now();
+      const elapsedSeconds = Math.floor((now - this.lastFetchTimestamp) / 1000);
+
+      // 情境 A：離開背景的時間超過設定的週期 -> 資料已過期，直接即時更新
+      if (elapsedSeconds >= this.totalIntervalSeconds) {
+        if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
+        this.triggerRefresh(refreshIcon);
+      } 
+      // 情境 B：離開時間很短 -> 自動校正剩餘倒數秒數並繼續倒數
+      else {
+        this.remainingSeconds = this.totalIntervalSeconds - elapsedSeconds;
+        if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
+      }
+    };
+
+    // 1. 監聽頁面可見性改變 (背景 ➔ 前台)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) handleAppResume();
+    });
+
+    // 2. 監聽視窗 Focus (適用於 App 內嵌 WebView 切換與手機解鎖)
+    window.addEventListener('focus', handleAppResume);
+  },
+
+  // 發起對 Server 端 loadDashboardConfig 的呼叫
+  triggerRefresh(iconEl) {
     if (iconEl) iconEl.classList.add('spinning');
 
-    // 優先執行自訂傳入的 JS 函數名稱，否則預設執行 loadDashboardConfig()
-    if (onRefreshCallback && typeof window[onRefreshCallback] === 'function') {
-      window[onRefreshCallback]();
+    // 記錄成功發起請求的時間與格式化字串
+    this.lastFetchTimestamp = Date.now();
+    const now = new Date();
+    this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    if (this.onRefreshCallbackName && typeof window[this.onRefreshCallbackName] === 'function') {
+      window[this.onRefreshCallbackName]();
     } else if (typeof window.loadDashboardConfig === 'function') {
       window.loadDashboardConfig();
     } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-      // 備用直連 GAS Server 端
       google.script.run
         .withSuccessHandler(schema => {
           UI.render('app-container', schema);
-          UI.showToast('資料已成功刷新', 'success');
+          UI.showToast('資料已刷新', 'success');
         })
         .getDashboardConfig();
     }
