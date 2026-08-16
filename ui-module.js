@@ -604,6 +604,24 @@ createSearchBar(item) {
     // 5. 調用 loadFormSchema(true) 發起背景靜默更新
     loadFormSchema(true);
   },
+
+  createSpacer(item) {
+    const spacer = document.createElement('div');
+    spacer.className = `app-spacer ${item.inline ? 'inline' : ''}`;
+    
+    // 支援直接指定 height (例如 8, 16, 24 或 '20px')
+    if (item.height !== undefined) {
+      const h = typeof item.height === 'number' ? `${item.height}px` : item.height;
+      spacer.style.height = h;
+    }
+    // 支援 inline 時指定 width
+    if (item.width !== undefined) {
+      const w = typeof item.width === 'number' ? `${item.width}px` : item.width;
+      spacer.style.width = w;
+    }
+
+    return spacer;
+  },
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
@@ -796,6 +814,9 @@ createSearchBar(item) {
     else if (item.type === 'refreshTimer') {
       element = this.createRefreshTimer(item);
     }
+    else if (item.type === 'spacer') {
+      element = this.createSpacer(item);
+    }
 
     // 7. Form 表單模組
     else if (item.type === 'form') {
@@ -906,6 +927,11 @@ createSearchBar(item) {
         else if (field.type === 'mediaPreview') {
           const mediaEl = this.createMediaPreview(field);
           if (mediaEl) form.appendChild(mediaEl);
+          return;
+        }
+        else if (field.type === 'spacer') {
+          const spacerEl = this.createSpacer(field);
+          if (spacerEl) form.appendChild(spacerEl);
           return;
         }
         else if (field.type === 'hidden') {
