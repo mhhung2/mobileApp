@@ -272,6 +272,29 @@ const UI = {
           form.appendChild(btnEl);
           return;
         }
+        else if (field.type === 'buttonGroup') {
+          const btnGroupEl = document.createElement('div');
+          const alignClass = `align-${field.align || 'left'}`;
+          btnGroupEl.className = `btn-group ${alignClass}`;
+
+          if (Array.isArray(field.buttons)) {
+            field.buttons.forEach(btnData => {
+              const btnEl = document.createElement('button');
+              btnEl.type = 'button'; // 強制為普通按鈕，避免觸發 form 提交
+              btnEl.className = `btn btn-inline btn-${btnData.variant || 'primary'}`;
+              btnEl.innerText = btnData.text || '按鈕';
+
+              if (btnData.disabled) btnEl.disabled = true;
+              if (btnData.onClick && typeof window[btnData.onClick] === 'function') {
+                btnEl.onclick = window[btnData.onClick];
+              }
+
+              btnGroupEl.appendChild(btnEl);
+            });
+          }
+          form.appendChild(btnGroupEl);
+          return;
+        }
         else if (field.type === 'hidden') {
           const hiddenInput = document.createElement('input');
           hiddenInput.type = 'hidden';
