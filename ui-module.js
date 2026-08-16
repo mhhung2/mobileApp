@@ -254,9 +254,6 @@ createSearchBar(item) {
   },
 
   // Timeline 時間軸模組 (支援混搭 items 子元件)
-// ==========================================
-  // Timeline 時間軸模組 (支援 mediaPreview 與 items 子元件)
-  // ==========================================
   createTimeline(item) {
     const container = document.createElement('div');
     container.className = 'app-timeline';
@@ -478,10 +475,6 @@ createSearchBar(item) {
   },
 
   // 建立倒數更新元件
-// ==========================================
-  // 建立倒數更新元件 (左側時間，右側倒數+按鈕)
-  // 上次更新：<時間>  <---- 空間 ---->  X秒後自動更新 [藍色立即更新按鈕]
-  // ==========================================
   createRefreshTimer(item) {
     this.totalIntervalSeconds = item.intervalSeconds || 60;
     this.remainingSeconds = this.totalIntervalSeconds;
@@ -582,20 +575,25 @@ createSearchBar(item) {
   triggerRefresh(iconEl) {
     if (iconEl) iconEl.classList.add('spinning');
 
-    // 記錄成功發起請求的時間與格式化字串
+    // 1. 記錄發起請求的時間與格式化時間字串 (HH:mm:ss)
     this.lastFetchTimestamp = Date.now();
     const now = new Date();
     this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-    if (this.onRefreshCallbackName && typeof window[this.onRefreshCallbackName] === 'function') {
-      window[this.onRefreshCallbackName]();
-    } else if (typeof window.loadDashboardConfig === 'function') {
-      window.loadDashboardConfig();
-    } else if (typeof google !== 'undefined' && google.script && google.script.run) {
+    // 2. 優先調用 loadFormSchema(true)，實現無 Loading 遮罩背景靜默更新
+    if (typeof window.loadFormSchema === 'function') {
+      window.loadFormSchema(true);
+    } 
+    // 備用：若有設定自訂 onRefresh 函數
+    else if (this.onRefreshCallbackName && typeof window[this.onRefreshCallbackName] === 'function') {
+      window[this.onRefreshCallbackName](true);
+    } 
+    // 備用：標準 GAS 直連模式
+    else if (typeof google !== 'undefined' && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(schema => {
-          UI.render('app-container', schema);
-          UI.showToast('資料已刷新', 'success');
+          UI.render('app', schema);
+          UI.showToast('資料已更新', 'success');
         })
         .getDashboardConfig();
     }
