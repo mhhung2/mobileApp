@@ -1101,64 +1101,67 @@ input[type="date"]::-webkit-date-and-time-value {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--card-bg, #ffffff);
-  border: 1px solid var(--border-color, #e5e5ea);
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin-bottom: 12px;
+  background-color: transparent; /* 移除背景色 */
+  border: none;                  /* 移除邊框 */
+  padding: 4px 4px 8px 4px;
+  margin-bottom: 8px;
   box-sizing: border-box;
 }
 
 .refresh-timer-info {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #636366;
-  font-weight: 500;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--secondary-text, #8e8e93); /* 淡灰色低調文字 */
+  font-weight: 400;
 }
 
-/* 秒數高亮標籤 */
-.refresh-seconds-badge {
-  background-color: rgba(0, 122, 255, 0.1);
-  color: var(--primary-color, #007aff);
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 13px;
-  min-width: 24px;
-  text-align: center;
-}
-
-/* 刷新按鈕 */
-.refresh-action-btn {
+.refresh-timer-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: none;
-  border: 1px solid var(--border-color, #e5e5ea);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 13px;
+}
+
+/* 秒數小標籤 */
+.refresh-seconds-badge {
+  color: var(--secondary-text, #8e8e93);
   font-weight: 600;
-  color: var(--primary-color, #007aff);
+  font-size: 11px;
+}
+
+/* 上次更新時間 */
+.refresh-last-updated {
+  font-size: 10px;
+  color: #aeaeb2;
+}
+
+/* 刷新按鈕 (低調邊框與文字) */
+.refresh-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--secondary-text, #8e8e93);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .refresh-action-btn:active {
-  background-color: rgba(0, 122, 255, 0.08);
-  transform: scale(0.96);
+  opacity: 0.6;
 }
 
 .refresh-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   fill: currentColor;
-  transition: transform 0.5s ease;
 }
 
-/* 旋轉動畫 (刷新時觸發) */
 .refresh-icon.spinning {
   animation: spin 0.8s linear infinite;
 }
