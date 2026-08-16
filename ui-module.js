@@ -478,15 +478,11 @@ createSearchBar(item) {
   },
 
   // 建立倒數更新元件
-// ==========================================
-  // 建立倒數更新元件 (含次要文字、上次更新時間與前後台智慧監聽)
-  // ==========================================
   createRefreshTimer(item) {
     this.totalIntervalSeconds = item.intervalSeconds || 60;
     this.remainingSeconds = this.totalIntervalSeconds;
     this.onRefreshCallbackName = item.onRefresh;
 
-    // 第一次載入時若無時間紀錄，則初始化為當前時間
     if (!this.lastFetchTimestamp) {
       this.lastFetchTimestamp = Date.now();
       const now = new Date();
@@ -497,34 +493,28 @@ createSearchBar(item) {
     container.className = 'refresh-timer-container';
 
     container.innerHTML = `
-      <div class="refresh-timer-info">
-        <div class="refresh-timer-row">
-          <span>${item.label || '自動更新倒數'}</span>
-          <span class="refresh-seconds-badge" id="timer-seconds-display">${this.remainingSeconds}s</span>
-        </div>
-        <div class="refresh-last-updated" id="timer-last-updated">
-          上次更新：${this.lastUpdatedStr}
-        </div>
+      <div class="refresh-timer-top-row">
+        <span class="refresh-last-updated" id="timer-last-updated">上次更新：${this.lastUpdatedStr}</span>
+        <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
+          <svg class="refresh-icon" viewBox="0 0 24 24">
+            <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+          </svg>
+          <span>${item.buttonText || '立即更新'}</span>
+        </button>
       </div>
-      <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
-        <svg class="refresh-icon" viewBox="0 0 24 24">
-          <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-        </svg>
-        <span>${item.buttonText || '刷新'}</span>
-      </button>
+      <div class="refresh-timer-bottom-row">
+        <span class="refresh-seconds-text" id="timer-seconds-display">${this.remainingSeconds}秒後自動更新</span>
+      </div>
     `;
 
     const secondsDisplay = container.querySelector('#timer-seconds-display');
     const refreshBtn = container.querySelector('#timer-refresh-btn');
     const refreshIcon = container.querySelector('.refresh-icon');
 
-    // 啟動 1 秒計時器
+    // 啟動倒數與前後台/焦點監聽
     this.startCountdownTimer(secondsDisplay, refreshIcon);
-
-    // 綁定頁面切換/視窗獲得焦點監聽 (僅綁定一次)
     this.bindVisibilityAndFocusEvents(secondsDisplay, refreshIcon);
 
-    // 手動點擊刷新按鈕
     refreshBtn.onclick = () => {
       if (this.refreshIntervalId) {
         clearInterval(this.refreshIntervalId);
@@ -542,7 +532,7 @@ createSearchBar(item) {
 
     this.refreshIntervalId = setInterval(() => {
       this.remainingSeconds--;
-      if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
+      if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}秒後自動更新`;
 
       if (this.remainingSeconds <= 0) {
         clearInterval(this.refreshIntervalId);
