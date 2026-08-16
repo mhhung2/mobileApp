@@ -234,10 +234,34 @@ const UI = {
           group.appendChild(select);
         } else {
           const input = document.createElement('input');
-          input.type = field.type || 'text';
           input.className = 'form-control';
           input.name = field.name;
           input.placeholder = field.placeholder || '';
+
+          // ==========================================
+          // 新增：數字限制與長度控制邏輯
+          // ==========================================
+          if (field.type === 'number_text') {
+            input.type = 'text';
+            input.inputMode = 'numeric'; // 手機端自動跳出純數字鍵盤
+            input.pattern = '[0-9]*';    // 限制只能輸入 0-9 數字
+
+            // 設定最大/最小字數長度限制
+            if (field.maxLength) input.maxLength = field.maxLength;
+            if (field.minLength) input.minLength = field.minLength;
+
+            // 即時過濾：若使用者輸入非數字字元，自動清除
+            input.oninput = (e) => {
+              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            };
+          } else {
+            input.type = field.type || 'text';
+            if (field.maxLength) input.maxLength = field.maxLength;
+            if (field.minLength) input.minLength = field.minLength;
+          }
+
+          if (field.required) input.required = true;
+
           group.appendChild(input);
         }
         form.appendChild(group);
