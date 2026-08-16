@@ -154,7 +154,7 @@ const UI = {
     container.appendChild(wrapper);
 
     // 搜尋與篩選邏輯
-// 搜尋與篩選邏輯
+// 搜尋與篩選邏輯 (已修正清空搜尋無法還原卡片問題)
     const filterCards = () => {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
@@ -167,20 +167,25 @@ const UI = {
       const cards = document.querySelectorAll(targetSelector);
 
       cards.forEach(card => {
-        // 1. 檢查該卡片的父層（Group/CardGroup 等）是否被 Tab 隱藏
+        // 1. 檢查該卡片所屬的 Tab / Category 容器是否正處於被隱藏狀態
         const groupParent = card.closest('[data-category]');
         if (groupParent && groupParent.style.display === 'none') {
-          // 若所屬的 Tab 根本沒被選中，強制保持隱藏，跳過比對
-          card.style.display = 'none';
+          card.style.display = 'none'; // 屬於非目前 Tab 的卡片，保持隱藏
           return;
         }
 
-        // 2. 只對當前顯示中的 Tab 內的卡片進行關鍵字文字比對
+        // 2. 搜尋框清空 (query 為空) 時，強制恢復顯示當前 Tab 內的所有卡片
+        if (!query) {
+          card.style.display = 'block'; // 強制顯式指定為 block，確保還原
+          return;
+        }
+
+        // 3. 有輸入關鍵字時，進行文字比對
         const cardText = card.innerText.toLowerCase();
-        if (!query || cardText.includes(query)) {
-          card.style.display = ''; // 匹配：顯示卡片
+        if (cardText.includes(query)) {
+          card.style.display = 'block'; // 匹配：顯示
         } else {
-          card.style.display = 'none'; // 不匹配：隱藏卡片
+          card.style.display = 'none';  // 不匹配：隱藏
         }
       });
     };
