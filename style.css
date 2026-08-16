@@ -98,10 +98,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 12px; 
+  transition: opacity 0.2s ease, background-color 0.2s ease;
 }
 .btn-primary {
   background-color: var(--primary-color);
   color: #fff;
+}
+.btn:last-child {
+  margin-bottom: 0;
+}
+.btn:active {
+  opacity: 0.85;
 }
 
 /* Loading 遮罩 */
