@@ -123,7 +123,7 @@ const UI = {
     return groupEl;
   },
 
-  createSearchBar(item) {
+createSearchBar(item) {
     const container = document.createElement('div');
     container.className = 'search-bar-container';
 
@@ -153,50 +153,41 @@ const UI = {
     wrapper.appendChild(clearBtn);
     container.appendChild(wrapper);
 
-    // 搜尋與篩選邏輯
+    // 即時搜尋與過濾邏輯
     const filterCards = () => {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
 
-      // 1. 找出所有帶有 data-category 的 Group 容器 (Tab 分頁內容容器)
-      const allCategoryGroups = document.querySelectorAll('[data-category]');
+      // 1. 抓取目前頁面上所有的卡片與表單
+      const allCards = document.querySelectorAll('.app-card, .kpi-card, .card-group');
 
-      allCategoryGroups.forEach(group => {
-        // 判定該 Group 容器是否為當前選中的 Tab (即 style.display 不為 'none')
-        const isCurrentActiveTab = group.style.display !== 'none';
-
-        if (!isCurrentActiveTab) {
-          // 不在當前 Tab 內的 Group，維持隱藏
+      allCards.forEach(card => {
+        // 2. 判斷該卡片是否屬於被隱藏的 Tab 分頁
+        const categoryGroup = card.closest('[data-category]');
+        if (categoryGroup && categoryGroup.style.display === 'none') {
+          card.style.display = 'none'; // 非當前 Tab，保持隱藏
           return;
         }
 
-        // 2. 針對當前啟動中 (Active) 的 Tab 內尋找所有卡片
-        const cards = group.querySelectorAll('.app-card, .kpi-card');
+        // 3. 若搜尋框清空，顯示當前 Tab 的所有卡片
+        if (!query) {
+          card.style.display = '';
+          return;
+        }
 
-        cards.forEach(card => {
-          // 若搜尋框清空 (query 為空)，無條件全部顯示
-          if (!query) {
-            card.style.display = '';
-            // 若卡片外層有 CardGroup，確保 CardGroup 本身也顯示
-            const parentCardGroup = card.closest('.card-group');
-            if (parentCardGroup) parentCardGroup.style.display = '';
-            return;
-          }
-
-          // 若有關鍵字，進行比對
-          const cardText = card.innerText.toLowerCase();
-          if (cardText.includes(query)) {
-            card.style.display = '';
-            const parentCardGroup = card.closest('.card-group');
-            if (parentCardGroup) parentCardGroup.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        });
+        // 4. 有輸入關鍵字時進行比對 (抓取卡片內的純文字)
+        const cardText = card.innerText.toLowerCase();
+        if (cardText.includes(query)) {
+          card.style.display = ''; // 匹配關鍵字：顯示
+        } else {
+          card.style.display = 'none'; // 不匹配：隱藏
+        }
       });
     };
-    // 事件監聽
+
+    // 使用 input 事件 (即時監聽打字) 與 compositionend (支援中文輸入法拼音完成)
     input.addEventListener('input', filterCards);
+    input.addEventListener('compositionend', filterCards);
 
     clearBtn.addEventListener('click', () => {
       input.value = '';
