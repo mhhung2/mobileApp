@@ -526,13 +526,17 @@ createSearchBar(item) {
   },
 
   // 1 秒計時器 (確保每秒都寫入完整的 "X 秒後自動更新")
+// 1 秒計時器 (動態獲取最新 DOM，確保永遠顯示 "X 秒後自動更新")
   startCountdownTimer(secondsDisplay, refreshIcon) {
     if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
 
     this.refreshIntervalId = setInterval(() => {
       this.remainingSeconds--;
-      if (secondsDisplay) {
-        secondsDisplay.innerText = `${this.remainingSeconds} 秒後自動更新`;
+      
+      // 動態抓取畫面上最新的 DOM 元素
+      const currentSecondsEl = document.getElementById('timer-seconds-display');
+      if (currentSecondsEl) {
+        currentSecondsEl.innerText = `${this.remainingSeconds} 秒後自動更新`;
       }
 
       if (this.remainingSeconds <= 0) {
@@ -543,7 +547,7 @@ createSearchBar(item) {
     }, 1000);
   },
 
-  // 前後台切換與解鎖校正 (確保校正時也顯示完整格式)
+  // 視窗切換與 App 獲得焦點監聽 (動態獲取最新 DOM，避免舊 DOM 閉包干擾)
   bindVisibilityAndFocusEvents(secondsDisplay, refreshIcon) {
     if (this.visibilityListenersBound) return;
     this.visibilityListenersBound = true;
@@ -559,8 +563,11 @@ createSearchBar(item) {
         this.triggerRefresh(refreshIcon);
       } else {
         this.remainingSeconds = this.totalIntervalSeconds - elapsedSeconds;
-        if (secondsDisplay) {
-          secondsDisplay.innerText = `${this.remainingSeconds} 秒後自動更新`;
+        
+        // 切換回來時，動態抓取最新 DOM 更新文字
+        const currentSecondsEl = document.getElementById('timer-seconds-display');
+        if (currentSecondsEl) {
+          currentSecondsEl.innerText = `${this.remainingSeconds} 秒後自動更新`;
         }
       }
     };
