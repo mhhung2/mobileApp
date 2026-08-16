@@ -168,7 +168,7 @@ const UI = {
     }
     else if (item.type === 'quote') {
       element = document.createElement('div');
-      element.className = 'item-quote';
+      element.className = `item-quote ${item.variant ? `quote-${item.variant}` : ''}`;
       element.innerText = item.text || '';
     }
     else if (item.type === 'badgeGroup') {
@@ -262,7 +262,7 @@ const UI = {
         }
         else if (field.type === 'quote') {
           const quoteEl = document.createElement('div');
-          quoteEl.className = 'item-quote';
+          quoteEl.className = `item-quote ${field.variant ? `quote-${field.variant}` : ''}`;
           quoteEl.innerText = field.text || '';
           form.appendChild(quoteEl);
           return;
