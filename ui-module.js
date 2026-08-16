@@ -130,7 +130,6 @@ createSearchBar(item) {
     const wrapper = document.createElement('div');
     wrapper.className = 'search-input-wrapper';
 
-    // 左側 SVG 搜尋圖示
     wrapper.innerHTML = `
       <svg class="search-icon" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"></circle>
@@ -143,7 +142,6 @@ createSearchBar(item) {
     input.className = 'search-input';
     input.placeholder = item.placeholder || '搜尋卡片與內文...';
 
-    // 右側清除按鈕
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'search-clear-btn';
@@ -153,39 +151,59 @@ createSearchBar(item) {
     wrapper.appendChild(clearBtn);
     container.appendChild(wrapper);
 
-    // 即時搜尋與過濾邏輯
+    // ==========================================
+    // 通盤考慮：Tab 內 / Tab 外 / CardGroup 完整過濾演算法
+    // ==========================================
     const filterCards = () => {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
 
-      // 1. 抓取目前頁面上所有的卡片與表單
-      const allCards = document.querySelectorAll('.app-card, .kpi-card, .card-group');
+      // 1. 處理獨立的 app-card 與 kpi-card (包含在 Tab 內與 Tab 外)
+      const allCards = document.querySelectorAll('.app-card, .kpi-card');
 
       allCards.forEach(card => {
-        // 2. 判斷該卡片是否屬於被隱藏的 Tab 分頁
+        // 檢查該卡片是否屬於某個 Tab 分頁容器
         const categoryGroup = card.closest('[data-category]');
+
+        // 【情境 A】：若屬於某個 Tab，且該 Tab 目前是被隱藏的 (非 Active)
         if (categoryGroup && categoryGroup.style.display === 'none') {
-          card.style.display = 'none'; // 非當前 Tab，保持隱藏
+          card.style.display = 'none';
           return;
         }
 
-        // 3. 若搜尋框清空，顯示當前 Tab 的所有卡片
+        // 【情境 B】：在當前 Active Tab 內，或屬於完全不在 Tab 裡的獨立卡片
         if (!query) {
-          card.style.display = '';
+          card.style.display = ''; // 清空搜尋時無條件還原顯示
+        } else {
+          const cardText = card.innerText.toLowerCase();
+          card.style.display = cardText.includes(query) ? '' : 'none';
+        }
+      });
+
+      // 2. 處理可折疊的 cardGroup (避免外殼容器影響子卡片顯示)
+      const allCardGroups = document.querySelectorAll('.card-group');
+
+      allCardGroups.forEach(group => {
+        const categoryGroup = group.closest('[data-category]');
+
+        // 若 CardGroup 屬於被隱藏的 Tab，維持隱藏
+        if (categoryGroup && categoryGroup.style.display === 'none') {
+          group.style.display = 'none';
           return;
         }
 
-        // 4. 有輸入關鍵字時進行比對 (抓取卡片內的純文字)
-        const cardText = card.innerText.toLowerCase();
-        if (cardText.includes(query)) {
-          card.style.display = ''; // 匹配關鍵字：顯示
+        if (!query) {
+          group.style.display = ''; // 清空時顯示外殼
         } else {
-          card.style.display = 'none'; // 不匹配：隱藏
+          // 檢查該 cardGroup 內部是否有任何一張子卡片是匹配並顯示的
+          const visibleChildren = group.querySelectorAll('.app-card:not([style*="display: none"])');
+          // 只要有至少一張子卡片匹配，外殼就顯示；若全部都不匹配，才隱藏整個 CardGroup
+          group.style.display = visibleChildren.length > 0 ? '' : 'none';
         }
       });
     };
 
-    // 使用 input 事件 (即時監聽打字) 與 compositionend (支援中文輸入法拼音完成)
+    // 事件監聽：即時打字 (input) + 中文輸入法完成選字 (compositionend)
     input.addEventListener('input', filterCards);
     input.addEventListener('compositionend', filterCards);
 
