@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- 引入樣式檔 -->
+    <?!= include('CSS'); ?>
+  </head>
+  <body>
+
+    <!-- 手機 App 容器 -->
+    <div id="app" class="mobile-container">
+      <!-- 動態 UI 將由 UI_Module 渲染於此 -->
+    </div>
+
+    <!-- 引入前端模組與邏輯 -->
+    <?!= include('UI_Module'); ?>
+    <?!= include('JS'); ?>
+
+    <script>
+      // ==========================================
+      // 【日後快速開發只需修改此處的結構配置】
+      // ==========================================
+      const pageSchema = [
+        {
+          type: 'header',
+          title: '快速管理系統',
+          subtitle: '手機版通用模組 Template'
+        },
+        {
+          type: 'text',
+          content: '歡迎使用！這是一個支援動態渲染的 GAS 手機 Web App 範本。'
+        },
+        {
+          type: 'card',
+          title: '重要通知',
+          content: '你可以透過 JSON 快速建立標題、文字、卡片、表單及按鈕。'
+        },
+        {
+          type: 'form',
+          id: 'mainForm',
+          fields: [
+            { type: 'text', name: 'userName', label: '姓名', placeholder: '請輸入姓名' },
+            { type: 'tel', name: 'userPhone', label: '電話', placeholder: '請輸入電話' },
+            { 
+              type: 'select', 
+              name: 'department', 
+              label: '部門/單位', 
+              options: ['單位 A', '單位 B', '單位 C'] 
+            }
+          ],
+          submitText: '確認提交',
+          onSubmit: 'handleFormSubmit'
+        },
+        {
+          type: 'button',
+          text: '次要按鈕（次級操作）',
+          variant: 'secondary',
+          onClick: 'handleSecondaryAction'
+        }
+      ];
+
+      // 頁面載入後自動渲染
+      document.addEventListener('DOMContentLoaded', () => {
+        UI.render('app', pageSchema);
+      });
+
+      // 自訂按鈕/表單觸發事件
+      function handleFormSubmit(data) {
+        UI.showLoading(true);
+        google.script.run
+          .withSuccessHandler((res) => {
+            UI.showLoading(false);
+            alert(res.message);
+          })
+          .withFailureHandler((err) => {
+            UI.showLoading(false);
+            alert('發生錯誤：' + err);
+          })
+          .apiSubmitData(data);
+      }
+
+      function handleSecondaryAction() {
+        alert('你點擊了次要按鈕！');
+      }
+    </script>
+  </body>
+</html>
