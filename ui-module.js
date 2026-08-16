@@ -75,20 +75,25 @@ const UI = {
   filterGroups(category, groupId) {
     const categoryElements = document.querySelectorAll(`[data-category="${category}"]`);
     categoryElements.forEach(el => {
-      // 若元素設定為 groupId === 'all' 或與當前 Tab 吻合則顯示，否則隱藏
       if (groupId === 'all' || el.dataset.groupId === groupId) {
-        el.style.display = ''; // 恢復原本的 CSS display 樣式
+        el.style.display = '';
       } else {
         el.style.display = 'none';
       }
     });
 
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-      searchInput.dispatchEvent(new Event('input'));
+    // 精準喚醒：只觸發屬於該 category 或該可見區域內的 searchBar
+    const targetCategoryContainer = document.querySelector(`[data-category="${category}"]`);
+    if (targetCategoryContainer) {
+      const searchInputs = targetCategoryContainer.querySelectorAll('.search-input');
+      searchInputs.forEach(input => input.dispatchEvent(new Event('input')));
+    } else {
+      // 若該 category 無專屬 SearchBar，才觸發全域 SearchBar
+      const globalSearchInputs = document.querySelectorAll('.search-bar-container:not([data-category]) .search-input');
+      globalSearchInputs.forEach(input => input.dispatchEvent(new Event('input')));
     }
   },
-
+  
   createKPIGroup(item) {
     const groupEl = document.createElement('div');
     const colsClass = item.cols ? `cols-${item.cols}` : 'cols-2'; // 預設 2 欄
@@ -127,6 +132,10 @@ createSearchBar(item) {
     const container = document.createElement('div');
     container.className = 'search-bar-container';
 
+    // 若 searchBar 本身配置在某個 category 或 groupId 下，綁定作用域
+    if (item.category) container.dataset.category = item.category;
+    if (item.groupId) container.dataset.groupId = item.groupId;
+
     const wrapper = document.createElement('div');
     wrapper.className = 'search-input-wrapper';
 
@@ -152,58 +161,65 @@ createSearchBar(item) {
     container.appendChild(wrapper);
 
     // ==========================================
-    // 通盤考慮：Tab 內 / Tab 外 / CardGroup 完整過濾演算法
+    // 嚴密過濾演算法 (多 SearchBar 作用域隔離)
     // ==========================================
     const filterCards = () => {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
 
-      // 1. 處理獨立的 app-card 與 kpi-card (包含在 Tab 內與 Tab 外)
-      const allCards = document.querySelectorAll('.app-card, .kpi-card');
+      // 1. 動態計算此 searchBar 的「有效作用範圍 (Scope Container)」
+      let scopeContainer = null;
 
-      allCards.forEach(card => {
-        // 檢查該卡片是否屬於某個 Tab 分頁容器
+      if (item.targetGroup) {
+        // 情境 1：JSON 明確指定只搜尋特定的 data-group-id
+        scopeContainer = document.querySelector(`[data-group-id="${item.targetGroup}"]`);
+      } else {
+        // 情境 2：自動向上尋找最近的 Tab / Category 容器；若無則為全頁面 (document)
+        scopeContainer = container.closest('[data-category]') || document;
+      }
+
+      if (!scopeContainer) return;
+
+      // 2. 只搜尋該作用範圍內部的卡片
+      const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card');
+
+      cards.forEach(card => {
+        // 防護 1：檢查卡片所屬的 Tab 容器是否正被隱藏 (style.display === 'none')
         const categoryGroup = card.closest('[data-category]');
-
-        // 【情境 A】：若屬於某個 Tab，且該 Tab 目前是被隱藏的 (非 Active)
         if (categoryGroup && categoryGroup.style.display === 'none') {
           card.style.display = 'none';
           return;
         }
 
-        // 【情境 B】：在當前 Active Tab 內，或屬於完全不在 Tab 裡的獨立卡片
+        // 防護 2：清空搜尋框時還原
         if (!query) {
-          card.style.display = ''; // 清空搜尋時無條件還原顯示
+          card.style.display = '';
         } else {
           const cardText = card.innerText.toLowerCase();
           card.style.display = cardText.includes(query) ? '' : 'none';
         }
       });
 
-      // 2. 處理可折疊的 cardGroup (避免外殼容器影響子卡片顯示)
-      const allCardGroups = document.querySelectorAll('.card-group');
-
-      allCardGroups.forEach(group => {
+      // 3. 處理作用範圍內部的 cardGroup 外殼顯隱
+      const cardGroups = scopeContainer.querySelectorAll('.card-group');
+      cardGroups.forEach(group => {
         const categoryGroup = group.closest('[data-category]');
-
-        // 若 CardGroup 屬於被隱藏的 Tab，維持隱藏
         if (categoryGroup && categoryGroup.style.display === 'none') {
           group.style.display = 'none';
           return;
         }
 
         if (!query) {
-          group.style.display = ''; // 清空時顯示外殼
+          group.style.display = '';
         } else {
-          // 檢查該 cardGroup 內部是否有任何一張子卡片是匹配並顯示的
+          // 檢查組內是否有可見的子卡片
           const visibleChildren = group.querySelectorAll('.app-card:not([style*="display: none"])');
-          // 只要有至少一張子卡片匹配，外殼就顯示；若全部都不匹配，才隱藏整個 CardGroup
           group.style.display = visibleChildren.length > 0 ? '' : 'none';
         }
       });
     };
 
-    // 事件監聽：即時打字 (input) + 中文輸入法完成選字 (compositionend)
+    // 事件綁定
     input.addEventListener('input', filterCards);
     input.addEventListener('compositionend', filterCards);
 
