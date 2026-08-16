@@ -239,6 +239,30 @@ createSearchBar(item) {
 
     return container;
   },
+
+  createTimeline(item) {
+    const container = document.createElement('div');
+    container.className = 'app-timeline';
+
+    if (Array.isArray(item.events)) {
+      item.events.forEach(evt => {
+        const eventEl = document.createElement('div');
+        const statusClass = evt.status ? `status-${evt.status}` : '';
+        eventEl.className = `timeline-event ${statusClass}`;
+
+        eventEl.innerHTML = `
+          ${evt.time ? `<div class="timeline-time">${evt.time}</div>` : ''}
+          ${evt.title ? `<div class="timeline-title">${evt.title}</div>` : ''}
+          ${evt.text ? `<div class="timeline-text">${evt.text}</div>` : ''}
+        `;
+
+        container.appendChild(eventEl);
+      });
+    }
+
+    return container;
+  },
+  
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
     if (item.category) element.dataset.category = item.category;
@@ -421,6 +445,9 @@ createSearchBar(item) {
     else if (item.type === 'kpiGroup') {
       element = this.createKPIGroup(item);
     }
+    else if (item.type === 'timeline') {
+      element = this.createTimeline(item);
+    }
 
     // 7. Form 表單模組
     else if (item.type === 'form') {
@@ -521,6 +548,11 @@ createSearchBar(item) {
         else if (field.type === 'kpiGroup') {
           const kpiEl = this.createKPIGroup(field);
           if (kpiEl) form.appendChild(kpiEl);
+          return;
+        }
+        else if (field.type === 'timeline') {
+          const timelineEl = this.createTimeline(field);
+          if (timelineEl) form.appendChild(timelineEl);
           return;
         }
         else if (field.type === 'hidden') {
