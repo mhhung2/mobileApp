@@ -5,50 +5,37 @@ const UI = {
   // 紀錄當前 Tab 篩選狀態
   activeTab: 'all',
 
-  // 渲染頁面主入口
+// 渲染頁面主入口
   render(containerId, schema) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
 
-    // 檢查是否有包含 cardGroup 的項目，若有則自動產生 Tab 導覽列
+    // 1. 先將 schema 拆分為「頂端元素 (如 header)」與「內容元素 (如 card, cardGroup)」
+    const topElements = schema.filter(item => item.type === 'header');
+    const bodyElements = schema.filter(item => item.type !== 'header');
+
+    // 2. 渲染 Header 頂端資訊
+    topElements.forEach(item => {
+      const el = this.createComponent(item);
+      if (el) container.appendChild(el);
+    });
+
+    // 3. 在 Header 下方、Group 正上方，插入 Tab 分頁導覽列
     const groupItems = schema.filter(item => item.type === 'cardGroup');
     if (groupItems.length > 0) {
       const tabsHeader = this.createTabsHeader(groupItems);
       container.appendChild(tabsHeader);
     }
 
-    schema.forEach(item => {
+    // 4. 最後渲染所有的 Group 與卡片內容
+    bodyElements.forEach(item => {
       const el = this.createComponent(item);
       if (el) container.appendChild(el);
     });
 
     // 初始觸發一次 Tab 篩選
     this.filterGroups(this.activeTab);
-  },
-
-  // 建立頂端 Tab 分頁導覽列
-  createTabsHeader(groupItems) {
-    const tabContainer = document.createElement('div');
-    tabContainer.className = 'tab-container';
-
-    // 1. 「全部」Tab
-    const allTab = document.createElement('button');
-    allTab.className = 'tab-btn active';
-    allTab.innerText = '全部';
-    allTab.onclick = (e) => this.switchTab('all', e.target);
-    tabContainer.appendChild(allTab);
-
-    // 2. 根據 Group ID / Title 產生獨立 Tab
-    groupItems.forEach(group => {
-      const btn = document.createElement('button');
-      btn.className = 'tab-btn';
-      btn.innerText = group.title;
-      btn.onclick = (e) => this.switchTab(group.groupId, e.target);
-      tabContainer.appendChild(btn);
-    });
-
-    return tabContainer;
   },
 
   // 切換 Tab 點擊事件
