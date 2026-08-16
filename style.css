@@ -1103,59 +1103,58 @@ input[type="date"]::-webkit-date-and-time-value {
   justify-content: space-between;
   background: transparent;
   border: none;
-  padding: 6px 0 10px 0;
-  margin-bottom: 8px;
+  padding: 2px 0 4px 0;
+  margin-bottom: 4px;
   box-sizing: border-box;
-  font-size: 13px;
+  font-size: 12px;     /* 微調字型大小 */
+  line-height: 1.2;    /* 緊湊行高 */
 }
 
 /* 左側：上次更新時間 (靠最左) */
 .refresh-last-updated {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-color, #1c1c1e);
+  line-height: 1.2;
 }
 
-/* 右側區塊：包含倒數秒數與按鈕 (靠最右) */
 .refresh-timer-right {
   display: flex;
   align-items: center;
-  gap: 8px; /* 倒數文字與按鈕之間的緊密間距 */
+  gap: 6px;            /* 縮小倒數文字與按鈕的間距 */
   margin-left: auto;
 }
-
-/* 靠右靠近按鈕的倒數文字 */
 .refresh-seconds-text {
   font-size: 12px;
   font-weight: 400;
   color: #8e8e93;
-}
+  line-height: 1.2;
+}}
 
-/* 帶有色彩的立即更新按鈕 */
 .refresh-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background-color: rgba(0, 122, 255, 0.1);
   border: 1px solid rgba(0, 122, 255, 0.25);
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 3px 8px;     /* 縮小按鈕內邊距 */
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--primary-color, #007aff);
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  line-height: 1.2;
 }
-
 .refresh-action-btn:active {
   background-color: rgba(0, 122, 255, 0.2);
   transform: scale(0.96);
 }
 
 .refresh-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   fill: currentColor;
 }
 
