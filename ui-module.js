@@ -38,6 +38,30 @@ const UI = {
     this.filterGroups(this.activeTab);
   },
 
+  // 建立頂端 Tab 分頁導覽列
+  createTabsHeader(groupItems) {
+    const tabContainer = document.createElement('div');
+    tabContainer.className = 'tab-container';
+
+    // 1. 「全部」Tab
+    const allTab = document.createElement('button');
+    allTab.className = 'tab-btn active';
+    allTab.innerText = '全部';
+    allTab.onclick = (e) => this.switchTab('all', e.target);
+    tabContainer.appendChild(allTab);
+
+    // 2. 根據 Group ID / Title 產生獨立 Tab
+    groupItems.forEach(group => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn';
+      btn.innerText = group.title;
+      btn.onclick = (e) => this.switchTab(group.groupId, e.target);
+      tabContainer.appendChild(btn);
+    });
+
+    return tabContainer;
+  },
+
   // 切換 Tab 點擊事件
   switchTab(groupId, targetBtn) {
     this.activeTab = groupId;
