@@ -130,5 +130,21 @@ function handleApproveShift() {
   });
 }
 
+function loadDashboardConfig() {
+    UI.showLoading(true, '更新最新資料中...');
+    
+    google.script.run
+      .withSuccessHandler(function(schema) {
+        UI.showLoading(false);
+        UI.render('app-container', schema);
+        UI.showToast('最新勤務與資安資料已載入', 'success');
+      })
+      .withFailureHandler(function(err) {
+        UI.showLoading(false);
+        UI.showToast('載入失敗：' + err.message, 'danger');
+      })
+      .getDashboardConfig(); // 呼叫 Server.gs 函數
+  }
+
 // 網頁載入完成後觸發
 document.addEventListener('DOMContentLoaded', loadFormSchema);
