@@ -785,3 +785,76 @@ input[type="date"]::-webkit-date-and-time-value {
 .kpi-status.warning { background: #fff8d6; color: #8a6d00; }
 .kpi-status.danger  { background: #ffe5e5; color: #dc3545; }
 .kpi-status.info    { background: #e5f1ff; color: #007aff; }
+
+
+/* ==========================================
+   SearchBar 即時搜尋列樣式
+   ========================================== */
+.search-bar-container {
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 36px 8px 36px; /* 留出左右圖示空間 */
+  font-size: 15px;
+  border: 1px solid var(--border-color, #e5e5ea);
+  border-radius: 10px;
+  background-color: var(--card-bg, #ffffff);
+  outline: none;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: var(--primary-color, #007aff);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* 左側搜尋 SVG 圖示 */
+.search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #8e8e93;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* 右側一鍵清除按鈕 (x) */
+.search-clear-btn {
+  position: absolute;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  background: #c7c7cc;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  display: none; /* 有輸入文字時才顯示 */
+  padding: 0;
+}
+
+.search-clear-btn:active {
+  background: #8e8e93;
+}
