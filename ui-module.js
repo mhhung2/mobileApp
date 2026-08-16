@@ -336,6 +336,9 @@ createSearchBar(item) {
   // ==========================================
   // 彈出式 Modal / BottomSheet 全域控制 API
   // ==========================================
+// ==========================================
+  // 升級版 Modal / BottomSheet / Confirm Box API
+  // ==========================================
   showModal(config = {}) {
     let overlay = document.getElementById('app-modal-overlay');
     if (!overlay) {
@@ -344,30 +347,36 @@ createSearchBar(item) {
       document.body.appendChild(overlay);
     }
 
-    const isCenter = config.position === 'center';
+    // 預設 Confirm Box 或 center 模式使用中央對齊
+    const isConfirm = config.isConfirm || false;
+    const position = config.position || (isConfirm ? 'center' : 'bottom');
+    const isCenter = position === 'center';
+
     overlay.className = `modal-overlay ${isCenter ? 'center' : ''}`;
 
     const container = document.createElement('div');
     container.className = 'modal-container';
 
-    let headerHTML = '';
-    if (!isCenter) {
-      headerHTML += `<div class="modal-handle"></div>`;
-    }
+    let handleHTML = !isCenter ? `<div class="modal-handle"></div>` : '';
+    let showCloseBtn = config.showClose !== false;
 
+    // 1. 建立外殼結構
     container.innerHTML = `
-      ${headerHTML}
+      ${handleHTML}
       <div class="modal-header">
-        <div class="modal-title">${config.title || ''}</div>
-        <button class="modal-close-btn" onclick="UI.closeModal()">✕</button>
+        <div class="modal-title">${config.title || (isConfirm ? '確認提示' : '')}</div>
+        ${showCloseBtn ? `<button class="modal-close-btn" id="modal-close-x">✕</button>` : ''}
       </div>
-      <div class="modal-body" id="modal-body-content"></div>
+      <div class="modal-body" id="modal-body-content">
+        ${config.message ? `<div class="item-text" style="margin-bottom:12px;">${config.message}</div>` : ''}
+      </div>
+      <div class="modal-footer" id="modal-footer-content"></div>
     `;
 
     overlay.innerHTML = '';
     overlay.appendChild(container);
 
-    // 動態繪製 Modal 內部的 items 元件
+    // 2. 渲染 body 內的 items UI 元件
     const bodyContent = container.querySelector('#modal-body-content');
     if (Array.isArray(config.items)) {
       config.items.forEach(item => {
@@ -376,9 +385,56 @@ createSearchBar(item) {
       });
     }
 
-    // 點擊背景遮罩關閉
+    // 3. 處理 Confirm Box 按鈕列 (若有設定 confirmText 或 isConfirm)
+    const footerContent = container.querySelector('#modal-footer-content');
+    if (isConfirm || config.confirmText || config.cancelText) {
+      const btnGroup = document.createElement('div');
+      const alignClass = config.btnAlign || (isCenter ? 'center' : 'right');
+      btnGroup.className = `btn-group align-${alignClass}`;
+      btnGroup.style.marginTop = '16px';
+
+      // 取消按鈕
+      if (config.cancelText !== false) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = `btn btn-inline btn-${config.cancelVariant || 'secondary'}`;
+        cancelBtn.innerText = config.cancelText || '取消';
+        cancelBtn.onclick = () => {
+          this.closeModal();
+          if (typeof config.onCancel === 'function') config.onCancel();
+          if (typeof window[config.onCancel] === 'function') window[config.onCancel]();
+        };
+        btnGroup.appendChild(cancelBtn);
+      }
+
+      // 確認按鈕
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = `btn btn-inline btn-${config.confirmVariant || 'primary'}`;
+      confirmBtn.innerText = config.confirmText || '確認';
+      confirmBtn.onclick = () => {
+        this.closeModal();
+        if (typeof config.onConfirm === 'function') config.onConfirm();
+        if (typeof window[config.onConfirm] === 'function') window[config.onConfirm]();
+      };
+      btnGroup.appendChild(confirmBtn);
+
+      footerContent.appendChild(btnGroup);
+    }
+
+    // 4. 事件綁定
+    const xBtn = container.querySelector('#modal-close-x');
+    if (xBtn) {
+      xBtn.onclick = () => {
+        this.closeModal();
+        if (typeof config.onCancel === 'function') config.onCancel();
+      };
+    }
+
+    // 點擊背景遮罩關閉 (Confirm 模式可設定 allowBackdropClose: false)
     overlay.onclick = (e) => {
-      if (e.target === overlay) this.closeModal();
+      if (e.target === overlay && config.allowBackdropClose !== false) {
+        this.closeModal();
+        if (typeof config.onCancel === 'function') config.onCancel();
+      }
     };
 
     // 顯示 Modal
@@ -391,7 +447,6 @@ createSearchBar(item) {
       overlay.classList.remove('active');
     }
   },
-
   // 頂部 Toast 即時通知橫幅 API
   showToast(message, variant = 'info', duration = 3000) {
     let toast = document.getElementById('app-toast');
