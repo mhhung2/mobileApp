@@ -4,7 +4,7 @@ let currentFormType = 'default';
  * 1. 向 GAS 請求 UI Config 結構
  */
 async function loadFormSchema() {
-  UI.showLoading(true, '載入介面模組中...');
+  UI.showLoading(true, '載入中...');
 
   // 讀取網址列參數（例如 ?type=leave）
   const urlParams = new URLSearchParams(window.location.search);
