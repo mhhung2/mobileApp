@@ -1,0 +1,117 @@
+:root {
+  --primary-color: #007aff;
+  --primary-hover: #0056b3;
+  --bg-color: #f2f2f7;
+  --card-bg: #ffffff;
+  --text-color: #1c1c1e;
+  --border-color: #e5e5ea;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-container {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  padding: 16px;
+  padding-bottom: 40px;
+}
+
+/* Header 模組 */
+.app-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+.app-header h1 {
+  font-size: 24px;
+  margin: 0 0 6px 0;
+}
+.app-header p {
+  font-size: 14px;
+  color: #8e8e93;
+  margin: 0;
+}
+
+/* Card & Text 模組 */
+.app-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.app-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+.app-text {
+  font-size: 14px;
+  color: #3a3a3c;
+  line-height: 1.4;
+}
+
+/* Form 模組 */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #636366;
+}
+.form-control {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: #fff;
+  outline: none;
+}
+
+/* Button 模組 */
+.btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* Loading 遮罩 */
+.loading-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 999;
+}
