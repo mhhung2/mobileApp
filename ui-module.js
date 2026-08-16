@@ -240,6 +240,9 @@ createSearchBar(item) {
     return container;
   },
 
+// ==========================================
+  // Timeline 時間軸模組 (支援混搭 items 子元件)
+  // ==========================================
   createTimeline(item) {
     const container = document.createElement('div');
     container.className = 'app-timeline';
@@ -250,11 +253,48 @@ createSearchBar(item) {
         const statusClass = evt.status ? `status-${evt.status}` : '';
         eventEl.className = `timeline-event ${statusClass}`;
 
-        eventEl.innerHTML = `
-          ${evt.time ? `<div class="timeline-time">${evt.time}</div>` : ''}
-          ${evt.title ? `<div class="timeline-title">${evt.title}</div>` : ''}
-          ${evt.text ? `<div class="timeline-text">${evt.text}</div>` : ''}
-        `;
+        // 1. 時間標籤 (有帶 time 屬性時繪製)
+        if (evt.time) {
+          const timeEl = document.createElement('div');
+          timeEl.className = 'timeline-time';
+          timeEl.innerText = evt.time;
+          eventEl.appendChild(timeEl);
+        }
+
+        // 2. 方式 A：如果傳入 items 陣列，動態繪製各式 UI 元件
+        if (Array.isArray(evt.items)) {
+          evt.items.forEach(child => {
+            const childEl = this.createComponent(child);
+            if (childEl) eventEl.appendChild(childEl);
+          });
+        } 
+        // 3. 方式 B：向下相容傳統純文字欄位 (title, text, subtitle, badge)
+        else {
+          if (evt.badge) {
+            const badgeEl = document.createElement('span');
+            badgeEl.className = `item-badge badge-${evt.badgeVariant || 'info'}`;
+            badgeEl.innerText = evt.badge;
+            eventEl.appendChild(badgeEl);
+          }
+          if (evt.title) {
+            const titleEl = document.createElement('div');
+            titleEl.className = 'timeline-title';
+            titleEl.innerText = evt.title;
+            eventEl.appendChild(titleEl);
+          }
+          if (evt.subtitle) {
+            const subEl = document.createElement('div');
+            subEl.className = 'item-subtitle';
+            subEl.innerText = evt.subtitle;
+            eventEl.appendChild(subEl);
+          }
+          if (evt.text) {
+            const textEl = document.createElement('div');
+            textEl.className = 'timeline-text';
+            textEl.innerText = evt.text;
+            eventEl.appendChild(textEl);
+          }
+        }
 
         container.appendChild(eventEl);
       });
