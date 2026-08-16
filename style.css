@@ -865,3 +865,78 @@ input[type="date"]::-webkit-date-and-time-value {
 .search-hidden {
   display: none !important;
 }
+
+/* ==========================================
+   Timeline 時間軸模組樣式
+   ========================================== */
+.app-timeline {
+  position: relative;
+  padding-left: 24px;
+  margin: 12px 0;
+  box-sizing: border-box;
+}
+
+/* 貫穿全域的縱向軸線 */
+.app-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background-color: var(--border-color, #e5e5ea);
+}
+
+/* 時間軸單一事件項目 */
+.timeline-event {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.timeline-event:last-child {
+  margin-bottom: 0;
+}
+
+/* 時間軸圓點標記 */
+.timeline-event::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary-color, #007aff);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px var(--border-color, #e5e5ea);
+  z-index: 1;
+}
+
+/* 狀態圓點色彩發散 (根據 status 變色) */
+.timeline-event.status-success::before { background-color: #34c759; box-shadow: 0 0 0 2px #e3f9e5; }
+.timeline-event.status-warning::before { background-color: #ff9500; box-shadow: 0 0 0 2px #ffeacc; }
+.timeline-event.status-danger::before  { background-color: #ff3b30; box-shadow: 0 0 0 2px #ffe5e5; }
+.timeline-event.status-purple::before  { background-color: #af52de; box-shadow: 0 0 0 2px #f3e8ff; }
+
+/* 時間標籤 */
+.timeline-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8e8e93;
+  margin-bottom: 2px;
+}
+
+/* 事件標題 */
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color, #1c1c1e);
+  margin-bottom: 2px;
+}
+
+/* 事件內文備註 */
+.timeline-text {
+  font-size: 12px;
+  color: #636366;
+  line-height: 1.4;
+}
