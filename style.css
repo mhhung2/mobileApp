@@ -1106,29 +1106,32 @@ input[type="date"]::-webkit-date-and-time-value {
   padding: 6px 0 10px 0;
   margin-bottom: 8px;
   box-sizing: border-box;
-  font-size: 13px; /* 字體放大至 13px */
-  color: var(--secondary-text, #636366);
+  font-size: 13px;
 }
 
-.refresh-timer-left {
-  display: flex;
-  align-items: center;
-  gap: 12px; /* 時間與倒數秒數間距 */
-}
-
+/* 左側：上次更新時間 (靠最左) */
 .refresh-last-updated {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-color, #1c1c1e);
 }
 
+/* 右側區塊：包含倒數秒數與按鈕 (靠最右) */
+.refresh-timer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 倒數文字與按鈕之間的緊密間距 */
+  margin-left: auto;
+}
+
+/* 靠右靠近按鈕的倒數文字 */
 .refresh-seconds-text {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   color: #8e8e93;
 }
 
-/* 帶有色彩的放大版立即更新按鈕 */
+/* 帶有色彩的立即更新按鈕 */
 .refresh-action-btn {
   display: inline-flex;
   align-items: center;
