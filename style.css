@@ -858,3 +858,8 @@ input[type="date"]::-webkit-date-and-time-value {
 .search-clear-btn:active {
   background: #8e8e93;
 }
+
+/* 搜尋隱藏專用 Class (確保優先度最高，且不破壞原生排版) */
+.search-hidden {
+  display: none !important;
+}
