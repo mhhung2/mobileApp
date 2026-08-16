@@ -429,16 +429,136 @@ input[type="date"]::-webkit-date-and-time-value {
   margin-bottom: 8px;
 }
 
+/* ==========================================
+   全新 20 款 Quote 樣式
+   ========================================== */
+
+/* 基礎 Quote 轉折動畫與微調 */
 .item-quote {
   font-size: 13px;
-  border-left: 3px solid var(--primary-color);
-  padding-left: 10px;
-  margin: 8px 0;
+  line-height: 1.5;
+  padding: 10px 14px;
+  margin: 10px 0;
+  border-radius: 0 8px 8px 0;
+  box-sizing: border-box;
+}
+
+/* 1. 語意狀態系列 (Semantic States) */
+.quote-success {
+  border-left: 4px solid #34c759;
+  background-color: #f0faf1;
+  color: #1e7e34;
+}
+.quote-warning {
+  border-left: 4px solid #ffd700;
+  background-color: #fffdf0;
+  color: #8a6d00;
+}
+.quote-caution {
+  border-left: 4px solid #ff9500;
+  background-color: #fff7ed;
+  color: #c2410c;
+}
+.quote-danger {
+  border-left: 4px solid #ff3b30;
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+.quote-info {
+  border-left: 4px solid #007aff;
+  background-color: #f0f7ff;
+  color: #1d4ed8;
+}
+
+/* 2. 筆記與提示系列 (Notes & Tips) */
+.quote-note {
+  border-left: 4px solid #af52de;
+  background-color: #fcf5ff;
+  color: #6b21a8;
+}
+.quote-tip {
+  border-left: 4px solid #14b8a6;
+  background-color: #f0fdfa;
+  color: #0f766e;
+}
+
+/* 3. 深色滿版系列 (Solid Dark) */
+.quote-dark {
+  background-color: #1c1c1e;
+  border-left: 4px solid #8e8e93;
+  color: #f2f2f7;
+}
+.quote-midnight {
+  background-color: #0f172a;
+  border-left: 4px solid #38bdf8;
+  color: #e2e8f0;
+}
+.quote-gold {
+  background-color: #2a2415;
+  border-left: 4px solid #ffd700;
+  color: #fef08a;
+}
+.quote-black {
+  background-color: #000000;
+  border-left: 4px solid #ffffff;
+  color: #ffffff;
+}
+
+/* 4. 霓虹亮色系列 (Vivid & Neon) */
+.quote-neon-lime {
+  border-left: 4px solid #84cc16;
+  background-color: #f7fee7;
+  color: #3f6212;
+}
+.quote-neon-cyan {
+  border-left: 4px solid #06b6d4;
+  background-color: #ecfeff;
+  color: #164e63;
+}
+.quote-neon-pink {
+  border-left: 4px solid #ec4899;
+  background-color: #fdf2f8;
+  color: #9d174d;
+}
+
+/* 5. 邊框與結構變形系列 (Borders & Structures) */
+.quote-top-border {
+  border-top: 3px solid #007aff;
+  border-left: none;
+  border-radius: 8px;
+  background-color: #f8f8fb;
+  color: #3a3a3c;
+}
+.quote-dotted {
+  border-left: 3px dotted #8e8e93;
+  background-color: #fafafa;
+  color: #555555;
+}
+.quote-box {
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-color);
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #1c1c1e;
+}
+.quote-gradient-border {
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(180deg, #ff7e5f, #feb47b) 1;
+  background-color: #fff9f6;
+  color: #4a2c20;
+}
+
+/* 6. 極簡與柔和系列 (Minimal & Soft) */
+.quote-minimal {
+  border-left: 2px solid #d1d1d6;
+  background-color: transparent;
   color: #636366;
-  background: #f8f8fb;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  border-radius: 0 6px 6px 0;
+  padding-left: 10px;
+}
+.quote-cream {
+  border-left: 4px solid #eab308;
+  background-color: #fefce8;
+  color: #713f12;
 }
 
 /* 狀態標籤 (Badge) */
