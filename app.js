@@ -83,5 +83,52 @@ function handleSendAlert() {
   UI.showToast('已成功發送緊急通知給 Team B 成員！', 'success', 3000);
 }
 
+function handleDeleteItem() {
+  UI.showModal({
+    isConfirm: true,
+    title: '確認刪除任務？',
+    message: '此動作將無法復原，請確認是否要刪除該筆 HKR 排班紀錄。',
+    confirmText: '確認刪除',
+    confirmVariant: 'danger',  // 紅色警告按鈕
+    cancelText: '再想想',
+    onConfirm: function() {
+      // 點擊確認後執行的動作
+      UI.showToast('項目已成功刪除！', 'success');
+      // 可在此呼叫 google.script.run.deleteData(...) 進行後端刪除
+    },
+    onCancel: function() {
+      UI.showToast('已取消操作', 'info');
+    }
+  });
+}
+
+function handleApproveShift() {
+  UI.showModal({
+    isConfirm: true,
+    title: '審核勤務支援申請',
+    items: [
+      {
+        type: 'badgeGroup',
+        badges: [
+          { text: '大埔更支援', variant: 'caution' },
+          { text: '待審核', variant: 'warning' }
+        ]
+      },
+      { type: 'text', text: '申請人：Team B (急救合格人員 1 名)' },
+      {
+        type: 'mediaPreview',
+        src: 'https://picsum.photos/400/180',
+        caption: '支援地點巡檢參考圖'
+      }
+    ],
+    confirmText: '同意派員',
+    confirmVariant: 'primary',
+    cancelText: '駁回申請',
+    cancelVariant: 'danger',
+    onConfirm: () => UI.showToast('已核准派員請求！', 'success'),
+    onCancel: () => UI.showToast('已駁回申請', 'warning')
+  });
+}
+
 // 網頁載入完成後觸發
 document.addEventListener('DOMContentLoaded', loadFormSchema);
