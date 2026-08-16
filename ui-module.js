@@ -153,24 +153,38 @@ const UI = {
       const query = input.value.trim().toLowerCase();
       clearBtn.style.display = query ? 'block' : 'none';
 
-      // 決定要搜尋的範圍 (若指定 targetGroup 則只搜尋特定 groupId 的卡片)
+      // 1. 取得目前啟動中 (Active) 的 Tab Group ID
+      const activeTabBtn = document.querySelector('.tab-btn.active');
+      const activeGroupId = activeTabBtn ? activeTabBtn.getAttribute('data-tab-id') : null;
+
+      // 2. 決定搜尋目標範圍
       let targetSelector = '.app-card, .kpi-card';
       if (item.targetGroup) {
         targetSelector = `[data-group-id="${item.targetGroup}"] .app-card, [data-group-id="${item.targetGroup}"] .kpi-card`;
       }
 
       const cards = document.querySelectorAll(targetSelector);
+
       cards.forEach(card => {
-        // 比對卡片內的所有純文字
+        // 取得該卡片所屬的 Group 容器 (Tab 分組)
+        const groupParent = card.closest('[data-group-id]');
+        const cardGroupId = groupParent ? groupParent.getAttribute('data-group-id') : null;
+
+        // 關鍵判定 1：若該卡片隸屬於某個 Tab Group，且該 Group 目前不是 Active 狀態，則保持隱藏
+        if (cardGroupId && activeGroupId && cardGroupId !== activeGroupId) {
+          card.style.display = 'none';
+          return; // 跳過此卡片的文字比對
+        }
+
+        // 關鍵判定 2：在當前 Active 的 Tab 內進行關鍵字文字比對
         const cardText = card.innerText.toLowerCase();
         if (!query || cardText.includes(query)) {
-          card.style.display = '';
+          card.style.display = ''; // 匹配：顯示卡片
         } else {
-          card.style.display = 'none';
+          card.style.display = 'none'; // 不匹配：隱藏卡片
         }
       });
     };
-
     // 事件監聽
     input.addEventListener('input', filterCards);
 
