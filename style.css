@@ -182,6 +182,69 @@ input[type="date"]::-webkit-date-and-time-value {
   text-align: left; /* 確保 iOS 上日期文字靠左對齊 */
   min-height: 20px;
 }
+/* ==========================================
+   Switch (開關切換器) 樣式
+   ========================================== */
+.switch-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.switch-label-text {
+  font-size: 15px;
+  color: var(--text-color);
+}
+
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 51px;
+  height: 31px;
+  flex-shrink: 0;
+}
+
+/* 隱藏原生 Checkbox */
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 開關滑軌背景 (iOS 風格) */
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e5e5ea;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 31px;
+}
+
+/* 開關小白球 */
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 27px;
+  width: 27px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 啟用狀態 (ON) */
+.switch-toggle input:checked + .switch-slider {
+  background-color: var(--primary-color); /* 自動套用主題藍 (#007aff) */
+}
+
+/* 點擊移動小白球 */
+.switch-toggle input:checked + .switch-slider:before {
+  transform: translateX(20px);
+}
 
 /* Button 模組 */
 .btn {
