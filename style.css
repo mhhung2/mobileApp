@@ -693,3 +693,71 @@ input[type="date"]::-webkit-date-and-time-value {
 /* 【擴充外框線系列 (Outline)】 */
 .badge-outline-success { background: transparent; border: 1px solid #34c759; color: #28a745; } /* 綠色外框 */
 .badge-outline-danger  { background: transparent; border: 1px solid #ff3b30; color: #dc3545; } /* 紅色外框 */
+
+
+/* ==========================================
+   KPI Group & KPI Card 模組樣式
+   ========================================== */
+
+/* KPI 網格容器 (手機端預設雙欄並排，寬度自動分配) */
+.kpi-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 預設 2 欄 */
+  gap: 10px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+/* 當指定欄數或單欄模式時 */
+.kpi-group.cols-1 { grid-template-columns: 1fr; }
+.kpi-group.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* KPI 單張卡片 */
+.kpi-card {
+  background-color: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e5ea);
+  border-radius: var(--radius, 12px);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+/* KPI 標題 */
+.kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8e8e93;
+  margin-bottom: 4px;
+}
+
+/* KPI 核心數據數值 */
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-color, #1c1c1e);
+  line-height: 1.2;
+}
+
+/* KPI 底部狀態/變化標籤 */
+.kpi-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #636366;
+}
+
+/* 狀態色彩與指標 */
+.kpi-status {
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.kpi-status.success { background: #e3f9e5; color: #28a745; }
+.kpi-status.warning { background: #fff8d6; color: #8a6d00; }
+.kpi-status.danger  { background: #ffe5e5; color: #dc3545; }
+.kpi-status.info    { background: #e5f1ff; color: #007aff; }
