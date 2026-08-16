@@ -84,6 +84,24 @@ body {
   border-radius: 8px;
   background-color: #fff;
   outline: none;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* 針對 iOS Date Picker 內建圖示與容器修正寬度溢出 */
+input[type="date"].form-control,
+input[type="datetime-local"].form-control,
+input[type="time"].form-control {
+  max-width: 100%;
+  min-width: 0; /* 允許 flex/grid 容器內壓縮 */
+  box-sizing: border-box;
+  display: block;
+}
+
+/* 修正 iOS Safari 日期內建清除/開關按鈕導致的寬度擠壓 */
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left; /* 確保 iOS 上日期文字靠左對齊 */
+  min-height: 20px;
 }
 
 /* Button 模組 */
