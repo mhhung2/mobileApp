@@ -105,6 +105,36 @@ body {
   background-color: var(--primary-color);
   color: #fff;
 }
+
+/* 主題顏色：綠色 (Success / Positive) */
+.btn-success {
+  background-color: #34c759;
+  color: #ffffff;
+}
+.btn-success:active {
+  background-color: #28a745;
+}
+
+/* 主題顏色：黃色/橘色 (Warning / Caution) */
+.btn-warning {
+  background-color: #ff9500;
+  color: #ffffff;
+}
+.btn-warning:active {
+  background-color: #cc7700;
+}
+
+/* Disabled (禁用) 狀態樣式 */
+.btn:disabled,
+.btn.disabled {
+  background-color: #e5e5ea !important;
+  color: #aeaeb2 !important;
+  border-color: #e5e5ea !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  pointer-events: none; /* 阻止任何點擊與觸控事件 */
+  box-shadow: none !important;
+}
 .btn:last-child {
   margin-bottom: 0;
 }
