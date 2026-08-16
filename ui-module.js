@@ -215,8 +215,9 @@ const UI = {
       }
     }
 
+    // 7. Form 表單模組
 // ==========================================
-    // Form 表單模組 (支援 textarea, radio, checkbox, file)
+    // Form 表單模組 (支援各欄位 defaultValue 預設值)
     // ==========================================
     else if (item.type === 'form') {
       element = document.createElement('div');
@@ -234,10 +235,17 @@ const UI = {
           select.className = 'form-control';
           select.name = field.name;
           if (field.required) select.required = true;
+
           field.options.forEach(opt => {
             const val = opt.value !== undefined ? opt.value : opt;
             const text = opt.label !== undefined ? opt.label : opt;
-            select.add(new Option(text, val));
+            const optionEl = new Option(text, val);
+            
+            // 匹配 defaultValue
+            if (field.defaultValue !== undefined && String(val) === String(field.defaultValue)) {
+              optionEl.selected = true;
+            }
+            select.add(optionEl);
           });
           group.appendChild(select);
         }
@@ -249,6 +257,12 @@ const UI = {
           textarea.name = field.name;
           textarea.rows = field.rows || 3;
           textarea.placeholder = field.placeholder || '';
+          
+          // 帶入 defaultValue
+          if (field.defaultValue !== undefined) {
+            textarea.value = field.defaultValue;
+          }
+
           if (field.maxLength) textarea.maxLength = field.maxLength;
           if (field.minLength) textarea.minLength = field.minLength;
           if (field.required) textarea.required = true;
@@ -273,7 +287,17 @@ const UI = {
               inputEl.name = field.name;
               inputEl.value = val;
 
-              // 首個 Radio 設為必填
+              // 匹配 defaultValue (支援單一值或陣列，如 ["network", "software"])
+              if (field.defaultValue !== undefined) {
+                if (Array.isArray(field.defaultValue)) {
+                  if (field.defaultValue.map(String).includes(String(val))) {
+                    inputEl.checked = true;
+                  }
+                } else if (String(val) === String(field.defaultValue)) {
+                  inputEl.checked = true;
+                }
+              }
+
               if (field.required && field.type === 'radio' && idx === 0) {
                 inputEl.required = true;
               }
@@ -286,19 +310,19 @@ const UI = {
           group.appendChild(optGroup);
         }
 
-        // 4. File 檔案 / 照片上傳
+        // 4. File 檔案上傳 (註：瀏覽器基於安全性不支援設定 File value，僅支援宣告預設提示)
         else if (field.type === 'file') {
           const fileInput = document.createElement('input');
           fileInput.type = 'file';
           fileInput.className = 'form-control';
           fileInput.name = field.name;
-          if (field.accept) fileInput.accept = field.accept; // 例如 "image/*"
+          if (field.accept) fileInput.accept = field.accept;
           if (field.multiple) fileInput.multiple = true;
           if (field.required) fileInput.required = true;
           group.appendChild(fileInput);
         }
 
-        // 5. 一般文字與數字欄位 (text, number_text, date, time 等)
+        // 5. 一般文字、數字、日期欄位 (text, number_text, date, time 等)
         else {
           const input = document.createElement('input');
           input.className = 'form-control';
@@ -314,6 +338,11 @@ const UI = {
             };
           } else {
             input.type = field.type || 'text';
+          }
+
+          // 帶入 defaultValue
+          if (field.defaultValue !== undefined) {
+            input.value = field.defaultValue;
           }
 
           if (field.maxLength) input.maxLength = field.maxLength;
@@ -340,7 +369,6 @@ const UI = {
         const formData = new FormData(form);
         const data = {};
 
-        // 處理多選 Checkbox 陣列轉成逗號分隔或陣列字串
         for (let [key, val] of formData.entries()) {
           if (data[key]) {
             if (!Array.isArray(data[key])) data[key] = [data[key]];
