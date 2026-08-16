@@ -132,16 +132,46 @@ const UI = {
     // 1. Header (支援傳統 title/subtitle 或 items 無限子項目)
     if (item.type === 'header') {
       element = document.createElement('div');
-      element.className = 'app-header';
+      const alignClass = `align-${item.align || 'left'}`; // 預設靠左 left
+      element.className = `app-header ${alignClass}`;
 
-      if (Array.isArray(item.items)) {
-        item.items.forEach(child => {
-          const childEl = this.createComponent(child);
-          if (childEl) element.appendChild(childEl);
-        });
-      } else {
-        element.innerHTML = `<h1>${item.title || ''}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
-      }
+      // 支援兩種寫法：傳入 items 陣列 或 直接傳入 title / subtitle / badge
+      const headerItems = Array.isArray(item.items) ? item.items : [
+        item.badge ? { type: 'badge', text: item.badge, variant: item.badgeVariant || 'info' } : null,
+        item.title ? { type: 'title', text: item.title } : null,
+        item.subtitle ? { type: 'subtitle', text: item.subtitle } : null
+      ].filter(Boolean);
+
+      headerItems.forEach(child => {
+        if (child.type === 'title') {
+          const titleEl = document.createElement('h1');
+          titleEl.className = 'header-title';
+          titleEl.innerText = child.text || '';
+          element.appendChild(titleEl);
+        } else if (child.type === 'subtitle') {
+          const subEl = document.createElement('p');
+          subEl.className = 'header-subtitle';
+          subEl.innerText = child.text || '';
+          element.appendChild(subEl);
+        } else if (child.type === 'badge') {
+          const badgeEl = document.createElement('span');
+          badgeEl.className = `item-badge badge-${child.variant || 'info'}`;
+          badgeEl.innerText = child.text || '';
+          element.appendChild(badgeEl);
+        } else if (child.type === 'badgeGroup') {
+          const badgeGroupEl = document.createElement('div');
+          badgeGroupEl.className = `badge-group ${alignClass}`;
+          if (Array.isArray(child.badges)) {
+            child.badges.forEach(b => {
+              const bEl = document.createElement('span');
+              bEl.className = `item-badge badge-${b.variant || 'primary'}`;
+              bEl.innerText = b.text || '';
+              badgeGroupEl.appendChild(bEl);
+            });
+          }
+          element.appendChild(badgeGroupEl);
+        }
+      });
     }
 
     // 2. Card (支援傳統 title/content 或 items 無限子項目)
