@@ -28,11 +28,6 @@ async function loadFormSchema(silent = false) {
       
       // 即時重新渲染頁面 (UI.render 內部會更新上次更新時間)
       UI.render('app', result.schema);
-
-      // 若為背景靜態更新，可跳出右頂 Toast 提示（可選）
-      if (silent) {
-        UI.showToast('頁面資料已更新至最新狀態', 'success');
-      }
     } else {
       if (!silent) alert('無法載入表單架構');
     }
