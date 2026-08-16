@@ -555,3 +555,21 @@ input[type="date"]::-webkit-date-and-time-value {
 /* 【外框線風格系列】 */
 .badge-outline-primary { background: transparent; border: 1px solid #007aff; color: #007aff; }
 .badge-outline-dark    { background: transparent; border: 1px solid #8e8e93; color: #3a3a3c; }
+
+/* 【深色滿版系列 (Solid Dark)】 */
+.badge-solid-blue    { background: #007aff; color: #ffffff; }  /* 滿版鮮藍 */
+.badge-solid-green   { background: #34c759; color: #ffffff; }  /* 滿版翡翠綠 */
+.badge-solid-red     { background: #ff3b30; color: #ffffff; }  /* 滿版熱烈紅 */
+.badge-solid-purple  { background: #af52de; color: #ffffff; }  /* 滿版魅惑紫 */
+
+/* 【霓虹亮色系列 (Vivid / Neon)】 */
+.badge-neon-lime     { background: #a3e635; color: #1a2e05; }  /* 霓虹檸檬綠 */
+.badge-neon-cyan     { background: #22d3ee; color: #083344; }  /* 霓虹青藍 */
+
+/* 【時尚漸層系列 (Gradient)】 */
+.badge-gradient-sunset { background: linear-gradient(135deg, #ff7e5f, #feb47b); color: #ffffff; } /* 日落橘紅 */
+.badge-gradient-ocean  { background: linear-gradient(135deg, #2b5876, #4e4376); color: #ffffff; } /* 深海藍紫 */
+
+/* 【擴充外框線系列 (Outline)】 */
+.badge-outline-success { background: transparent; border: 1px solid #34c759; color: #28a745; } /* 綠色外框 */
+.badge-outline-danger  { background: transparent; border: 1px solid #ff3b30; color: #dc3545; } /* 紅色外框 */
