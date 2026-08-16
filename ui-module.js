@@ -11,8 +11,14 @@ const UI = {
   render(containerId, schema) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.innerHTML = '';
 
+    // 清除先前可能存在的倒數計時器
+    if (this.refreshIntervalId) {
+      clearInterval(this.refreshIntervalId);
+      this.refreshIntervalId = null;
+    }
+    container.innerHTML = '';
+    
     // 按順序渲染元件
     schema.forEach(item => {
       // 1. 如果遇到 tabBlock，產生該分類的 Tab 導覽列
@@ -468,11 +474,8 @@ createSearchBar(item) {
 
   // 建立倒數更新元件
   createRefreshTimer(item) {
-    const totalSeconds = item.intervalSeconds || 60; // 預設 60 秒倒數
+    const totalSeconds = item.intervalSeconds || 60; // 預設 60 秒
     this.remainingSeconds = totalSeconds;
-
-    // 清除舊的計時器，避免多次渲染時累加
-    if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
 
     const container = document.createElement('div');
     container.className = 'refresh-timer-container';
@@ -494,45 +497,47 @@ createSearchBar(item) {
     const refreshBtn = container.querySelector('#timer-refresh-btn');
     const refreshIcon = container.querySelector('.refresh-icon');
 
-    // 啟動倒數計時器
+    // 啟動倒數：只有渲染了 refreshTimer 才會執行這段計時器
     this.refreshIntervalId = setInterval(() => {
       this.remainingSeconds--;
       if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
 
       if (this.remainingSeconds <= 0) {
         clearInterval(this.refreshIntervalId);
+        this.refreshIntervalId = null;
+        // 倒數歸零，才發動 Request 向 Server 取新資料
         this.triggerRefresh(item.onRefresh, refreshIcon);
       }
     }, 1000);
 
-    // 手動點擊刷新
+    // 手動點擊刷新按鈕
     refreshBtn.onclick = () => {
-      if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
+      if (this.refreshIntervalId) {
+        clearInterval(this.refreshIntervalId);
+        this.refreshIntervalId = null;
+      }
+      // 手動觸發向 Server 取新資料
       this.triggerRefresh(item.onRefresh, refreshIcon);
     };
 
     return container;
   },
 
-  // 觸發重新向後端取得最新資料
+  // 執行對 Server 端 loadDashboardConfig 的呼叫
   triggerRefresh(onRefreshCallback, iconEl) {
     if (iconEl) iconEl.classList.add('spinning');
 
-    // 1. 若 JSON 有指定 JS 函數名稱（如 'fetchDataFromServer'）
-    if (typeof window[onRefreshCallback] === 'function') {
+    // 優先執行自訂傳入的 JS 函數名稱，否則預設執行 loadDashboardConfig()
+    if (onRefreshCallback && typeof window[onRefreshCallback] === 'function') {
       window[onRefreshCallback]();
-    } 
-    // 2. 預設標準 GAS 請求流程：調用伺服器端的 loadDashboardConfig()
-    else if (typeof window.loadDashboardConfig === 'function') {
+    } else if (typeof window.loadDashboardConfig === 'function') {
       window.loadDashboardConfig();
     } else if (typeof google !== 'undefined' && google.script && google.script.run) {
+      // 備用直連 GAS Server 端
       google.script.run
         .withSuccessHandler(schema => {
           UI.render('app-container', schema);
-          UI.showToast('資料已更新至最新狀態', 'success');
-        })
-        .withFailureHandler(err => {
-          UI.showToast('更新失敗，請檢查網路狀態', 'danger');
+          UI.showToast('資料已成功刷新', 'success');
         })
         .getDashboardConfig();
     }
