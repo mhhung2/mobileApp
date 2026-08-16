@@ -118,6 +118,71 @@ const UI = {
     return groupEl;
   },
 
+  createSearchBar(item) {
+    const container = document.createElement('div');
+    container.className = 'search-bar-container';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'search-input-wrapper';
+
+    // 左側 SVG 搜尋圖示
+    wrapper.innerHTML = `
+      <svg class="search-icon" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    `;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'search-input';
+    input.placeholder = item.placeholder || '搜尋卡片與內文...';
+
+    // 右側清除按鈕
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'search-clear-btn';
+    clearBtn.innerText = '✕';
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(clearBtn);
+    container.appendChild(wrapper);
+
+    // 搜尋與篩選邏輯
+    const filterCards = () => {
+      const query = input.value.trim().toLowerCase();
+      clearBtn.style.display = query ? 'block' : 'none';
+
+      // 決定要搜尋的範圍 (若指定 targetGroup 則只搜尋特定 groupId 的卡片)
+      let targetSelector = '.app-card, .kpi-card';
+      if (item.targetGroup) {
+        targetSelector = `[data-group-id="${item.targetGroup}"] .app-card, [data-group-id="${item.targetGroup}"] .kpi-card`;
+      }
+
+      const cards = document.querySelectorAll(targetSelector);
+      cards.forEach(card => {
+        // 比對卡片內的所有純文字
+        const cardText = card.innerText.toLowerCase();
+        if (!query || cardText.includes(query)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    };
+
+    // 事件監聽
+    input.addEventListener('input', filterCards);
+
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      filterCards();
+      input.focus();
+    });
+
+    return container;
+  },
+
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
     if (item.category) element.dataset.category = item.category;
@@ -212,6 +277,10 @@ const UI = {
 
       element.appendChild(headerDiv);
       element.appendChild(bodyDiv);
+    }
+
+    else if (item.type === 'searchBar') {
+      element = this.createSearchBar(item);
     }
 
     // 4. 基礎內容元件：各式樣式文字與引言
