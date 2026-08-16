@@ -3,8 +3,12 @@ let currentFormType = 'default';
 /**
  * 1. 向 GAS 請求 UI Config 結構
  */
-async function loadFormSchema() {
-  UI.showLoading(true, '載入中...');
+// 預設 silent = false (首次載入顯示 Loading，Timer 觸發時傳入 true 不顯示)
+async function loadFormSchema(silent = false) {
+  // 僅非靜默更新時才顯示全螢幕 Loading
+  if (!silent) {
+    UI.showLoading(true, '載入中...');
+  }
 
   // 讀取網址列參數（例如 ?type=leave）
   const urlParams = new URLSearchParams(window.location.search);
@@ -14,17 +18,31 @@ async function loadFormSchema() {
   try {
     const response = await fetch(requestUrl);
     const result = await response.json();
-    UI.showLoading(false);
+
+    if (!silent) {
+      UI.showLoading(false);
+    }
 
     if (result.success && result.schema) {
       currentFormType = result.formType || 'default';
+      
+      // 即時重新渲染頁面 (UI.render 內部會更新上次更新時間)
       UI.render('app', result.schema);
+
+      // 若為背景靜態更新，可跳出右頂 Toast 提示（可選）
+      if (silent) {
+        UI.showToast('頁面資料已更新至最新狀態', 'success');
+      }
     } else {
-      alert('無法載入表單架構');
+      if (!silent) alert('無法載入表單架構');
     }
   } catch (error) {
-    UI.showLoading(false);
-    alert('載入失敗：' + error);
+    if (!silent) {
+      UI.showLoading(false);
+      alert('載入失敗：' + error);
+    } else {
+      UI.showToast('背景自動更新失敗', 'danger');
+    }
   }
 }
 
