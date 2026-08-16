@@ -475,6 +475,9 @@ createSearchBar(item) {
   },
 
   // 建立倒數更新元件
+ // ==========================================
+  // 建立倒數更新元件 (統一秒數顯示格式)
+  // ==========================================
   createRefreshTimer(item) {
     this.totalIntervalSeconds = item.intervalSeconds || 60;
     this.remainingSeconds = this.totalIntervalSeconds;
@@ -489,11 +492,11 @@ createSearchBar(item) {
     const container = document.createElement('div');
     container.className = 'refresh-timer-container';
 
-    // 佈局結構：最左側時間，右側包覆倒數文字與按鈕
+    // 統一格式：最左側上次更新時間，右側包覆「X 秒後自動更新」與「立即更新按鈕」
     container.innerHTML = `
       <span class="refresh-last-updated" id="timer-last-updated">上次更新：${this.lastUpdatedStr}</span>
       <div class="refresh-timer-right">
-        <span class="refresh-seconds-text" id="timer-seconds-display">${this.remainingSeconds}秒後自動更新</span>
+        <span class="refresh-seconds-text" id="timer-seconds-display">${this.remainingSeconds} 秒後自動更新</span>
         <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
           <svg class="refresh-icon" viewBox="0 0 24 24">
             <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
@@ -522,13 +525,15 @@ createSearchBar(item) {
     return container;
   },
 
-  // 啟動倒數內部邏輯
+  // 1 秒計時器 (確保每秒都寫入完整的 "X 秒後自動更新")
   startCountdownTimer(secondsDisplay, refreshIcon) {
     if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
 
     this.refreshIntervalId = setInterval(() => {
       this.remainingSeconds--;
-      if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}秒後自動更新`;
+      if (secondsDisplay) {
+        secondsDisplay.innerText = `${this.remainingSeconds} 秒後自動更新`;
+      }
 
       if (this.remainingSeconds <= 0) {
         clearInterval(this.refreshIntervalId);
@@ -538,39 +543,35 @@ createSearchBar(item) {
     }, 1000);
   },
 
-  // 智慧監聽：視窗焦點/頁面從背景切回前台/解鎖
+  // 前後台切換與解鎖校正 (確保校正時也顯示完整格式)
   bindVisibilityAndFocusEvents(secondsDisplay, refreshIcon) {
     if (this.visibilityListenersBound) return;
     this.visibilityListenersBound = true;
 
     const handleAppResume = () => {
-      // 僅當頁面處於可見狀態且獲焦點時才檢查
       if (document.hidden) return;
 
       const now = Date.now();
       const elapsedSeconds = Math.floor((now - this.lastFetchTimestamp) / 1000);
 
-      // 情境 A：離開背景的時間超過設定的週期 -> 資料已過期，直接即時更新
       if (elapsedSeconds >= this.totalIntervalSeconds) {
         if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
         this.triggerRefresh(refreshIcon);
-      } 
-      // 情境 B：離開時間很短 -> 自動校正剩餘倒數秒數並繼續倒數
-      else {
+      } else {
         this.remainingSeconds = this.totalIntervalSeconds - elapsedSeconds;
-        if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
+        if (secondsDisplay) {
+          secondsDisplay.innerText = `${this.remainingSeconds} 秒後自動更新`;
+        }
       }
     };
 
-    // 1. 監聽頁面可見性改變 (背景 ➔ 前台)
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) handleAppResume();
     });
 
-    // 2. 監聽視窗 Focus (適用於 App 內嵌 WebView 切換與手機解鎖)
     window.addEventListener('focus', handleAppResume);
   },
-
+  
   // 發起對 Server 端 loadDashboardConfig 的呼叫
   triggerRefresh(iconEl) {
     if (iconEl) iconEl.classList.add('spinning');
@@ -580,23 +581,7 @@ createSearchBar(item) {
     const now = new Date();
     this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-    // 2. 優先調用 loadFormSchema(true)，實現無 Loading 遮罩背景靜默更新
-    if (typeof window.loadFormSchema === 'function') {
-      window.loadFormSchema(true);
-    } 
-    // 備用：若有設定自訂 onRefresh 函數
-    else if (this.onRefreshCallbackName && typeof window[this.onRefreshCallbackName] === 'function') {
-      window[this.onRefreshCallbackName](true);
-    } 
-    // 備用：標準 GAS 直連模式
-    else if (typeof google !== 'undefined' && google.script && google.script.run) {
-      google.script.run
-        .withSuccessHandler(schema => {
-          UI.render('app', schema);
-          UI.showToast('資料已更新', 'success');
-        })
-        .getDashboardConfig();
-    }
+    loadFormSchema(true);
   },
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
