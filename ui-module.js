@@ -216,9 +216,6 @@ const UI = {
     }
 
     // 7. Form 表單模組
-// ==========================================
-    // Form 表單模組 (支援各欄位 defaultValue 預設值)
-    // ==========================================
     else if (item.type === 'form') {
       element = document.createElement('div');
       element.className = 'app-card';
@@ -357,11 +354,34 @@ const UI = {
         form.appendChild(group);
       });
 
-      const btn = document.createElement('button');
-      btn.type = 'submit';
-      btn.className = 'btn btn-primary';
-      btn.innerText = item.submitText || '提交';
-      form.appendChild(btn);
+
+      const btnGroup = document.createElement('div');
+      btnGroup.className = 'btn-group align-left';
+      // 1. 提交按鈕
+      const submitBtn = document.createElement('button');
+      submitBtn.type = 'submit';
+      submitBtn.className = 'btn btn-inline btn-primary';
+      submitBtn.innerText = item.submitText || '提交';
+      btnGroup.appendChild(submitBtn);
+
+      // 2. 清除 / 重置按鈕 (當 JSON 中設定 resetText 或 showReset: true 時顯示)
+      if (item.showReset || item.resetText) {
+        const resetBtn = document.createElement('button');
+        resetBtn.type = 'reset';
+        resetBtn.className = 'btn btn-inline btn-secondary';
+        resetBtn.innerText = item.resetText || '清除重置';
+        
+        // 點擊重置時的動作
+        resetBtn.onclick = (e) => {
+          // 如果有自訂的 onReset 回調函式，則觸發它
+          if (item.onReset && typeof window[item.onReset] === 'function') {
+            window[item.onReset](form);
+          }
+        };
+
+        btnGroup.appendChild(resetBtn);
+      }
+      form.appendChild(btnGroup);
 
       // 表單提交處理
       form.onsubmit = (e) => {
