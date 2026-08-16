@@ -478,6 +478,10 @@ createSearchBar(item) {
   },
 
   // 建立倒數更新元件
+// ==========================================
+  // 建立倒數更新元件 (左側時間，右側倒數+按鈕)
+  // 上次更新：<時間>  <---- 空間 ---->  X秒後自動更新 [藍色立即更新按鈕]
+  // ==========================================
   createRefreshTimer(item) {
     this.totalIntervalSeconds = item.intervalSeconds || 60;
     this.remainingSeconds = this.totalIntervalSeconds;
@@ -492,18 +496,18 @@ createSearchBar(item) {
     const container = document.createElement('div');
     container.className = 'refresh-timer-container';
 
-    // 單一行結構：左側（上次更新 + 倒數秒數） / 右側（彩色按鈕）
+    // 佈局結構：最左側時間，右側包覆倒數文字與按鈕
     container.innerHTML = `
-      <div class="refresh-timer-left">
-        <span class="refresh-last-updated" id="timer-last-updated">上次更新：${this.lastUpdatedStr}</span>
+      <span class="refresh-last-updated" id="timer-last-updated">上次更新：${this.lastUpdatedStr}</span>
+      <div class="refresh-timer-right">
         <span class="refresh-seconds-text" id="timer-seconds-display">${this.remainingSeconds}秒後自動更新</span>
+        <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
+          <svg class="refresh-icon" viewBox="0 0 24 24">
+            <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+          </svg>
+          <span>${item.buttonText || '立即更新'}</span>
+        </button>
       </div>
-      <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
-        <svg class="refresh-icon" viewBox="0 0 24 24">
-          <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-        </svg>
-        <span>${item.buttonText || '立即更新'}</span>
-      </button>
     `;
 
     const secondsDisplay = container.querySelector('#timer-seconds-display');
