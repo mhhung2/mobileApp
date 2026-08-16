@@ -4,6 +4,8 @@
 const UI = {
   // 記錄每個 category 當前選中的 Tab (例如 { team: 'all', device: 'all' })
   activeTabs: {},
+  refreshIntervalId: null, // 記錄倒數計時器 ID
+  remainingSeconds: 0,     // 當前剩餘秒數
 
   // 渲染頁面主入口
   render(containerId, schema) {
@@ -333,12 +335,7 @@ createSearchBar(item) {
     return container;
   },
 
-  // ==========================================
-  // 彈出式 Modal / BottomSheet 全域控制 API
-  // ==========================================
-// ==========================================
   // 升級版 Modal / BottomSheet / Confirm Box API
-  // ==========================================
   showModal(config = {}) {
     let overlay = document.getElementById('app-modal-overlay');
     if (!overlay) {
@@ -467,6 +464,78 @@ createSearchBar(item) {
     window.toastTimer = setTimeout(() => {
       toast.classList.remove('active');
     }, duration);
+  },
+
+  // 建立倒數更新元件
+  createRefreshTimer(item) {
+    const totalSeconds = item.intervalSeconds || 60; // 預設 60 秒倒數
+    this.remainingSeconds = totalSeconds;
+
+    // 清除舊的計時器，避免多次渲染時累加
+    if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
+
+    const container = document.createElement('div');
+    container.className = 'refresh-timer-container';
+
+    container.innerHTML = `
+      <div class="refresh-timer-info">
+        <span>${item.label || '自動更新倒數'}</span>
+        <span class="refresh-seconds-badge" id="timer-seconds-display">${this.remainingSeconds}s</span>
+      </div>
+      <button type="button" class="refresh-action-btn" id="timer-refresh-btn">
+        <svg class="refresh-icon" viewBox="0 0 24 24">
+          <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+        <span>${item.buttonText || '立即刷新'}</span>
+      </button>
+    `;
+
+    const secondsDisplay = container.querySelector('#timer-seconds-display');
+    const refreshBtn = container.querySelector('#timer-refresh-btn');
+    const refreshIcon = container.querySelector('.refresh-icon');
+
+    // 啟動倒數計時器
+    this.refreshIntervalId = setInterval(() => {
+      this.remainingSeconds--;
+      if (secondsDisplay) secondsDisplay.innerText = `${this.remainingSeconds}s`;
+
+      if (this.remainingSeconds <= 0) {
+        clearInterval(this.refreshIntervalId);
+        this.triggerRefresh(item.onRefresh, refreshIcon);
+      }
+    }, 1000);
+
+    // 手動點擊刷新
+    refreshBtn.onclick = () => {
+      if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
+      this.triggerRefresh(item.onRefresh, refreshIcon);
+    };
+
+    return container;
+  },
+
+  // 觸發重新向後端取得最新資料
+  triggerRefresh(onRefreshCallback, iconEl) {
+    if (iconEl) iconEl.classList.add('spinning');
+
+    // 1. 若 JSON 有指定 JS 函數名稱（如 'fetchDataFromServer'）
+    if (typeof window[onRefreshCallback] === 'function') {
+      window[onRefreshCallback]();
+    } 
+    // 2. 預設標準 GAS 請求流程：調用伺服器端的 loadDashboardConfig()
+    else if (typeof window.loadDashboardConfig === 'function') {
+      window.loadDashboardConfig();
+    } else if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(schema => {
+          UI.render('app-container', schema);
+          UI.showToast('資料已更新至最新狀態', 'success');
+        })
+        .withFailureHandler(err => {
+          UI.showToast('更新失敗，請檢查網路狀態', 'danger');
+        })
+        .getDashboardConfig();
+    }
   },
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
@@ -656,6 +725,9 @@ createSearchBar(item) {
     }
     else if (item.type === 'mediaPreview') {
       element = this.createMediaPreview(item);
+    }
+    else if (item.type === 'refreshTimer') {
+      element = this.createRefreshTimer(item);
     }
 
     // 7. Form 表單模組
