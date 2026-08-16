@@ -71,7 +71,7 @@ const UI = {
     this.filterGroups(category, groupId);
   },
 
-  // 控制同 category 下的 Group 顯示或隱藏
+  // 控制同 category 下的 Group 顯示或隱藏 (支援多 SearchBar 精準連動)
   filterGroups(category, groupId) {
     const categoryElements = document.querySelectorAll(`[data-category="${category}"]`);
     categoryElements.forEach(el => {
@@ -82,16 +82,18 @@ const UI = {
       }
     });
 
-    // 精準喚醒：只觸發屬於該 category 或該可見區域內的 searchBar
-    const targetCategoryContainer = document.querySelector(`[data-category="${category}"]`);
-    if (targetCategoryContainer) {
-      const searchInputs = targetCategoryContainer.querySelectorAll('.search-input');
-      searchInputs.forEach(input => input.dispatchEvent(new Event('input')));
-    } else {
-      // 若該 category 無專屬 SearchBar，才觸發全域 SearchBar
-      const globalSearchInputs = document.querySelectorAll('.search-bar-container:not([data-category]) .search-input');
-      globalSearchInputs.forEach(input => input.dispatchEvent(new Event('input')));
-    }
+    // 切換 Tab 後，精準喚醒當前 Active 區域內的 searchBar 進行過濾
+    const targetCategoryContainers = document.querySelectorAll(`[data-category="${category}"]`);
+    targetCategoryContainers.forEach(container => {
+      if (container.style.display !== 'none') {
+        const searchInputs = container.querySelectorAll('.search-input');
+        searchInputs.forEach(input => input.dispatchEvent(new Event('input')));
+      }
+    });
+
+    // 喚醒全局 searchBar (無指定 category 者)
+    const globalSearchInputs = document.querySelectorAll('.search-bar-container:not([data-category]) .search-input');
+    globalSearchInputs.forEach(input => input.dispatchEvent(new Event('input')));
   },
   
   createKPIGroup(item) {
@@ -132,7 +134,6 @@ createSearchBar(item) {
     const container = document.createElement('div');
     container.className = 'search-bar-container';
 
-    // 若 searchBar 本身配置在某個 category 或 groupId 下，綁定作用域
     if (item.category) container.dataset.category = item.category;
     if (item.groupId) container.dataset.groupId = item.groupId;
 
@@ -161,65 +162,72 @@ createSearchBar(item) {
     container.appendChild(wrapper);
 
     // ==========================================
-    // 嚴密過濾演算法 (多 SearchBar 作用域隔離)
+    // 終極全情境過濾演算法 (Class-Based 防禦機制)
     // ==========================================
     const filterCards = () => {
-      const query = input.value.trim().toLowerCase();
-      clearBtn.style.display = query ? 'block' : 'none';
+      const rawQuery = input.value.trim().toLowerCase();
+      clearBtn.style.display = rawQuery ? 'block' : 'none';
 
-      // 1. 動態計算此 searchBar 的「有效作用範圍 (Scope Container)」
+      // 1. 決定作用域範圍 (Scope Container)
       let scopeContainer = null;
-
       if (item.targetGroup) {
-        // 情境 1：JSON 明確指定只搜尋特定的 data-group-id
         scopeContainer = document.querySelector(`[data-group-id="${item.targetGroup}"]`);
       } else {
-        // 情境 2：自動向上尋找最近的 Tab / Category 容器；若無則為全頁面 (document)
         scopeContainer = container.closest('[data-category]') || document;
       }
 
       if (!scopeContainer) return;
 
-      // 2. 只搜尋該作用範圍內部的卡片
+      // 2. 獲取作用域內的所有獨立卡片 (含 app-card, kpi-card)
       const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card');
 
       cards.forEach(card => {
-        // 防護 1：檢查卡片所屬的 Tab 容器是否正被隱藏 (style.display === 'none')
+        // 檢查卡片所屬的 Tab 分頁容器是否處於隱藏狀態
         const categoryGroup = card.closest('[data-category]');
         if (categoryGroup && categoryGroup.style.display === 'none') {
-          card.style.display = 'none';
+          card.classList.add('search-hidden');
           return;
         }
 
-        // 防護 2：清空搜尋框時還原
-        if (!query) {
-          card.style.display = '';
+        // 清空搜尋條件：移除 hidden class，還原原生 CSS 排版
+        if (!rawQuery) {
+          card.classList.remove('search-hidden');
+          return;
+        }
+
+        // 有搜尋條件：比對內文 (正規化清洗多餘空白與換行)
+        const textContent = (card.innerText || card.textContent || '').replace(/\s+/g, ' ').toLowerCase();
+        if (textContent.includes(rawQuery)) {
+          card.classList.remove('search-hidden');
         } else {
-          const cardText = card.innerText.toLowerCase();
-          card.style.display = cardText.includes(query) ? '' : 'none';
+          card.classList.add('search-hidden');
         }
       });
 
-      // 3. 處理作用範圍內部的 cardGroup 外殼顯隱
+      // 3. 處理 cardGroup 折疊外殼的連動
       const cardGroups = scopeContainer.querySelectorAll('.card-group');
       cardGroups.forEach(group => {
         const categoryGroup = group.closest('[data-category]');
         if (categoryGroup && categoryGroup.style.display === 'none') {
-          group.style.display = 'none';
+          group.classList.add('search-hidden');
           return;
         }
 
-        if (!query) {
-          group.style.display = '';
+        if (!rawQuery) {
+          group.classList.remove('search-hidden');
         } else {
-          // 檢查組內是否有可見的子卡片
-          const visibleChildren = group.querySelectorAll('.app-card:not([style*="display: none"])');
-          group.style.display = visibleChildren.length > 0 ? '' : 'none';
+          // 檢查該 cardGroup 內部是否有任何未被 hidden 的子卡片
+          const visibleChildren = group.querySelectorAll('.app-card:not(.search-hidden), .kpi-card:not(.search-hidden)');
+          if (visibleChildren.length > 0) {
+            group.classList.remove('search-hidden');
+          } else {
+            group.classList.add('search-hidden');
+          }
         }
       });
     };
 
-    // 事件綁定
+    // 事件雙重綁定：即時打字 + 中文/注音選字完成
     input.addEventListener('input', filterCards);
     input.addEventListener('compositionend', filterCards);
 
@@ -231,7 +239,6 @@ createSearchBar(item) {
 
     return container;
   },
-
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
     if (item.category) element.dataset.category = item.category;
