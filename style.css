@@ -1166,3 +1166,22 @@ input[type="date"]::-webkit-date-and-time-value {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
+/* ==========================================
+   Spacer / Gap 透明行距與間距模組
+   ========================================== */
+.app-spacer {
+  display: block;
+  width: 100%;
+  height: 12px; /* 預設留白高度 */
+  background: transparent;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* 橫向並排 (如在 buttonGroup / flex 容器內) 時支援水平寬度留白 */
+.app-spacer.inline {
+  display: inline-block;
+  width: 12px;
+  height: 100%;
+}
