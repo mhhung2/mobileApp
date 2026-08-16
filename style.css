@@ -33,8 +33,31 @@ body {
 
 /* Header 模組 */
 .app-header {
-  margin-bottom: 20px;
+  padding: 16px 20px;
+  background-color: var(--card-bg, #ffffff);
+  border-bottom: 1px solid var(--border-color, #e5e5ea);
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 1. 靠左對齊 (預設) */
+.app-header.align-left {
+  text-align: left;
+  align-items: flex-start;
+}
+
+/* 2. 置中對齊 */
+.app-header.align-center {
   text-align: center;
+  align-items: center;
+}
+
+/* 3. 靠右對齊 */
+.app-header.align-right {
+  text-align: right;
+  align-items: flex-end;
 }
 .app-header h1 {
   font-size: 24px;
