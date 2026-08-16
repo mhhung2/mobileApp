@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mobile Web App</title>
+  <title>Mobile Dynamic Web App</title>
   <style>
     :root {
       --primary-color: #007aff;
-      --primary-hover: #0056b3;
       --bg-color: #f2f2f7;
       --card-bg: #ffffff;
       --text-color: #1c1c1e;
@@ -16,55 +15,23 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
     body {
       margin: 0; padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      background-color: var(--bg-color); color: var(--text-color);
       display: flex; justify-content: center;
     }
-
-    .mobile-container {
-      width: 100%; max-width: 480px;
-      min-height: 100vh;
-      padding: 16px; padding-bottom: 40px;
-    }
-
+    .mobile-container { width: 100%; max-width: 480px; min-height: 100vh; padding: 16px; padding-bottom: 40px; }
     .app-header { margin-bottom: 20px; text-align: center; }
     .app-header h1 { font-size: 24px; margin: 0 0 6px 0; }
     .app-header p { font-size: 14px; color: #8e8e93; margin: 0; }
-
-    .app-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 16px; margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-    .app-card h3 { margin: 0 0 8px 0; font-size: 16px; }
-    .app-text { font-size: 14px; color: #3a3a3c; line-height: 1.4; }
-
+    .app-card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #636366; }
-    .form-control {
-      width: 100%; height: 44px; padding: 10px 12px;
-      font-size: 16px; border: 1px solid var(--border-color);
-      border-radius: 8px; background-color: #fff; outline: none;
-    }
-
-    .btn {
-      width: 100%; height: 48px; border: none; border-radius: var(--radius);
-      font-size: 16px; font-weight: 600; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
-    }
+    .form-control { width: 100%; height: 44px; padding: 10px 12px; font-size: 16px; border: 1px solid var(--border-color); border-radius: 8px; background-color: #fff; outline: none; }
+    .btn { width: 100%; height: 48px; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .btn-primary { background-color: var(--primary-color); color: #fff; }
-
-    .loading-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.85);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; z-index: 999;
-    }
+    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 999; }
   </style>
 </head>
 <body>
@@ -72,10 +39,10 @@
   <div id="app" class="mobile-container"></div>
 
   <script>
-    // ⚠️ 請填入你的 GAS Web App URL
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1zD0KL6xRFbxXCxtyXUrwmggO-q1xkJRkkzH8er7cjcc9NhBRsiyga8BbNl_ZNkRc/exec";
+    let currentFormType = 'default';
 
-    // 前端 UI 動態生成器
+    // UI 動態生成器 Engine
     const UI = {
       render(containerId, schema) {
         const container = document.getElementById(containerId);
@@ -161,15 +128,24 @@
       }
     };
 
-    // 1. 初始化：向 GAS 讀取 UI 結構並繪製畫面
+    // 1. 抓取 GitHub 網址上的參數並向 GAS 請求對應的 Config
     async function loadFormSchema() {
-      UI.showLoading(true, '載入介面模组中...');
+      UI.showLoading(true, '載入介面模組中...');
+
+      // 取得網址列上的所有參數 (例如 ?type=leave)
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParamsString = urlParams.toString(); // 轉為 "type=leave" 格式
+
+      // 將參數附加到 GAS URL 後端
+      const requestUrl = queryParamsString ? `${GAS_WEB_APP_URL}?${queryParamsString}` : GAS_WEB_APP_URL;
+
       try {
-        const response = await fetch(GAS_WEB_APP_URL);
+        const response = await fetch(requestUrl);
         const result = await response.json();
         UI.showLoading(false);
 
         if (result.success && result.schema) {
+          currentFormType = result.formType || 'default'; // 紀錄當前表單類型
           UI.render('app', result.schema);
         } else {
           alert('無法載入表單架構');
@@ -180,14 +156,17 @@
       }
     }
 
-    // 2. 表單提交：將填寫內容送回 GAS
+    // 2. 表單提交：將資料與當前表單類型一起送回 GAS
     async function handleFormSubmit(formData) {
       UI.showLoading(true, '提交中，請稍候...');
       try {
         const response = await fetch(GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ data: formData })
+          body: JSON.stringify({
+            formType: currentFormType, // 讓 GAS 後端知道這是哪張表單的提交
+            data: formData
+          })
         });
 
         const result = await response.json();
@@ -204,7 +183,6 @@
       }
     }
 
-    // 頁面載入完成後觸發
     document.addEventListener('DOMContentLoaded', loadFormSchema);
   </script>
 </body>
