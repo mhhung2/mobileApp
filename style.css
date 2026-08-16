@@ -276,3 +276,36 @@ body {
   background-color: #ff3b30;
   color: #ffffff;
 }
+
+/* ==========================================
+   Button Group 模組樣式
+   ========================================== */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;        /* 滿版時自動換行 */
+  gap: 8px 10px;          /* 上下間距 8px，左右間距 10px */
+  margin-bottom: 12px;    /* 群組下方間距 */
+  width: 100%;
+}
+
+/* 對齊方式控制 */
+.btn-group.align-left {
+  justify-content: flex-start;
+}
+.btn-group.align-center {
+  justify-content: center;
+}
+.btn-group.align-right {
+  justify-content: flex-end;
+}
+
+/* 按鈕群組內部的自適應寬度按鈕 */
+.btn-group .btn-inline {
+  width: auto;            /* 依照文字長度自動調整寬度 */
+  min-width: fit-content;
+  height: 40px;           /* 調整為適合並排的高度 */
+  padding: 0 16px;        /* 左右內邊距 */
+  font-size: 14px;
+  margin-bottom: 0;       /* 由 .btn-group 的 gap 統一控制間距 */
+  flex-grow: 0;           /* 不強制撐滿 */
+}
