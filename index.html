@@ -1,87 +1,207 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <!-- 引入樣式檔 -->
-    <?!= include('CSS'); ?>
-  </head>
-  <body>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mobile Web App</title>
+  <style>
+    :root {
+      --primary-color: #007aff;
+      --primary-hover: #0056b3;
+      --bg-color: #f2f2f7;
+      --card-bg: #ffffff;
+      --text-color: #1c1c1e;
+      --border-color: #e5e5ea;
+      --radius: 12px;
+    }
 
-    <!-- 手機 App 容器 -->
-    <div id="app" class="mobile-container">
-      <!-- 動態 UI 將由 UI_Module 渲染於此 -->
-    </div>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    <!-- 引入前端模組與邏輯 -->
-    <?!= include('UI_Module'); ?>
-    <?!= include('JS'); ?>
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex; justify-content: center;
+    }
 
-    <script>
-      // ==========================================
-      // 【日後快速開發只需修改此處的結構配置】
-      // ==========================================
-      const pageSchema = [
-        {
-          type: 'header',
-          title: '快速管理系統',
-          subtitle: '手機版通用模組 Template'
-        },
-        {
-          type: 'text',
-          content: '歡迎使用！這是一個支援動態渲染的 GAS 手機 Web App 範本。'
-        },
-        {
-          type: 'card',
-          title: '重要通知',
-          content: '你可以透過 JSON 快速建立標題、文字、卡片、表單及按鈕。'
-        },
-        {
-          type: 'form',
-          id: 'mainForm',
-          fields: [
-            { type: 'text', name: 'userName', label: '姓名', placeholder: '請輸入姓名' },
-            { type: 'tel', name: 'userPhone', label: '電話', placeholder: '請輸入電話' },
-            { 
-              type: 'select', 
-              name: 'department', 
-              label: '部門/單位', 
-              options: ['單位 A', '單位 B', '單位 C'] 
-            }
-          ],
-          submitText: '確認提交',
-          onSubmit: 'handleFormSubmit'
-        },
-        {
-          type: 'button',
-          text: '次要按鈕（次級操作）',
-          variant: 'secondary',
-          onClick: 'handleSecondaryAction'
+    .mobile-container {
+      width: 100%; max-width: 480px;
+      min-height: 100vh;
+      padding: 16px; padding-bottom: 40px;
+    }
+
+    .app-header { margin-bottom: 20px; text-align: center; }
+    .app-header h1 { font-size: 24px; margin: 0 0 6px 0; }
+    .app-header p { font-size: 14px; color: #8e8e93; margin: 0; }
+
+    .app-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px; margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #636366; }
+    .form-control {
+      width: 100%; height: 44px; padding: 10px 12px;
+      font-size: 16px; border: 1px solid var(--border-color);
+      border-radius: 8px; background-color: #fff; outline: none;
+    }
+
+    .btn {
+      width: 100%; height: 48px; border: none; border-radius: var(--radius);
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+    }
+    .btn-primary { background-color: var(--primary-color); color: #fff; }
+
+    .loading-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app" class="mobile-container"></div>
+
+  <script>
+    // ⚠️ 請將下方的網址替換為你 GAS 部署取得的 Web App URL
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1zD0KL6xRFbxXCxtyXUrwmggO-q1xkJRkkzH8er7cjcc9NhBRsiyga8BbNl_ZNkRc/exec";
+
+    // 頁面動態結構配置
+    const pageSchema = [
+      { type: 'header', title: '快速管理系統', subtitle: 'GitHub + GAS 串接範本' },
+      {
+        type: 'form',
+        id: 'mainForm',
+        fields: [
+          { type: 'text', name: 'userName', label: '姓名', placeholder: '請輸入姓名' },
+          { type: 'tel', name: 'userPhone', label: '電話', placeholder: '請輸入電話' },
+          { type: 'select', name: 'department', label: '部門/單位', options: ['單位 A', '單位 B', '單位 C'] }
+        ],
+        submitText: '確認提交',
+        onSubmit: 'handleFormSubmit'
+      }
+    ];
+
+    // 前端 UI 渲染引擎
+    const UI = {
+      render(containerId, schema) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        schema.forEach(item => {
+          const el = this.createComponent(item);
+          if (el) container.appendChild(el);
+        });
+      },
+
+      createComponent(item) {
+        if (item.type === 'header') {
+          const div = document.createElement('div');
+          div.className = 'app-header';
+          div.innerHTML = `<h1>${item.title}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
+          return div;
         }
-      ];
 
-      // 頁面載入後自動渲染
-      document.addEventListener('DOMContentLoaded', () => {
-        UI.render('app', pageSchema);
-      });
+        if (item.type === 'form') {
+          const card = document.createElement('div');
+          card.className = 'app-card';
+          const form = document.createElement('form');
 
-      // 自訂按鈕/表單觸發事件
-      function handleFormSubmit(data) {
-        UI.showLoading(true);
-        google.script.run
-          .withSuccessHandler((res) => {
-            UI.showLoading(false);
-            alert(res.message);
-          })
-          .withFailureHandler((err) => {
-            UI.showLoading(false);
-            alert('發生錯誤：' + err);
-          })
-          .apiSubmitData(data);
+          item.fields.forEach(field => {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            group.innerHTML = `<label>${field.label}</label>`;
+
+            if (field.type === 'select') {
+              const select = document.createElement('select');
+              select.className = 'form-control';
+              select.name = field.name;
+              field.options.forEach(opt => select.add(new Option(opt, opt)));
+              group.appendChild(select);
+            } else {
+              const input = document.createElement('input');
+              input.type = field.type || 'text';
+              input.className = 'form-control';
+              input.name = field.name;
+              input.placeholder = field.placeholder || '';
+              group.appendChild(input);
+            }
+            form.appendChild(group);
+          });
+
+          const btn = document.createElement('button');
+          btn.type = 'submit';
+          btn.className = 'btn btn-primary';
+          btn.innerText = item.submitText || '提交';
+          form.appendChild(btn);
+
+          form.onsubmit = (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(form));
+            if (window[item.onSubmit]) window[item.onSubmit](data);
+          };
+
+          card.appendChild(form);
+          return card;
+        }
+      },
+
+      showLoading(show) {
+        let loader = document.getElementById('app-loader');
+        if (show) {
+          if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'app-loader';
+            loader.className = 'loading-overlay';
+            loader.innerText = '處理中，請稍候...';
+            document.body.appendChild(loader);
+          }
+        } else if (loader) {
+          loader.remove();
+        }
       }
+    };
 
-      function handleSecondaryAction() {
-        alert('你點擊了次要按鈕！');
+    // 透過 fetch 與 GAS API 串接
+    async function handleFormSubmit(formData) {
+      UI.showLoading(true);
+
+      try {
+        // 使用 text/plain 避免觸發複雜的 CORS 預檢請求
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'submitForm',
+            data: formData
+          })
+        });
+
+        const result = await response.json();
+        UI.showLoading(false);
+
+        if (result.success) {
+          alert('成功：' + result.message);
+        } else {
+          alert('失敗：' + result.message);
+        }
+
+      } catch (error) {
+        UI.showLoading(false);
+        alert('連線發生錯誤：' + error);
       }
-    </script>
-  </body>
+    }
+
+    // 初始化渲染
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.render('app', pageSchema);
+    });
+  </script>
+</body>
 </html>
