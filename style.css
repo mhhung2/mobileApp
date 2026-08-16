@@ -1129,7 +1129,7 @@ input[type="date"]::-webkit-date-and-time-value {
   font-weight: 400;
   color: #8e8e93;
   line-height: 1.2;
-}}
+}
 
 .refresh-action-btn {
   display: inline-flex;
