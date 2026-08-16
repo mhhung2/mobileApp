@@ -240,9 +240,7 @@ createSearchBar(item) {
     return container;
   },
 
-// ==========================================
   // Timeline 時間軸模組 (支援混搭 items 子元件)
-  // ==========================================
   createTimeline(item) {
     const container = document.createElement('div');
     container.className = 'app-timeline';
@@ -383,9 +381,7 @@ createSearchBar(item) {
     }
   },
 
-  // ==========================================
   // 頂部 Toast 即時通知橫幅 API
-  // ==========================================
   showToast(message, variant = 'info', duration = 3000) {
     let toast = document.getElementById('app-toast');
     if (!toast) {
@@ -405,7 +401,7 @@ createSearchBar(item) {
     window.toastTimer = setTimeout(() => {
       toast.classList.remove('active');
     }, duration);
-  }
+  },
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
@@ -414,7 +410,7 @@ createSearchBar(item) {
     return element;
   },
 
-// 核心元件繪製工廠
+  // 核心元件繪製工廠
   createComponent(item) {
     let element = null;
 
