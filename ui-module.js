@@ -73,54 +73,49 @@ const UI = {
 
   // 控制同 category 下的 Group 顯示或隱藏
   filterGroups(category, groupId) {
-    // 找出所有屬於該 category 的 cardGroup
-    const categoryGroups = document.querySelectorAll(`.card-group[data-category="${category}"]`);
-    categoryGroups.forEach(group => {
-      if (groupId === 'all' || group.dataset.groupId === groupId) {
-        group.style.display = 'block';
+    const categoryElements = document.querySelectorAll(`[data-category="${category}"]`);
+    categoryElements.forEach(el => {
+      // 若元素設定為 groupId === 'all' 或與當前 Tab 吻合則顯示，否則隱藏
+      if (groupId === 'all' || el.dataset.groupId === groupId) {
+        el.style.display = ''; // 恢復原本的 CSS display 樣式
       } else {
-        group.style.display = 'none';
+        el.style.display = 'none';
       }
     });
   },
 
+  // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
+  bindTabCategory(element, item) {
+    if (item.category) element.dataset.category = item.category;
+    if (item.groupId) element.dataset.groupId = item.groupId;
+    return element;
+  },
+
   // 元件工廠
   createComponent(item) {
+    let element = null;
+    
     if (item.type === 'header') {
-      const div = document.createElement('div');
-      div.className = 'app-header';
-      div.innerHTML = `<h1>${item.title}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
-      return div;
+      element = document.createElement('div');
+      element.className = 'app-header';
+      element.innerHTML = `<h1>${item.title}</h1>${item.subtitle ? `<p>${item.subtitle}</p>` : ''}`;
     }
 
-    if (item.type === 'card') {
-      const div = document.createElement('div');
-      div.className = 'app-card';
-      div.innerHTML = `<h3>${item.title}</h3><div class="app-text">${item.content}</div>`;
-      return div;
+    else if (item.type === 'card') {
+      element = document.createElement('div');
+      element.className = 'app-card';
+      element.innerHTML = `<h3>${item.title}</h3><div class="app-text">${item.content}</div>`;
     }
 
-    // ==========================================
-    // Card Group (綁定 category 與 groupId)
-    // ==========================================
-    if (item.type === 'cardGroup') {
-      const groupDiv = document.createElement('div');
-      groupDiv.className = `card-group ${item.collapsed ? 'collapsed' : ''}`;
-      groupDiv.dataset.category = item.category || 'default'; // 屬於哪個 Tab 群組
-      groupDiv.dataset.groupId = item.groupId;              // 自身的 ID
+    else if (item.type === 'cardGroup') {
+      element = document.createElement('div');
+      element.className = `card-group ${item.collapsed ? 'collapsed' : ''}`;
 
-      // 1. Group 標題區塊（含折疊切換）
       const headerDiv = document.createElement('div');
       headerDiv.className = 'card-group-header';
-      headerDiv.innerHTML = `
-        <span>${item.title}</span>
-        <span class="toggle-icon">▲</span>
-      `;
-      headerDiv.onclick = () => {
-        groupDiv.classList.toggle('collapsed');
-      };
+      headerDiv.innerHTML = `<span>${item.title}</span><span class="toggle-icon">▲</span>`;
+      headerDiv.onclick = () => element.classList.toggle('collapsed');
 
-      // 2. Group 內部內容
       const bodyDiv = document.createElement('div');
       bodyDiv.className = 'card-group-body';
 
@@ -131,14 +126,13 @@ const UI = {
         });
       }
 
-      groupDiv.appendChild(headerDiv);
-      groupDiv.appendChild(bodyDiv);
-      return groupDiv;
+      element.appendChild(headerDiv);
+      element.appendChild(bodyDiv);
     }
 
-    if (item.type === 'form') {
-      const card = document.createElement('div');
-      card.className = 'app-card';
+    else if (item.type === 'form') {
+      element = document.createElement('div');
+      element.className = 'app-card';
       const form = document.createElement('form');
 
       item.fields.forEach(field => {
@@ -177,11 +171,15 @@ const UI = {
         }
       };
 
-      card.appendChild(form);
-      return card;
+      element.appendChild(form);
     }
 
-    return null;
+    // 統一為所有元件綁定 Tab 分類屬性
+    if (element) {
+      this.bindTabCategory(element, item);
+    }
+
+    return element;
   },
 
   showLoading(show, message = '載入中...') {
