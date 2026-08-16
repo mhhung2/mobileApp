@@ -475,9 +475,6 @@ createSearchBar(item) {
   },
 
   // 建立倒數更新元件
- // ==========================================
-  // 建立倒數更新元件 (統一秒數顯示格式)
-  // ==========================================
   createRefreshTimer(item) {
     this.totalIntervalSeconds = item.intervalSeconds || 60;
     this.remainingSeconds = this.totalIntervalSeconds;
@@ -526,7 +523,6 @@ createSearchBar(item) {
   },
 
   // 1 秒計時器 (確保每秒都寫入完整的 "X 秒後自動更新")
-// 1 秒計時器 (動態獲取最新 DOM，確保永遠顯示 "X 秒後自動更新")
   startCountdownTimer(secondsDisplay, refreshIcon) {
     if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
 
@@ -583,11 +579,29 @@ createSearchBar(item) {
   triggerRefresh(iconEl) {
     if (iconEl) iconEl.classList.add('spinning');
 
-    // 1. 記錄發起請求的時間與格式化時間字串 (HH:mm:ss)
+    // 1. 重置倒數秒數為初始總秒數 (例如 60 秒)
+    this.remainingSeconds = this.totalIntervalSeconds;
+
+    // 2. 記錄成功發起請求的時間與格式化時間字串 (HH:mm:ss)
     this.lastFetchTimestamp = Date.now();
     const now = new Date();
     this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
+    // 3. 即時更新畫面上的「上次更新時間」與「倒數秒數」DOM 顯示
+    const lastUpdatedEl = document.getElementById('timer-last-updated');
+    if (lastUpdatedEl) {
+      lastUpdatedEl.innerText = `上次更新：${this.lastUpdatedStr}`;
+    }
+
+    const currentSecondsEl = document.getElementById('timer-seconds-display');
+    if (currentSecondsEl) {
+      currentSecondsEl.innerText = `${this.remainingSeconds} 秒後自動更新`;
+    }
+
+    // 4. 重啟 1 秒倒數計時器 (確保舊計時器被銷毀，並從滿秒數重新倒數)
+    this.startCountdownTimer(currentSecondsEl, iconEl);
+
+    // 5. 調用 loadFormSchema(true) 發起背景靜默更新
     loadFormSchema(true);
   },
   
