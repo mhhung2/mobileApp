@@ -34,8 +34,9 @@ body {
 /* Header 模組 */
 .app-header {
   padding: 16px 20px;
-  background-color: var(--card-bg, #ffffff);
-  border-bottom: 1px solid var(--border-color, #e5e5ea);
+  background-color: transparent;
+  border-bottom: none;
+  box-shadow: none;
   margin-bottom: 12px;
   display: flex;
   flex-direction: column;
