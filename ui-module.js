@@ -177,21 +177,23 @@ const UI = {
       element.innerText = item.text || '';
     }
 
-    // 5. 獨立按鈕元件
+    // 5. 獨立按鈕元件 (button)
     else if (item.type === 'button') {
       element = document.createElement('button');
       element.className = `btn btn-${item.variant || 'primary'}`;
       element.innerText = item.text || '按鈕';
-      if (item.onClick && typeof window[item.onClick] === 'function') {
+
+      // 支援 disabled 設定
+      if (item.disabled) {
+        element.disabled = true;
+      } else if (item.onClick && typeof window[item.onClick] === 'function') {
         element.onclick = window[item.onClick];
       }
     }
 
-    // 6. Button Group (按鈕群組模組)
+    //6. 按鈕群組元件 (buttonGroup)
     else if (item.type === 'buttonGroup') {
       element = document.createElement('div');
-      
-      // 設定對齊方式：align-left (靠左), align-center (置中), align-right (靠右)
       const alignClass = `align-${item.align || 'left'}`;
       element.className = `btn-group ${alignClass}`;
 
@@ -201,7 +203,10 @@ const UI = {
           btnEl.className = `btn btn-inline btn-${btnData.variant || 'primary'}`;
           btnEl.innerText = btnData.text || '按鈕';
 
-          if (btnData.onClick && typeof window[btnData.onClick] === 'function') {
+          // 支援 disabled 設定
+          if (btnData.disabled) {
+            btnEl.disabled = true;
+          } else if (btnData.onClick && typeof window[btnData.onClick] === 'function') {
             btnEl.onclick = window[btnData.onClick];
           }
 
