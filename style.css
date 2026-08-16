@@ -1097,63 +1097,54 @@ input[type="date"]::-webkit-date-and-time-value {
 /* ==========================================
    倒數更新模組 (Refresh Timer) 樣式
    ========================================== */
+/* ==========================================
+   倒數更新模組 (雙行精細版：右上按鈕帶色彩)
+   ========================================== */
 .refresh-timer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 4px 0 8px 0;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  font-size: 11px;
+}
+
+/* 第一行：左側時間 + 右側彩色按鈕 */
+.refresh-timer-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: transparent; /* 移除背景色 */
-  border: none;                  /* 移除邊框 */
-  padding: 4px 4px 8px 4px;
-  margin-bottom: 8px;
-  box-sizing: border-box;
+  width: 100%;
 }
 
-.refresh-timer-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.refresh-last-updated {
+  color: var(--secondary-text, #8e8e93);
   font-size: 11px;
-  color: var(--secondary-text, #8e8e93); /* 淡灰色低調文字 */
   font-weight: 400;
 }
 
-.refresh-timer-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* 秒數小標籤 */
-.refresh-seconds-badge {
-  color: var(--secondary-text, #8e8e93);
-  font-weight: 600;
-  font-size: 11px;
-}
-
-/* 上次更新時間 */
-.refresh-last-updated {
-  font-size: 10px;
-  color: #aeaeb2;
-}
-
-/* 刷新按鈕 (低調邊框與文字) */
+/* 帶有色彩與微背景的立即更新按鈕 */
 .refresh-action-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: none;
-  border: none;
-  padding: 4px 8px;
+  background-color: rgba(0, 122, 255, 0.08); /* 輕微藍色底色 */
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  padding: 3px 8px;
   border-radius: 6px;
   font-size: 11px;
-  font-weight: 500;
-  color: var(--secondary-text, #8e8e93);
+  font-weight: 600;
+  color: var(--primary-color, #007aff); /* 亮藍色文字 */
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .refresh-action-btn:active {
-  opacity: 0.6;
+  background-color: rgba(0, 122, 255, 0.18);
+  transform: scale(0.96);
 }
 
 .refresh-icon {
@@ -1164,6 +1155,18 @@ input[type="date"]::-webkit-date-and-time-value {
 
 .refresh-icon.spinning {
   animation: spin 0.8s linear infinite;
+}
+
+/* 第二行：靠右淡灰色倒數文字 */
+.refresh-timer-bottom-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.refresh-seconds-text {
+  font-size: 10px;
+  color: #aeaeb2; /* 較淡的次要文字色彩 */
 }
 
 @keyframes spin {
