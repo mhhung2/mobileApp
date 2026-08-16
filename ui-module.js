@@ -171,6 +171,20 @@ const UI = {
       element.className = 'item-quote';
       element.innerText = item.text || '';
     }
+    else if (item.type === 'badgeGroup') {
+      element = document.createElement('div');
+      const alignClass = `align-${item.align || 'left'}`;
+      element.className = `badge-group ${alignClass}`;
+
+      if (Array.isArray(item.badges)) {
+        item.badges.forEach(badgeData => {
+          const badgeEl = document.createElement('span');
+          badgeEl.className = `item-badge badge-${badgeData.variant || 'primary'}`;
+          badgeEl.innerText = badgeData.text || '';
+          element.appendChild(badgeEl);
+        });
+      }
+    }
     else if (item.type === 'badge') {
       element = document.createElement('span');
       element.className = `item-badge badge-${item.variant || 'info'}`;
@@ -258,6 +272,22 @@ const UI = {
           badgeEl.className = `item-badge badge-${field.variant || 'info'}`;
           badgeEl.innerText = field.text || '';
           form.appendChild(badgeEl);
+          return;
+        }
+        else if (field.type === 'badgeGroup') {
+          const badgeGroupEl = document.createElement('div');
+          const alignClass = `align-${field.align || 'left'}`;
+          badgeGroupEl.className = `badge-group ${alignClass}`;
+
+          if (Array.isArray(field.badges)) {
+            field.badges.forEach(badgeData => {
+              const badgeEl = document.createElement('span');
+              badgeEl.className = `item-badge badge-${badgeData.variant || 'primary'}`;
+              badgeEl.innerText = badgeData.text || '';
+              badgeGroupEl.appendChild(badgeEl);
+            });
+          }
+          form.appendChild(badgeGroupEl);
           return;
         }
         else if (field.type === 'button') {
