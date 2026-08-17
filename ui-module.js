@@ -672,6 +672,132 @@ createSearchBar(item) {
 
     return container;
   },
+
+  // 建立摺疊手風琴模組 (Accordion)
+  createAccordion(item) {
+    const container = document.createElement('div');
+    container.className = 'app-accordion';
+
+    if (Array.isArray(item.items)) {
+      item.items.forEach((acc, index) => {
+        const itemEl = document.createElement('div');
+        const isOpen = acc.open || (item.openFirst && index === 0);
+        itemEl.className = `accordion-item ${isOpen ? 'active' : ''}`;
+
+        const headerEl = document.createElement('div');
+        headerEl.className = 'accordion-header';
+        headerEl.innerHTML = `
+          <span>${acc.title || ''}</span>
+          <span class="accordion-icon">▼</span>
+        `;
+
+        const bodyEl = document.createElement('div');
+        bodyEl.className = 'accordion-body';
+
+        // 支援手風琴內嵌入子元件陣列 (items) 或純文字 (content)
+        if (Array.isArray(acc.items)) {
+          acc.items.forEach(child => {
+            const childEl = this.createComponent(child);
+            if (childEl) bodyEl.appendChild(childEl);
+          });
+        } else if (acc.content) {
+          bodyEl.innerHTML = `<div class="item-text">${acc.content}</div>`;
+        }
+
+        // 點擊切換展開/收合
+        headerEl.onclick = () => {
+          // 若設定 singleExpand = true，點擊時收合其他同層項目
+          if (item.singleExpand && !itemEl.classList.contains('active')) {
+            const siblings = container.querySelectorAll('.accordion-item');
+            siblings.forEach(sib => sib.classList.remove('active'));
+          }
+          itemEl.classList.toggle('active');
+        };
+
+        itemEl.appendChild(headerEl);
+        itemEl.appendChild(bodyEl);
+        container.appendChild(itemEl);
+      });
+    }
+
+    return container;
+  },
+
+  // 建立手勢滑動輪播模組 (Carousel)
+  createCarousel(item) {
+    const container = document.createElement('div');
+    const peekClass = item.peek ? 'peek' : '';
+    container.className = `app-carousel-container ${peekClass}`;
+
+    const track = document.createElement('div');
+    track.className = 'carousel-track';
+
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'carousel-dots';
+
+    const slidesData = item.slides || item.items || [];
+
+    if (Array.isArray(slidesData) && slidesData.length > 0) {
+      slidesData.forEach((slideData, idx) => {
+        // 1. Slide 容器
+        const slideEl = document.createElement('div');
+        slideEl.className = 'carousel-slide';
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'carousel-slide-content';
+
+        // 如果 Slide 裡面是 items 陣列，動態繪製 UI 元件
+        if (Array.isArray(slideData.items)) {
+          slideData.items.forEach(child => {
+            const childEl = this.createComponent(child);
+            if (childEl) contentEl.appendChild(childEl);
+          });
+        } 
+        // 簡易模式：圖片輪播 (如橫幅 Banner)
+        else if (slideData.image || slideData.src) {
+          const mediaEl = this.createMediaPreview({
+            type: 'mediaPreview',
+            src: slideData.image || slideData.src,
+            caption: slideData.caption || slideData.title
+          });
+          if (mediaEl) contentEl.appendChild(mediaEl);
+        }
+        // 純文字卡片輪播
+        else {
+          const cardEl = this.createComponent({ type: 'card', ...slideData });
+          if (cardEl) contentEl.appendChild(cardEl);
+        }
+
+        slideEl.appendChild(contentEl);
+        track.appendChild(slideEl);
+
+        // 2. 指示圓點 (Dot)
+        const dot = document.createElement('div');
+        dot.className = `carousel-dot ${idx === 0 ? 'active' : ''}`;
+        dot.onclick = () => {
+          slideEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        };
+        dotsContainer.appendChild(dot);
+      });
+
+      // 3. 監聽滾動，自動高亮當前的可視圓點
+      track.addEventListener('scroll', () => {
+        const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : track.clientWidth;
+        const activeIndex = Math.round(track.scrollLeft / slideWidth);
+        const dots = dotsContainer.querySelectorAll('.carousel-dot');
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === activeIndex);
+        });
+      }, { passive: true });
+    }
+
+    container.appendChild(track);
+    if (item.showDots !== false && slidesData.length > 1) {
+      container.appendChild(dotsContainer);
+    }
+
+    return container;
+  },
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
@@ -873,6 +999,12 @@ createSearchBar(item) {
     else if (item.type === 'actionCard') {
       element = this.createActionCard(item);
     }
+    else if (item.type === 'accordion') {
+      element = this.createAccordion(item);
+    }
+    else if (item.type === 'carousel') {
+      element = this.createCarousel(item);
+    }
     // 7. Form 表單模組
     else if (item.type === 'form') {
       element = document.createElement('div');
@@ -992,6 +1124,16 @@ createSearchBar(item) {
         else if (field.type === 'divider') {
           const dividerEl = this.createDivider(field);
           if (dividerEl) form.appendChild(dividerEl);
+          return;
+        }
+        else if (field.type === 'accordion') {
+          const accEl = this.createAccordion(field);
+          if (accEl) form.appendChild(accEl);
+          return;
+        }
+        else if (field.type === 'carousel') {
+          const carEl = this.createCarousel(field);
+          if (carEl) form.appendChild(carEl);
           return;
         }
         else if (field.type === 'hidden') {
