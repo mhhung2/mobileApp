@@ -59,6 +59,7 @@ const UI = {
     switch (item.type) {
       // 區塊與容器
       case 'header':      element = this.createHeader(item); break;
+      case 'gridRow':     element = this.createGridRow(item); break;
       case 'card':        element = this.createCard(item); break;
       case 'cardGroup':   element = this.createCardGroup(item); break;
       case 'form':        element = this.createForm(item); break;
