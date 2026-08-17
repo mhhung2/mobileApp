@@ -4,7 +4,7 @@ let currentFormType = 'default';
  * 1. 向 GAS 請求 UI Config 結構
  */
 // 預設 silent = false (首次載入顯示 Loading，Timer 觸發時傳入 true 不顯示)
-async function loadFormSchema(silent = false) {
+async function loadForm(silent = false) {
   // 僅非靜默更新時才顯示全螢幕 Loading
   if (!silent) {
     UI.showLoading(true, '載入中...');
@@ -160,4 +160,4 @@ function loadDashboardConfig() {
   }
 
 // 網頁載入完成後觸發
-document.addEventListener('DOMContentLoaded', loadFormSchema);
+document.addEventListener('DOMContentLoaded', loadForm);
