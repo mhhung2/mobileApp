@@ -44,7 +44,7 @@ Object.assign(UI, {
 
       if (!scopeContainer) return;
 
-      const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card', .ui-grid-row');
+      const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card, .ui-grid-row');
       cards.forEach(card => {
         const categoryGroup = card.closest('[data-category]');
         if (categoryGroup && categoryGroup.style.display === 'none') {
