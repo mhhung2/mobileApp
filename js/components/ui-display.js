@@ -49,7 +49,11 @@ Object.assign(UI, {
       if (item.content) {
         const textEl = document.createElement('div');
         textEl.className = 'app-text';
-        textEl.innerText = item.content;
+        if (item.isHtml === true) {
+          textEl.innerHTML = item.content;
+        } else {
+          textEl.innerText = item.content;
+        }
         element.appendChild(textEl);
       }
     }
