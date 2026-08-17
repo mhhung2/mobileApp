@@ -158,7 +158,7 @@ function loadDashboardConfig() {
     google.script.run
       .withSuccessHandler(function(schema) {
         UI.showLoading(false);
-        UI.render('app-container', schema);
+        UI.render('app', schema);
         UI.showToast('最新勤務與資安資料已載入', 'success');
       })
       .withFailureHandler(function(err) {
