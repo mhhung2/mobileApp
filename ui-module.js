@@ -723,8 +723,7 @@ createSearchBar(item) {
     return container;
   },
 
-  // 建立手勢滑動輪播模組 (Carousel)
-// 建立跨平台 Carousel (支援電腦滑鼠拖曳、箭頭導航與正確 Padding)
+// 建立跨平台 Carousel (支援電腦滑鼠拖曳、箭頭導航、Padding 與自動輪播 Autoplay)
   createCarousel(item) {
     const container = document.createElement('div');
     const peekClass = item.peek ? 'peek' : '';
@@ -773,10 +772,9 @@ createSearchBar(item) {
 
           if (Array.isArray(slideData.items)) {
             slideData.items.forEach(child => {
-              // 特殊處理：如果在 items 裡有 mediaPreview，讓圖片滿版，其餘留邊框
               if (child.type === 'mediaPreview') {
                 const mediaEl = this.createMediaPreview(child);
-                if (mediaEl) contentEl.appendChild(mediaEl); // 放外層滿版
+                if (mediaEl) contentEl.appendChild(mediaEl);
               } else {
                 const childEl = this.createComponent(child);
                 if (childEl) textBody.appendChild(childEl);
@@ -830,7 +828,7 @@ createSearchBar(item) {
 
       track.addEventListener('mousedown', (e) => {
         isMouseDown = true;
-        track.style.scrollSnapType = 'none'; // 拖曳時暫停 snap 避免卡頓
+        track.style.scrollSnapType = 'none';
         startX = e.pageX - track.offsetLeft;
         scrollLeft = track.scrollLeft;
       });
@@ -850,20 +848,67 @@ createSearchBar(item) {
         if (!isMouseDown) return;
         e.preventDefault();
         const x = e.pageX - track.offsetLeft;
-        const walk = (x - startX) * 1.5; // 拖曳靈敏度
+        const walk = (x - startX) * 1.5;
         track.scrollLeft = scrollLeft - walk;
       });
 
       // 3. 電腦版點擊左右箭頭按鈕切換
-      prevBtn.onclick = () => {
+      const scrollNext = () => {
         const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : 300;
-        track.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+        const maxScrollLeft = track.scrollWidth - track.clientWidth;
+        
+        // 若到達最右端，自動平滑滾回起點 (實現無限循環)
+        if (track.scrollLeft >= maxScrollLeft - 10) {
+          track.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          track.scrollBy({ left: slideWidth, behavior: 'smooth' });
+        }
       };
 
-      nextBtn.onclick = () => {
+      const scrollPrev = () => {
         const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : 300;
-        track.scrollBy({ left: slideWidth, behavior: 'smooth' });
+        if (track.scrollLeft <= 10) {
+          track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
+        } else {
+          track.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+        }
       };
+
+      prevBtn.onclick = scrollPrev;
+      nextBtn.onclick = scrollNext;
+
+      // ==========================================
+      // 4. 自動輪播 (Auto-Play) 核心邏輯
+      // ==========================================
+      const isAutoplay = item.autoplay === true || item.autoPlay === true;
+      const intervalTime = item.autoplayInterval || item.interval || 3500; // 預設 3.5 秒切換一次
+
+      if (isAutoplay && slidesData.length > 1) {
+        let autoplayTimer = null;
+
+        const startAutoplay = () => {
+          if (autoplayTimer) clearInterval(autoplayTimer);
+          autoplayTimer = setInterval(() => {
+            scrollNext();
+          }, intervalTime);
+        };
+
+        const stopAutoplay = () => {
+          if (autoplayTimer) {
+            clearInterval(autoplayTimer);
+            autoplayTimer = null;
+          }
+        };
+
+        // 啟動自動輪播
+        startAutoplay();
+
+        // 人性化防護：當滑鼠移入、觸控操作或拖曳時自動暫停，離開時還原
+        container.addEventListener('mouseenter', stopAutoplay);
+        container.addEventListener('mouseleave', startAutoplay);
+        container.addEventListener('touchstart', stopAutoplay, { passive: true });
+        container.addEventListener('touchend', startAutoplay, { passive: true });
+      }
     }
 
     container.appendChild(track);
