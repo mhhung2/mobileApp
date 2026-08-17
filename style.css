@@ -1312,34 +1312,29 @@ input[type="date"]::-webkit-date-and-time-value {
 /* ==========================================
    Carousel (圖片/卡片手勢輪播模組) 樣式
    ========================================== */
-.app-carousel-container {
-  position: relative;
-  width: 100%;
-  margin-bottom: 16px;
-  overflow: hidden;
+.carousel-slide-content {
+  background: var(--card-bg, #ffffff);
   border-radius: var(--radius, 12px);
-  box-sizing: border-box;
-}
-
-.carousel-track {
+  border: 1px solid var(--border-color, #e5e5ea);
+  overflow: hidden;
+  height: 100%;
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  gap: 12px;
-  padding-bottom: 8px;
-  scrollbar-width: none; /* Firefox 隱藏滾動條 */
+  flex-direction: column;
 }
 
-.carousel-track::-webkit-scrollbar {
-  display: none; /* Chrome/Safari 隱藏滾動條 */
-}
-
-.carousel-slide {
-  flex: 0 0 100%; /* 預設滿版 */
-  scroll-snap-align: start;
+/* 專屬於文字/一般 UI 元件的舒適內邊距容器 */
+.carousel-text-body {
+  padding: 16px; /* 留出標準卡片內邊距 (16px) */
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+/* 如果 Slide 內部是圖片，保持滿版貼邊 (移除圖片額外邊距) */
+.carousel-slide-content .media-preview-container {
+  margin: 0;
+  border: none;
+  border-radius: 0;
 }
 
 /* 支援單頁顯示 85% 寬度，露出右側下一張卡片角落 (Peek Mode) */
