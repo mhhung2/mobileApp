@@ -25,6 +25,11 @@ async function loadForm(silent = false) {
 
     if (result.success && result.schema) {
       currentFormType = result.formType || 'default';
+
+      // 儲存後端傳回的全域變數與動態函數
+      if (result.variables || result.functions) {
+        AppState.init(result.variables, result.functions);
+      }
       
       // 即時重新渲染頁面 (UI.render 內部會更新上次更新時間)
       UI.render('app', result.schema);
@@ -47,14 +52,18 @@ async function loadForm(silent = false) {
 async function handleFormSubmit(formData) {
   UI.showLoading(true, '提交中，請稍候...');
 
+  // 夾帶先前儲存的全域變數
+  const payload = {
+    formType: currentFormType,
+    userContext: AppState.variables, // 帶入儲存的變數
+    data: formData
+  };
+
   try {
     const response = await fetch(GAS_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        formType: currentFormType,
-        data: formData
-      })
+      body: JSON.stringify(payload)
     });
 
     const result = await response.json();
