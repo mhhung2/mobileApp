@@ -3,7 +3,7 @@
  */
 const GASClient = {
   // 替換為您的 GAS Web App 發布 URL
-  baseUrl: 'https://script.google.com/macros/s/AKfycbx1zD0KL6xRFbxXCxtyXUrwmggO-q1xkJRkkzH8er7cjcc9NhBRsiyga8BbNl_ZNkRc/exec',
+  baseUrl: GAS_WEB_APP_URL,
 
   /**
    * 核心 POST 傳送方法
