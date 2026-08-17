@@ -49,6 +49,7 @@ async function loadForm(silent = false) {
 /**
  * 2. 處理表單提交，將資料送回 GAS
  */
+/*
 async function handleFormSubmit(formData) {
   UI.showLoading(true, '提交中，請稍候...');
 
@@ -151,7 +152,9 @@ function handleApproveShift() {
     onCancel: () => UI.showToast('已駁回申請', 'warning')
   });
 }
+*/
 
+/*
 function loadDashboardConfig() {
     UI.showLoading(true, '更新最新資料中...');
     
@@ -167,6 +170,7 @@ function loadDashboardConfig() {
       })
       .getDashboardConfig(); // 呼叫 Server.gs 函數
   }
+*/
 
 // 網頁載入完成後觸發
 document.addEventListener('DOMContentLoaded', loadForm);
