@@ -1,54 +1,13 @@
-let currentFormType = 'default';
-
 /**
- * 1. 向 GAS 請求 UI Config 結構
+ * 應用程式初始化進入點
  */
-// 預設 silent = false (首次載入顯示 Loading，Timer 觸發時傳入 true 不顯示)
-async function loadForm(silent = false) {
-  // 僅非靜默更新時才顯示全螢幕 Loading
-  if (!silent) {
-    UI.showLoading(true, '載入中...');
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  // 觸發 GASClient 進行頁面 Schema 載入
+  GASClient.loadFormSchema(false, 'app');
+});
 
-  // 讀取網址列參數（例如 ?type=leave）
-  const urlParams = new URLSearchParams(window.location.search);
-  const queryParamsString = urlParams.toString();
-  const requestUrl = queryParamsString ? `${GAS_WEB_APP_URL}?${queryParamsString}` : GAS_WEB_APP_URL;
 
-  try {
-    const response = await fetch(requestUrl);
-    const result = await response.json();
-
-    if (!silent) {
-      UI.showLoading(false);
-    }
-
-    if (result.success && result.schema) {
-      currentFormType = result.formType || 'default';
-
-      // 儲存後端傳回的全域變數與動態函數
-      if (result.variables || result.functions) {
-        AppState.init(result.variables, result.functions);
-      }
-      
-      // 即時重新渲染頁面 (UI.render 內部會更新上次更新時間)
-      UI.render('app', result.schema);
-    } else {
-      if (!silent) alert('無法載入表單架構');
-    }
-  } catch (error) {
-    if (!silent) {
-      UI.showLoading(false);
-      alert('載入失敗：' + error);
-    } else {
-      UI.showToast('背景自動更新失敗'  + error, 'danger');
-    }
-  }
-}
-
-/**
- * 2. 處理表單提交，將資料送回 GAS
- */
+//展示用
 /*
 async function handleFormSubmit(formData) {
   UI.showLoading(true, '提交中，請稍候...');
@@ -153,24 +112,3 @@ function handleApproveShift() {
   });
 }
 */
-
-/*
-function loadDashboardConfig() {
-    UI.showLoading(true, '更新最新資料中...');
-    
-    google.script.run
-      .withSuccessHandler(function(schema) {
-        UI.showLoading(false);
-        UI.render('app', schema);
-        UI.showToast('最新勤務與資安資料已載入', 'success');
-      })
-      .withFailureHandler(function(err) {
-        UI.showLoading(false);
-        UI.showToast('載入失敗：' + err.message, 'danger');
-      })
-      .getDashboardConfig(); // 呼叫 Server.gs 函數
-  }
-*/
-
-// 網頁載入完成後觸發
-document.addEventListener('DOMContentLoaded', loadForm);
