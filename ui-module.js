@@ -24,9 +24,6 @@ const UI = {
     }
     container.innerHTML = '';
 
-    // 初始化下拉刷新手勢 (僅綁定一次)
-    this.initPullToRefresh();
-    
     // 按順序渲染元件
     schema.forEach(item => {
       // 1. 如果遇到 tabBlock，產生該分類的 Tab 導覽列
@@ -258,94 +255,6 @@ createSearchBar(item) {
     });
 
     return container;
-  },
-
-  // 初始化下拉刷新 (Pull-to-Refresh) 監聽
-  initPullToRefresh() {
-    if (this.pullToRefreshBound) return;
-    this.pullToRefreshBound = true;
-
-    let ptrContainer = document.getElementById('app-ptr-container');
-    if (!ptrContainer) {
-      ptrContainer = document.createElement('div');
-      ptrContainer.id = 'app-ptr-container';
-      ptrContainer.className = 'pull-to-refresh-container';
-      ptrContainer.innerHTML = `
-        <svg class="pull-to-refresh-icon arrow-down" id="ptr-icon" viewBox="0 0 24 24">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <polyline points="19 12 12 19 5 12"></polyline>
-        </svg>
-        <span id="ptr-text">下拉即可刷新...</span>
-      `;
-      document.body.prepend(ptrContainer);
-    }
-
-    const ptrIcon = ptrContainer.querySelector('#ptr-icon');
-    const ptrText = ptrContainer.querySelector('#ptr-text');
-
-    let startY = 0;
-    let currentY = 0;
-    let isPulling = false;
-    const threshold = 70; // 觸發刷新的下位移像素值
-
-    window.addEventListener('touchstart', (e) => {
-      // 僅在頁面位於最頂端時啟動下拉監聽
-      if (window.scrollY <= 0) {
-        startY = e.touches[0].pageY;
-        isPulling = true;
-      }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!isPulling) return;
-      currentY = e.touches[0].pageY;
-      const pullDistance = currentY - startY;
-
-      // 只有向下拖曳且頁面在頂部
-      if (pullDistance > 0 && window.scrollY <= 0) {
-        const dampedDistance = Math.min(pullDistance * 0.4, 80); // 阻尼感計算
-        ptrContainer.style.transform = `translateY(${dampedDistance - 60}px)`;
-        ptrContainer.classList.add('pulling');
-
-        if (dampedDistance >= threshold * 0.4) {
-          ptrText.innerText = '放開即可刷新...';
-          ptrIcon.className = 'pull-to-refresh-icon arrow-up';
-        } else {
-          ptrText.innerText = '下拉即可刷新...';
-          ptrIcon.className = 'pull-to-refresh-icon arrow-down';
-        }
-      }
-    }, { passive: true });
-
-    window.addEventListener('touchend', () => {
-      if (!isPulling) return;
-      isPulling = false;
-      ptrContainer.classList.remove('pulling');
-
-      const pullDistance = currentY - startY;
-      if (pullDistance * 0.4 >= threshold * 0.4 && window.scrollY <= 0) {
-        // 達到閾值：展示 Spinning 並觸發靜默更新
-        ptrContainer.style.transform = 'translateY(0px)';
-        ptrText.innerText = '正在更新數據...';
-        ptrIcon.className = 'pull-to-refresh-icon spinning';
-
-        // 呼叫背景靜默更新
-        if (typeof loadFormSchema === 'function') {
-          loadFormSchema(true);
-        }
-
-        // 1 秒後恢復隱藏狀態
-        setTimeout(() => {
-          ptrContainer.style.transform = 'translateY(-100%)';
-        }, 1000);
-      } else {
-        // 未達閾值：彈回隱藏
-        ptrContainer.style.transform = 'translateY(-100%)';
-      }
-
-      startY = 0;
-      currentY = 0;
-    });
   },
 
   // Timeline 時間軸模組 (支援混搭 items 子元件)
