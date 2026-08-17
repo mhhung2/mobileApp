@@ -32,8 +32,25 @@ Object.assign(UI, {
 
         const group = document.createElement('div');
         group.className = 'form-group';
-        group.innerHTML = `<label>${field.label || ''}${field.required ? ' <span style="color:#ff3b30">*</span>' : ''}</label>`;
 
+        // 若 field.isHtml 為 true，則使用 HTML 組合 label，否則將純文字轉義或插入
+        const labelText = field.label || '';
+        const requiredMark = field.required ? ' <span style="color:#ff3b30">*</span>' : '';
+        const labelEl = document.createElement('label');
+
+        if (field.isHtml === true) {
+          labelEl.innerHTML = labelText + requiredMark;
+        } else {
+          labelEl.innerText = labelText;
+          if (field.required) {
+            const reqSpan = document.createElement('span');
+            reqSpan.style.color = '#ff3b30';
+            reqSpan.innerText = ' *';
+            labelEl.appendChild(reqSpan);
+          }
+        }
+        group.appendChild(labelEl);
+        
         if (field.type === 'select') {
           const select = document.createElement('select');
           select.className = 'form-control';
