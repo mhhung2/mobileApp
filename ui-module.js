@@ -622,6 +622,53 @@ createSearchBar(item) {
 
     return spacer;
   },
+
+  // 建立分隔線元件 (Divider)
+  createDivider(item) {
+    const divider = document.createElement('hr');
+    const variant = item.variant || 'solid'; // solid, dashed, dotted
+    divider.className = `app-divider ${variant}`;
+
+    if (item.color) divider.style.borderColor = item.color;
+    if (item.margin !== undefined) {
+      const m = typeof item.margin === 'number' ? `${item.margin}px` : item.margin;
+      divider.style.marginTop = m;
+      divider.style.marginBottom = m;
+    }
+
+    return divider;
+  },
+
+  // 建立空狀態元件 (Empty State)
+  createEmptyState(item) {
+    const container = document.createElement('div');
+    container.className = 'empty-state-container';
+
+    let iconHTML = '';
+    if (item.icon) {
+      iconHTML = `<div class="empty-state-icon">${item.icon}</div>`;
+    }
+
+    container.innerHTML = `
+      ${iconHTML}
+      <div class="empty-state-title">${item.title || '查無資料'}</div>
+      ${item.text ? `<div class="empty-state-text">${item.text}</div>` : ''}
+    `;
+
+    // 支援空狀態下方的行動按鈕 (如：重置搜尋、重新載入)
+    if (item.buttonText) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `btn btn-inline btn-${item.buttonVariant || 'primary'}`;
+      btn.innerText = item.buttonText;
+      if (item.onClick && typeof window[item.onClick] === 'function') {
+        btn.onclick = window[item.onClick];
+      }
+      container.appendChild(btn);
+    }
+
+    return container;
+  },
   
   // 通用綁定函數：幫任何產生的 DOM 元素加上 category 與 groupId 屬性
   bindTabCategory(element, item) {
@@ -817,6 +864,12 @@ createSearchBar(item) {
     else if (item.type === 'spacer') {
       element = this.createSpacer(item);
     }
+    else if (item.type === 'divider') {
+      element = this.createDivider(item);
+    }
+    else if (item.type === 'emptyState') {
+      element = this.createEmptyState(item);
+    }
 
     // 7. Form 表單模組
     else if (item.type === 'form') {
@@ -927,6 +980,16 @@ createSearchBar(item) {
         else if (field.type === 'mediaPreview') {
           const mediaEl = this.createMediaPreview(field);
           if (mediaEl) form.appendChild(mediaEl);
+          return;
+        }
+        else if (field.type === 'spacer') {
+          const spacerEl = this.createSpacer(field);
+          if (spacerEl) form.appendChild(spacerEl);
+          return;
+        }
+        else if (field.type === 'divider') {
+          const dividerEl = this.createDivider(field);
+          if (dividerEl) form.appendChild(dividerEl);
           return;
         }
         else if (field.type === 'spacer') {
@@ -1120,8 +1183,13 @@ createSearchBar(item) {
       form.appendChild(btnGroup);
 
       // 表單提交處理
-      form.onsubmit = (e) => {
+// 表單提交處理 (含防重複點擊與 Async 狀態還原)
+      form.onsubmit = async (e) => {
         e.preventDefault();
+
+        // 防重複觸發：如果正在提交中則直接擋下
+        if (form.dataset.submitting === 'true') return;
+
         const formData = new FormData(form);
         const data = {};
 
@@ -1134,8 +1202,24 @@ createSearchBar(item) {
           }
         }
 
-        if (window[item.onSubmit] && typeof window[item.onSubmit] === 'function') {
-          window[item.onSubmit](data);
+        // 鎖定表單狀態與按鈕
+        form.dataset.submitting = 'true';
+        const originalBtnText = submitBtn.innerText;
+        submitBtn.disabled = true;
+        submitBtn.innerText = '處理中...';
+
+        try {
+          if (window[item.onSubmit] && typeof window[item.onSubmit] === 'function') {
+            // 支援非同步 (Promise) 或同步 onSubmit 處理
+            await window[item.onSubmit](data);
+          }
+        } catch (err) {
+          console.error('表單提交錯誤:', err);
+        } finally {
+          // 提交完成或失敗後還原按鈕狀態
+          form.dataset.submitting = 'false';
+          submitBtn.disabled = false;
+          submitBtn.innerText = originalBtnText;
         }
       };
 
