@@ -1310,8 +1310,48 @@ input[type="date"]::-webkit-date-and-time-value {
 
 
 /* ==========================================
-   Carousel (圖片/卡片手勢輪播模組) 樣式
+   Carousel (圖片/卡片輪播) 電腦與手機跨平台樣式
    ========================================== */
+.app-carousel-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: 12px;
+  padding: 4px 2px 12px 2px;
+  scrollbar-width: none; /* Firefox 隱藏滾動條 */
+  cursor: grab;          /* 電腦版顯示抓取手勢 */
+  user-select: none;
+}
+
+.carousel-track:active {
+  cursor: grabbing;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;         /* Chrome/Safari 隱藏滾動條 */
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  box-sizing: border-box;
+}
+
+/* Peek 模式：露出右側卡片邊角 */
+.app-carousel-container.peek .carousel-slide {
+  flex: 0 0 85%;
+}
+
+/* 滑塊外殼 */
 .carousel-slide-content {
   background: var(--card-bg, #ffffff);
   border-radius: var(--radius, 12px);
@@ -1320,34 +1360,63 @@ input[type="date"]::-webkit-date-and-time-value {
   height: 100%;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
-/* 專屬於文字/一般 UI 元件的舒適內邊距容器 */
+/* 核心修復：專屬於文字/卡片內容的強制 Padding */
 .carousel-text-body {
-  padding: 16px; /* 留出標準卡片內邊距 (16px) */
-  box-sizing: border-box;
+  padding: 16px !important; /* 強制留出 16px 邊距 */
+  box-sizing: border-box !important;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
-/* 如果 Slide 內部是圖片，保持滿版貼邊 (移除圖片額外邊距) */
-.carousel-slide-content .media-preview-container {
-  margin: 0;
-  border: none;
-  border-radius: 0;
+/* 確保文字區域內的子元件不溢出 */
+.carousel-text-body .item-title,
+.carousel-text-body .item-text,
+.carousel-text-body .item-badge,
+.carousel-text-body .badge-group {
+  margin-left: 0;
+  margin-right: 0;
 }
 
-/* 支援單頁顯示 85% 寬度，露出右側下一張卡片角落 (Peek Mode) */
-.app-carousel-container.peek .carousel-slide {
-  flex: 0 0 85%;
-}
-
-.carousel-slide-content {
-  background: var(--card-bg, #ffffff);
-  border-radius: var(--radius, 12px);
+/* 電腦版左右左右箭頭按鈕 */
+.carousel-nav-btn {
+  display: none; /* 手機端預設隱藏 */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--border-color, #e5e5ea);
-  overflow: hidden;
-  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-color, #1c1c1e);
+  transition: all 0.2s ease;
+}
+
+.carousel-nav-btn:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav-btn.prev { left: -10px; }
+.carousel-nav-btn.next { right: -10px; }
+
+/* 電腦端 (螢幕 > 600px) 自動顯示懸浮導航箭頭 */
+@media (min-width: 601px) {
+  .carousel-nav-btn {
+    display: flex;
+  }
 }
 
 .carousel-dots {
@@ -1355,7 +1424,7 @@ input[type="date"]::-webkit-date-and-time-value {
   justify-content: center;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .carousel-dot {
@@ -1363,6 +1432,7 @@ input[type="date"]::-webkit-date-and-time-value {
   height: 6px;
   border-radius: 50%;
   background-color: #c7c7cc;
+  cursor: pointer;
   transition: all 0.25s ease;
 }
 
