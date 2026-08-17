@@ -3,19 +3,82 @@
  */
 const GASClient = {
   // 替換為您的 GAS Web App 發布 URL
-  baseUrl: GAS_WEB_APP_URL,
+  baseUrl: typeof GAS_WEB_APP_URL !== 'undefined' ? GAS_WEB_APP_URL : '',
 
   /**
-   * 核心 POST 傳送方法
-   * @param {string} action - 後端路由 Action (如 'log', 'append', 'update', 'delete')
-   * @param {Object} data - 傳遞給後端的資料數據
-   * @param {Object} options - 選項 (如 customSheet, showToast)
+   * 1. 核心載入介面 Schema (取代原本 app.js 的 loadForm)
+   * @param {boolean} silent - 是否靜默更新 (true 時不顯示全螢幕 Loading)
+   * @param {string} containerId - 渲染的主容器 ID (預設 'app')
+   */
+  async loadFormSchema(silent = false, containerId = 'app') {
+    const container = document.getElementById(containerId);
+
+    // 非靜默載入時顯示 UI Loading 提示
+    if (!silent && typeof UI !== 'undefined' && UI.showLoading) {
+      UI.showLoading(true, '系統介面載入中...');
+    }
+
+    // 自動讀取 URL 網址列參數 (?type=leave 等)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParamsString = urlParams.toString();
+    const requestUrl = queryParamsString ? `${this.baseUrl}?${queryParamsString}` : this.baseUrl;
+
+    try {
+      const response = await fetch(requestUrl);
+      if (!response.ok) throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
+
+      const result = await response.json();
+
+      if (!silent && typeof UI !== 'undefined' && UI.showLoading) {
+        UI.showLoading(false);
+      }
+
+      if (result.success && result.schema) {
+        // 初始化 AppState (變數與動態 Function)
+        if ((result.variables || result.functions) && typeof AppState !== 'undefined') {
+          AppState.init(result.variables, result.functions);
+        }
+
+        // 觸發 UI 繪製
+        if (typeof UI !== 'undefined' && UI.render) {
+          UI.render(containerId, result.schema);
+        }
+
+        return result;
+      } else {
+        throw new Error(result.message || '無法載入表單架構');
+      }
+
+    } catch (error) {
+      console.error('[GASClient] loadFormSchema 失敗:', error);
+
+      if (!silent) {
+        if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+        if (container) {
+          container.innerHTML = `
+            <div style="padding: 30px; text-align: center; color: #ff3b30;">
+              <h4>⚠️ 載入失敗</h4>
+              <p>${error.message || error}</p>
+              <button onclick="GASClient.loadFormSchema(false, '${containerId}')" style="padding: 8px 16px; background: #007aff; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;">重新載入</button>
+            </div>`;
+        }
+      } else {
+        if (typeof UI !== 'undefined' && UI.showToast) {
+          UI.showToast('背景自動更新失敗：' + error.message, 'danger');
+        }
+      }
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * 2. 通用 POST 數據傳送請求
    */
   async request(action, data = {}, options = {}) {
     const { showToast = true, loadingMessage = null } = options;
 
-    if (loadingMessage && typeof UI !== 'undefined') {
-      UI.showToast(loadingMessage, 'info', 2000);
+    if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
+      UI.showLoading(true, loadingMessage);
     }
 
     const payload = {
@@ -26,99 +89,56 @@ const GASClient = {
     };
 
     try {
-      // 關鍵：選用 text/plain;charset=utf-8 避開 CORS preflight OPTIONS 阻擋
       const response = await fetch(this.baseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
+      if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
+        UI.showLoading(false);
       }
+
+      if (!response.ok) throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
 
       const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error || result.message || '後端處理失敗');
-      }
+      if (!result.success) throw new Error(result.error || result.message || '後端處理失敗');
 
-      if (showToast && options.successMessage && typeof UI !== 'undefined') {
+      if (showToast && options.successMessage && typeof UI !== 'undefined' && UI.showToast) {
         UI.showToast(options.successMessage, 'success');
       }
 
       return result;
 
     } catch (err) {
-      console.error(`[GASClient Error] Action: ${action}`, err);
-      if (typeof UI !== 'undefined') {
-        UI.showToast(`連線失敗: ${err.message}`, 'danger');
+      console.error(`[GASClient Request Error] Action: ${action}`, err);
+      if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+      if (typeof UI !== 'undefined' && UI.showToast) {
+        UI.showToast(`操作失敗: ${err.message}`, 'danger');
       }
       return { success: false, error: err.message };
     }
   },
 
   // ----------------------------------------------------
-  // 快捷 Helper 函數 (方便前端按鈕與功能直接呼叫)
+  // 快捷 Helper 函數 (方便前端/動態按鈕點擊時呼叫)
   // ----------------------------------------------------
 
-  /**
-   * 寫入 Log 紀錄 (對應 DB_Logs)
-   */
   async log(actionName, details = {}, user = null) {
     const currentUser = user || (typeof AppState !== 'undefined' ? AppState.getVar('currentUser', 'System') : 'System');
-    return this.request('log', {
-      user: currentUser,
-      action: actionName,
-      details: details
-    }, { showToast: false });
+    return this.request('log', { user: currentUser, action: actionName, details: details }, { showToast: false });
   },
 
-  /**
-   * 新增一筆資料 (Append)
-   */
   async append(sheetName, rowData, successMsg = '新增資料成功！') {
-    return this.request('append', { rowData }, {
-      sheetName,
-      successMessage: successMsg,
-      loadingMessage: '資料寫入中...'
-    });
+    return this.request('append', { rowData }, { sheetName, successMessage: successMsg, loadingMessage: '資料寫入中...' });
   },
 
-  /**
-   * 修改一筆資料 (Update)
-   */
   async update(sheetName, targetId, idColIndex, updatedRowData, successMsg = '更新成功！') {
-    return this.request('update', { targetId, idColIndex, updatedRowData }, {
-      sheetName,
-      successMessage: successMsg,
-      loadingMessage: '更新中...'
-    });
+    return this.request('update', { targetId, idColIndex, updatedRowData }, { sheetName, successMessage: successMsg, loadingMessage: '更新中...' });
   },
 
-  /**
-   * 刪除一筆資料 (Delete)
-   */
   async delete(sheetName, targetId, idColIndex, successMsg = '已成功刪除！') {
-    return this.request('delete', { targetId, idColIndex }, {
-      sheetName,
-      successMessage: successMsg,
-      loadingMessage: '刪除中...'
-    });
-  },
-
-  /**
-   * 從 GAS 取得最新的 UI Schema 或 Sheet 資料 (GET)
-   */
-  async fetchSchema(formType = 'default') {
-    try {
-      const response = await fetch(`${this.baseUrl}?type=${encodeURIComponent(formType)}`);
-      return await response.json();
-    } catch (err) {
-      console.error('[GASClient] 讀取 Schema 失敗:', err);
-      return { success: false, error: err.message };
-    }
+    return this.request('delete', { targetId, idColIndex }, { sheetName, successMessage: successMsg, loadingMessage: '刪除中...' });
   }
 };
