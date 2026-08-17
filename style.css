@@ -1202,40 +1202,41 @@ input[type="date"]::-webkit-date-and-time-value {
 
 
 /* ==========================================
-   Empty State (空狀態模組) 樣式
+   Action Card / Block (萬用行動引導圖文卡片)
+   結構：Icon + Title + Text + Action Button
    ========================================== */
-.empty-state-container {
+.action-card-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
+  padding: 24px 16px;
   text-align: center;
   width: 100%;
   box-sizing: border-box;
 }
 
-.empty-state-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
+.action-card-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
   line-height: 1;
 }
 
-.empty-state-title {
+.action-card-title {
   font-size: 16px;
   font-weight: 700;
   color: var(--text-color, #1c1c1e);
   margin-bottom: 6px;
 }
 
-.empty-state-text {
+.action-card-text {
   font-size: 13px;
   color: var(--secondary-text, #8e8e93);
-  margin-bottom: 16px;
-  max-width: 280px;
+  margin-bottom: 14px;
+  max-width: 320px;
   line-height: 1.4;
 }
 
-.empty-state-container .btn {
+.action-card-container .btn {
   margin-bottom: 0;
 }
