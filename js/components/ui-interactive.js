@@ -512,8 +512,8 @@ Object.assign(UI, {
 
     this.startCountdownTimer(currentSecondsEl, iconEl);
 
-    if (typeof loadFormSchema === 'function') {
-      loadFormSchema(true);
+    if (typeof loadForm === 'function') {
+      loadForm(true);
     }
   },
 
