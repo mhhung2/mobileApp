@@ -35,14 +35,22 @@ Object.assign(UI, {
     const container = document.createElement('div');
     container.className = `ui-grid-row ${item.className || ''}`;
 
+    // 1. 整行 (Row Level) 樣式設定
     const totalColumns = item.totalColumns || 4;
     container.style.display = 'grid';
     container.style.gridTemplateColumns = `repeat(${totalColumns}, 1fr)`;
     container.style.gap = item.gap || '8px';
-    container.style.alignItems = item.alignItems || 'center'; // 垂直預設居中
+    container.style.alignItems = item.alignItems || 'center';
     container.style.width = '100%';
     container.style.boxSizing = 'border-box';
 
+    // 支援整行背景色、框線、圓角與內邊距
+    if (item.bg || item.bgColor) container.style.backgroundColor = item.bg || item.bgColor;
+    if (item.border) container.style.border = item.border;
+    if (item.borderRadius) container.style.borderRadius = item.borderRadius;
+    if (item.padding) container.style.padding = item.padding;
+
+    // 2. 處理內部各格子 (Col Level)
     if (Array.isArray(item.cols)) {
       item.cols.forEach(colData => {
         const colEl = document.createElement('div');
@@ -57,16 +65,22 @@ Object.assign(UI, {
         colEl.style.flexDirection = 'column';
         colEl.style.gap = colData.gap || '4px';
 
-        // 核心對齊邏輯 (align: 'left' | 'center' | 'right')
+        // 個別格子 (Cell Level) 樣式設定
+        if (colData.bg || colData.bgColor) colEl.style.backgroundColor = colData.bg || colData.bgColor;
+        if (colData.border) colEl.style.border = colData.border;
+        if (colData.borderRadius) colEl.style.borderRadius = colData.borderRadius;
+        if (colData.padding) colEl.style.padding = colData.padding;
+
+        // 對齊邏輯 (align: 'left' | 'center' | 'right')
         const alignMode = colData.align || 'left';
         if (alignMode === 'center') {
-          colEl.style.alignItems = 'center';      // 讓按鈕/塊級元件置中
-          colEl.style.textAlign = 'center';       // 讓文字置中
+          colEl.style.alignItems = 'center';
+          colEl.style.textAlign = 'center';
         } else if (alignMode === 'right') {
-          colEl.style.alignItems = 'flex-end';    // 讓按鈕/塊級元件靠右
-          colEl.style.textAlign = 'right';        // 讓文字靠右
+          colEl.style.alignItems = 'flex-end';
+          colEl.style.textAlign = 'right';
         } else {
-          colEl.style.alignItems = 'flex-start';  // 預設靠左
+          colEl.style.alignItems = 'flex-start';
           colEl.style.textAlign = 'left';
         }
 
@@ -77,10 +91,7 @@ Object.assign(UI, {
             if (childEl) {
               childEl.style.boxSizing = 'border-box';
               childEl.style.margin = '0';
-              
-              // 確保文字元件能正確套用父級對齊設定
               childEl.style.textAlign = alignMode;
-              
               colEl.appendChild(childEl);
             }
           });
