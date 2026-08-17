@@ -44,7 +44,7 @@ Object.assign(UI, {
 
       if (!scopeContainer) return;
 
-      const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card');
+      const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card', .ui-grid-row');
       cards.forEach(card => {
         const categoryGroup = card.closest('[data-category]');
         if (categoryGroup && categoryGroup.style.display === 'none') {
@@ -74,6 +74,24 @@ Object.assign(UI, {
         } else {
           const visibleChildren = group.querySelectorAll('.app-card:not(.search-hidden), .kpi-card:not(.search-hidden)');
           group.classList.toggle('search-hidden', visibleChildren.length === 0);
+        }
+      });
+
+      // 自動檢查並隱藏內部所有子項目皆已隱藏的 gridRow
+      const gridRows = scopeContainer.querySelectorAll('.ui-grid-row');
+      gridRows.forEach(row => {
+        const categoryGroup = row.closest('[data-category]');
+        if (categoryGroup && categoryGroup.style.display === 'none') {
+          row.classList.add('search-hidden');
+          return;
+        }
+      
+        if (!rawQuery) {
+          row.classList.remove('search-hidden');
+        } else {
+          // 檢查 gridRow 內是否還有可見的元素
+          const visibleChildren = row.querySelectorAll('.app-card:not(.search-hidden), .kpi-card:not(.search-hidden), .item-text:not(.search-hidden)');
+          row.classList.toggle('search-hidden', visibleChildren.length === 0);
         }
       });
     };
