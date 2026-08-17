@@ -724,7 +724,7 @@ createSearchBar(item) {
   },
 
   // 建立手勢滑動輪播模組 (Carousel)
-// 建立手勢滑動輪播模組 (自動為文字/卡片加上舒適 Padding)
+// 建立跨平台 Carousel (支援電腦滑鼠拖曳、箭頭導航與正確 Padding)
   createCarousel(item) {
     const container = document.createElement('div');
     const peekClass = item.peek ? 'peek' : '';
@@ -736,6 +736,17 @@ createSearchBar(item) {
     const dotsContainer = document.createElement('div');
     dotsContainer.className = 'carousel-dots';
 
+    // 電腦版左右控制箭頭
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.className = 'carousel-nav-btn prev';
+    prevBtn.innerHTML = '❮';
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'carousel-nav-btn next';
+    nextBtn.innerHTML = '❯';
+
     const slidesData = item.slides || item.items || [];
 
     if (Array.isArray(slidesData) && slidesData.length > 0) {
@@ -746,7 +757,7 @@ createSearchBar(item) {
         const contentEl = document.createElement('div');
         contentEl.className = 'carousel-slide-content';
 
-        // A. 如果是純圖片/媒體輪播：滿版貼邊，不加 Padding
+        // 判斷 1：如果 Slide 主要是圖片，直接滿版無 Padding
         if (slideData.image || slideData.src) {
           const mediaEl = this.createMediaPreview({
             type: 'mediaPreview',
@@ -755,35 +766,40 @@ createSearchBar(item) {
           });
           if (mediaEl) contentEl.appendChild(mediaEl);
         } 
-        // B. 如果包含 items 文字/UI 元件：包覆 .carousel-text-body 加上 16px Padding
-        else if (Array.isArray(slideData.items)) {
-          const textBody = document.createElement('div');
-          textBody.className = 'carousel-text-body';
-
-          slideData.items.forEach(child => {
-            const childEl = this.createComponent(child);
-            if (childEl) textBody.appendChild(childEl);
-          });
-          contentEl.appendChild(textBody);
-        } 
-        // C. 如果是標準卡片資料：預設使用 .carousel-text-body
+        // 判斷 2：只要包含 items，或是純文字/卡片，一律強制包入 .carousel-text-body
         else {
           const textBody = document.createElement('div');
           textBody.className = 'carousel-text-body';
 
-          if (slideData.title) {
-            const titleEl = document.createElement('div');
-            titleEl.className = 'item-title';
-            titleEl.innerText = slideData.title;
-            textBody.appendChild(titleEl);
+          if (Array.isArray(slideData.items)) {
+            slideData.items.forEach(child => {
+              // 特殊處理：如果在 items 裡有 mediaPreview，讓圖片滿版，其餘留邊框
+              if (child.type === 'mediaPreview') {
+                const mediaEl = this.createMediaPreview(child);
+                if (mediaEl) contentEl.appendChild(mediaEl); // 放外層滿版
+              } else {
+                const childEl = this.createComponent(child);
+                if (childEl) textBody.appendChild(childEl);
+              }
+            });
+          } else {
+            if (slideData.title) {
+              const titleEl = document.createElement('div');
+              titleEl.className = 'item-title';
+              titleEl.innerText = slideData.title;
+              textBody.appendChild(titleEl);
+            }
+            if (slideData.text || slideData.content) {
+              const textEl = document.createElement('div');
+              textEl.className = 'item-text';
+              textEl.innerText = slideData.text || slideData.content;
+              textBody.appendChild(textEl);
+            }
           }
-          if (slideData.text || slideData.content) {
-            const textEl = document.createElement('div');
-            textEl.className = 'item-text';
-            textEl.innerText = slideData.text || slideData.content;
-            textBody.appendChild(textEl);
+
+          if (textBody.hasChildNodes()) {
+            contentEl.appendChild(textBody);
           }
-          contentEl.appendChild(textBody);
         }
 
         slideEl.appendChild(contentEl);
@@ -798,7 +814,7 @@ createSearchBar(item) {
         dotsContainer.appendChild(dot);
       });
 
-      // 監聽滾動，自動高亮當前圓點
+      // 1. 監聽 Track 滾動更新指示點
       track.addEventListener('scroll', () => {
         const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : track.clientWidth;
         const activeIndex = Math.round(track.scrollLeft / slideWidth);
@@ -807,11 +823,56 @@ createSearchBar(item) {
           dot.classList.toggle('active', i === activeIndex);
         });
       }, { passive: true });
+
+      // 2. 電腦版滑鼠拖曳 (Mouse Drag to Scroll) 邏輯
+      let isMouseDown = false;
+      let startX, scrollLeft;
+
+      track.addEventListener('mousedown', (e) => {
+        isMouseDown = true;
+        track.style.scrollSnapType = 'none'; // 拖曳時暫停 snap 避免卡頓
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = track.scrollLeft;
+      });
+
+      track.addEventListener('mouseleave', () => {
+        if (!isMouseDown) return;
+        isMouseDown = false;
+        track.style.scrollSnapType = 'x mandatory';
+      });
+
+      track.addEventListener('mouseup', () => {
+        isMouseDown = false;
+        track.style.scrollSnapType = 'x mandatory';
+      });
+
+      track.addEventListener('mousemove', (e) => {
+        if (!isMouseDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5; // 拖曳靈敏度
+        track.scrollLeft = scrollLeft - walk;
+      });
+
+      // 3. 電腦版點擊左右箭頭按鈕切換
+      prevBtn.onclick = () => {
+        const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : 300;
+        track.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+      };
+
+      nextBtn.onclick = () => {
+        const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : 300;
+        track.scrollBy({ left: slideWidth, behavior: 'smooth' });
+      };
     }
 
     container.appendChild(track);
-    if (item.showDots !== false && slidesData.length > 1) {
-      container.appendChild(dotsContainer);
+    if (slidesData.length > 1) {
+      container.appendChild(prevBtn);
+      container.appendChild(nextBtn);
+      if (item.showDots !== false) {
+        container.appendChild(dotsContainer);
+      }
     }
 
     return container;
