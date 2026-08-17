@@ -42,7 +42,7 @@ async function loadForm(silent = false) {
       UI.showLoading(false);
       alert('載入失敗：' + error);
     } else {
-      UI.showToast('背景自動更新失敗', 'danger');
+      UI.showToast('背景自動更新失敗'  + error, 'danger');
     }
   }
 }
