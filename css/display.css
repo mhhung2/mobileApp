@@ -68,6 +68,22 @@
 .badge-caution   { background: #ffeacc; color: #d97706; }
 .badge-danger    { background: #ffe5e5; color: #dc3545; }
 .badge-info      { background: #e5f1ff; color: #007aff; }
+.badge-purple    { background: #f3e8ff; color: #7e22ce; } 
+.badge-pink      { background: #fce7f3; color: #be185d; }  
+.badge-teal      { background: #ccfbf1; color: #0f766e; } 
+.badge-dark      { background: #2c2c2e; color: #ffffff; }
+.badge-solid-blue    { background: #007aff; color: #ffffff; }  /* 滿版鮮藍 */
+.badge-solid-green   { background: #34c759; color: #ffffff; }  /* 滿版翡翠綠 */
+.badge-solid-red     { background: #ff3b30; color: #ffffff; }  /* 滿版熱烈紅 */
+.badge-solid-purple  { background: #af52de; color: #ffffff; }  /* 滿版魅惑紫 */
+.badge-neon-lime     { background: #a3e635; color: #1a2e05; }  /* 霓虹檸檬綠 */
+.badge-neon-cyan     { background: #22d3ee; color: #083344; }  /* 霓虹青藍 */
+.badge-gradient-sunset { background: linear-gradient(135deg, #ff7e5f, #feb47b); color: #ffffff; } /* 日落橘紅 */
+.badge-gradient-ocean  { background: linear-gradient(135deg, #2b5876, #4e4376); color: #ffffff; } /* 深海藍紫 */
+.badge-outline-primary { background: transparent; border: 1px solid #007aff; color: #007aff; }
+.badge-outline-dark    { background: transparent; border: 1px solid #8e8e93; color: #3a3a3c; }
+.badge-outline-success { background: transparent; border: 1px solid #34c759; color: #28a745; } /* 綠色外框 */
+.badge-outline-danger  { background: transparent; border: 1px solid #ff3b30; color: #dc3545; } /* 紅色外框 */
 
 /* ==========================================
    KPI & Timeline 數據模組
