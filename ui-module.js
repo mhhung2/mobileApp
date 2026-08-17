@@ -23,6 +23,9 @@ const UI = {
       this.refreshIntervalId = null;
     }
     container.innerHTML = '';
+
+    // 初始化下拉刷新手勢 (僅綁定一次)
+    this.initPullToRefresh();
     
     // 按順序渲染元件
     schema.forEach(item => {
@@ -174,14 +177,14 @@ createSearchBar(item) {
     wrapper.appendChild(clearBtn);
     container.appendChild(wrapper);
 
-    // ==========================================
-    // 終極全情境過濾演算法 (Class-Based 防禦機制)
-    // ==========================================
+    // 防抖定時器 (Debounce Timer)
+    let debounceTimer = null;
+
+    // 核心過濾邏輯
     const filterCards = () => {
       const rawQuery = input.value.trim().toLowerCase();
       clearBtn.style.display = rawQuery ? 'block' : 'none';
 
-      // 1. 決定作用域範圍 (Scope Container)
       let scopeContainer = null;
       if (item.targetGroup) {
         scopeContainer = document.querySelector(`[data-group-id="${item.targetGroup}"]`);
@@ -191,24 +194,20 @@ createSearchBar(item) {
 
       if (!scopeContainer) return;
 
-      // 2. 獲取作用域內的所有獨立卡片 (含 app-card, kpi-card)
       const cards = scopeContainer.querySelectorAll('.app-card, .kpi-card');
 
       cards.forEach(card => {
-        // 檢查卡片所屬的 Tab 分頁容器是否處於隱藏狀態
         const categoryGroup = card.closest('[data-category]');
         if (categoryGroup && categoryGroup.style.display === 'none') {
           card.classList.add('search-hidden');
           return;
         }
 
-        // 清空搜尋條件：移除 hidden class，還原原生 CSS 排版
         if (!rawQuery) {
           card.classList.remove('search-hidden');
           return;
         }
 
-        // 有搜尋條件：比對內文 (正規化清洗多餘空白與換行)
         const textContent = (card.innerText || card.textContent || '').replace(/\s+/g, ' ').toLowerCase();
         if (textContent.includes(rawQuery)) {
           card.classList.remove('search-hidden');
@@ -217,7 +216,6 @@ createSearchBar(item) {
         }
       });
 
-      // 3. 處理 cardGroup 折疊外殼的連動
       const cardGroups = scopeContainer.querySelectorAll('.card-group');
       cardGroups.forEach(group => {
         const categoryGroup = group.closest('[data-category]');
@@ -229,7 +227,6 @@ createSearchBar(item) {
         if (!rawQuery) {
           group.classList.remove('search-hidden');
         } else {
-          // 檢查該 cardGroup 內部是否有任何未被 hidden 的子卡片
           const visibleChildren = group.querySelectorAll('.app-card:not(.search-hidden), .kpi-card:not(.search-hidden)');
           if (visibleChildren.length > 0) {
             group.classList.remove('search-hidden');
@@ -240,17 +237,115 @@ createSearchBar(item) {
       });
     };
 
-    // 事件雙重綁定：即時打字 + 中文/注音選字完成
-    input.addEventListener('input', filterCards);
-    input.addEventListener('compositionend', filterCards);
+    // Debounce 包裹器：延遲 300ms 執行
+    const debouncedFilter = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        filterCards();
+      }, 300);
+    };
 
+    // 事件雙重綁定：打字防抖，選字完成防抖
+    input.addEventListener('input', debouncedFilter);
+    input.addEventListener('compositionend', filterCards); // 注音/中文選字完立刻觸發一次
+
+    // 點擊清空按鈕：立即執行，不延遲
     clearBtn.addEventListener('click', () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
       input.value = '';
       filterCards();
       input.focus();
     });
 
     return container;
+  },
+
+  // 初始化下拉刷新 (Pull-to-Refresh) 監聽
+  initPullToRefresh() {
+    if (this.pullToRefreshBound) return;
+    this.pullToRefreshBound = true;
+
+    let ptrContainer = document.getElementById('app-ptr-container');
+    if (!ptrContainer) {
+      ptrContainer = document.createElement('div');
+      ptrContainer.id = 'app-ptr-container';
+      ptrContainer.className = 'pull-to-refresh-container';
+      ptrContainer.innerHTML = `
+        <svg class="pull-to-refresh-icon arrow-down" id="ptr-icon" viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+        <span id="ptr-text">下拉即可刷新...</span>
+      `;
+      document.body.prepend(ptrContainer);
+    }
+
+    const ptrIcon = ptrContainer.querySelector('#ptr-icon');
+    const ptrText = ptrContainer.querySelector('#ptr-text');
+
+    let startY = 0;
+    let currentY = 0;
+    let isPulling = false;
+    const threshold = 70; // 觸發刷新的下位移像素值
+
+    window.addEventListener('touchstart', (e) => {
+      // 僅在頁面位於最頂端時啟動下拉監聽
+      if (window.scrollY <= 0) {
+        startY = e.touches[0].pageY;
+        isPulling = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isPulling) return;
+      currentY = e.touches[0].pageY;
+      const pullDistance = currentY - startY;
+
+      // 只有向下拖曳且頁面在頂部
+      if (pullDistance > 0 && window.scrollY <= 0) {
+        const dampedDistance = Math.min(pullDistance * 0.4, 80); // 阻尼感計算
+        ptrContainer.style.transform = `translateY(${dampedDistance - 60}px)`;
+        ptrContainer.classList.add('pulling');
+
+        if (dampedDistance >= threshold * 0.4) {
+          ptrText.innerText = '放開即可刷新...';
+          ptrIcon.className = 'pull-to-refresh-icon arrow-up';
+        } else {
+          ptrText.innerText = '下拉即可刷新...';
+          ptrIcon.className = 'pull-to-refresh-icon arrow-down';
+        }
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (!isPulling) return;
+      isPulling = false;
+      ptrContainer.classList.remove('pulling');
+
+      const pullDistance = currentY - startY;
+      if (pullDistance * 0.4 >= threshold * 0.4 && window.scrollY <= 0) {
+        // 達到閾值：展示 Spinning 並觸發靜默更新
+        ptrContainer.style.transform = 'translateY(0px)';
+        ptrText.innerText = '正在更新數據...';
+        ptrIcon.className = 'pull-to-refresh-icon spinning';
+
+        // 呼叫背景靜默更新
+        if (typeof loadFormSchema === 'function') {
+          loadFormSchema(true);
+        }
+
+        // 1 秒後恢復隱藏狀態
+        setTimeout(() => {
+          ptrContainer.style.transform = 'translateY(-100%)';
+        }, 1000);
+      } else {
+        // 未達閾值：彈回隱藏
+        ptrContainer.style.transform = 'translateY(-100%)';
+      }
+
+      startY = 0;
+      currentY = 0;
+    });
   },
 
   // Timeline 時間軸模組 (支援混搭 items 子元件)
