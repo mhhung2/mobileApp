@@ -674,6 +674,7 @@ createSearchBar(item) {
   },
 
   // 建立摺疊手風琴模組 (Accordion)
+// 建立摺疊手風琴模組 (Accordion - 支援動態混搭全 UI 模組)
   createAccordion(item) {
     const container = document.createElement('div');
     container.className = 'app-accordion';
@@ -684,29 +685,54 @@ createSearchBar(item) {
         const isOpen = acc.open || (item.openFirst && index === 0);
         itemEl.className = `accordion-item ${isOpen ? 'active' : ''}`;
 
+        // 1. 手風琴標頭 (Header)
         const headerEl = document.createElement('div');
         headerEl.className = 'accordion-header';
+        
+        let iconHTML = acc.icon ? `<span class="accordion-title-icon" style="margin-right:8px;">${acc.icon}</span>` : '';
+        let badgeHTML = acc.badge ? `<span class="item-badge badge-${acc.badgeVariant || 'info'}" style="margin-left:8px;margin-bottom:0;">${acc.badge}</span>` : '';
+
         headerEl.innerHTML = `
-          <span>${acc.title || ''}</span>
+          <div style="display:flex;align-items:center;">
+            ${iconHTML}
+            <span>${acc.title || ''}</span>
+            ${badgeHTML}
+          </div>
           <span class="accordion-icon">▼</span>
         `;
 
+        // 2. 手風琴內容區塊 (Body)
         const bodyEl = document.createElement('div');
         bodyEl.className = 'accordion-body';
 
-        // 支援手風琴內嵌入子元件陣列 (items) 或純文字 (content)
+        // 【高級模式】：若傳入 items 陣列，遞迴繪製所有子 UI 元件 (title, text, mediaPreview, kpiGroup, form 等)
         if (Array.isArray(acc.items)) {
           acc.items.forEach(child => {
             const childEl = this.createComponent(child);
             if (childEl) bodyEl.appendChild(childEl);
           });
-        } else if (acc.content) {
-          bodyEl.innerHTML = `<div class="item-text">${acc.content}</div>`;
+        } 
+        // 【簡易模式】：向下相容傳入純文字 (content / text) 或單張圖片 (media / src)
+        else {
+          if (acc.media || acc.src) {
+            const mediaEl = this.createMediaPreview({
+              type: 'mediaPreview',
+              src: acc.media || acc.src,
+              caption: acc.mediaCaption || acc.caption
+            });
+            if (mediaEl) bodyEl.appendChild(mediaEl);
+          }
+          if (acc.content || acc.text) {
+            const textEl = document.createElement('div');
+            textEl.className = 'item-text';
+            textEl.innerText = acc.content || acc.text;
+            bodyEl.appendChild(textEl);
+          }
         }
 
-        // 點擊切換展開/收合
+        // 3. 點擊展開 / 收合事件
         headerEl.onclick = () => {
-          // 若設定 singleExpand = true，點擊時收合其他同層項目
+          // 若設定 singleExpand = true，展開當前項目時自動收合其他項目
           if (item.singleExpand && !itemEl.classList.contains('active')) {
             const siblings = container.querySelectorAll('.accordion-item');
             siblings.forEach(sib => sib.classList.remove('active'));
