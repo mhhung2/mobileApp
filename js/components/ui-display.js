@@ -31,16 +31,15 @@ Object.assign(UI, {
     return element;
   },
 
-createGridRow(item) {
+  createGridRow(item) {
     const container = document.createElement('div');
     container.className = `ui-grid-row ${item.className || ''}`;
 
-    // 使用 CSS Grid 網格佈局
     const totalColumns = item.totalColumns || 4;
     container.style.display = 'grid';
     container.style.gridTemplateColumns = `repeat(${totalColumns}, 1fr)`;
     container.style.gap = item.gap || '8px';
-    container.style.alignItems = item.alignItems || 'start';
+    container.style.alignItems = item.alignItems || 'center'; // 垂直預設居中
     container.style.width = '100%';
     container.style.boxSizing = 'border-box';
 
@@ -49,33 +48,39 @@ createGridRow(item) {
         const colEl = document.createElement('div');
         colEl.className = 'ui-grid-col';
 
-        // 處理跨格跨欄 (Span)
+        // 跨格/合併儲存格
         const span = colData.span || 1;
         colEl.style.gridColumn = `span ${span}`;
-        colEl.style.minWidth = '0'; // 防止 Grid 子項目被長文字撐破
+        colEl.style.minWidth = '0';
         colEl.style.boxSizing = 'border-box';
         colEl.style.display = 'flex';
         colEl.style.flexDirection = 'column';
         colEl.style.gap = colData.gap || '4px';
 
-        // 處理對齊
-        if (colData.align === 'center') {
-          colEl.style.alignItems = 'center';
-          colEl.style.textAlign = 'center';
-        } else if (colData.align === 'right') {
-          colEl.style.alignItems = 'flex-end';
-          colEl.style.textAlign = 'right';
+        // 核心對齊邏輯 (align: 'left' | 'center' | 'right')
+        const alignMode = colData.align || 'left';
+        if (alignMode === 'center') {
+          colEl.style.alignItems = 'center';      // 讓按鈕/塊級元件置中
+          colEl.style.textAlign = 'center';       // 讓文字置中
+        } else if (alignMode === 'right') {
+          colEl.style.alignItems = 'flex-end';    // 讓按鈕/塊級元件靠右
+          colEl.style.textAlign = 'right';        // 讓文字靠右
+        } else {
+          colEl.style.alignItems = 'flex-start';  // 預設靠左
+          colEl.style.textAlign = 'left';
         }
 
-        // 遞迴渲染內部子元件
+        // 遞迴渲染內部元件
         if (Array.isArray(colData.items)) {
           colData.items.forEach(child => {
             const childEl = this.createComponent(child);
             if (childEl) {
-              // 修正：重置子元件在 Grid 格內的寬度與邊距，防止被推到下一行
-              childEl.style.width = '100%';
               childEl.style.boxSizing = 'border-box';
               childEl.style.margin = '0';
+              
+              // 確保文字元件能正確套用父級對齊設定
+              childEl.style.textAlign = alignMode;
+              
               colEl.appendChild(childEl);
             }
           });
