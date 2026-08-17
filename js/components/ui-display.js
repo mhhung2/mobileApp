@@ -87,7 +87,12 @@ Object.assign(UI, {
     else if (item.type === 'quote') el.className = `item-quote ${item.variant ? `quote-${item.variant}` : ''}`;
     else el.className = 'item-text';
 
-    el.innerText = item.text || '';
+    // 核心修改：判斷 item.isHtml 是否為 true
+    if (item.isHtml === true) {
+      el.innerHTML = item.text || '';
+    } else {
+      el.innerText = item.text || '';
+    }
     return el;
   },
 
