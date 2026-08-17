@@ -1,4 +1,28 @@
 /* ==========================================
+   GridRow 容器
+   ========================================== */
+.ui-grid-row {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 每一個獨立網格 */
+.ui-grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* 格內多個元件的間距 */
+  min-width: 0; /* 防止子元素撐爆 Grid 寬度 */
+}
+
+/* 確保格內的按鈕或圖片不會超出邊界 */
+.ui-grid-col .btn, 
+.ui-grid-col img {
+  max-width: 100%;
+  white-space: normal; /* 允許文字自動換行 */
+}
+
+
+/* ==========================================
    Card & Card Group 容器
    ========================================== */
 .app-card {
