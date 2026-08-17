@@ -18,6 +18,7 @@ async function loadForm(silent = false) {
   try {
     const response = await fetch(requestUrl);
     const result = await response.json();
+    console.log(result);
 
     if (!silent) {
       UI.showLoading(false);
