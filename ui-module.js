@@ -638,24 +638,23 @@ createSearchBar(item) {
 
     return divider;
   },
-
-  // 建立空狀態元件 (Empty State)
-  createEmptyState(item) {
+// 建立萬用行動引導卡片 (Icon + Title + Text + Button)
+  createActionCard(item) {
     const container = document.createElement('div');
-    container.className = 'empty-state-container';
+    container.className = 'action-card-container';
 
     let iconHTML = '';
     if (item.icon) {
-      iconHTML = `<div class="empty-state-icon">${item.icon}</div>`;
+      iconHTML = `<div class="action-card-icon">${item.icon}</div>`;
     }
 
     container.innerHTML = `
       ${iconHTML}
-      <div class="empty-state-title">${item.title || '查無資料'}</div>
-      ${item.text ? `<div class="empty-state-text">${item.text}</div>` : ''}
+      <div class="action-card-title">${item.title || ''}</div>
+      ${item.text ? `<div class="action-card-text">${item.text}</div>` : ''}
     `;
 
-    // 支援空狀態下方的行動按鈕 (如：重置搜尋、重新載入)
+    // 支援行動按鈕 (Action Button)
     if (item.buttonText) {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -867,10 +866,9 @@ createSearchBar(item) {
     else if (item.type === 'divider') {
       element = this.createDivider(item);
     }
-    else if (item.type === 'emptyState') {
-      element = this.createEmptyState(item);
+    else if (item.type === 'actionCard') {
+      element = this.createActionCard(item);
     }
-
     // 7. Form 表單模組
     else if (item.type === 'form') {
       element = document.createElement('div');
@@ -990,11 +988,6 @@ createSearchBar(item) {
         else if (field.type === 'divider') {
           const dividerEl = this.createDivider(field);
           if (dividerEl) form.appendChild(dividerEl);
-          return;
-        }
-        else if (field.type === 'spacer') {
-          const spacerEl = this.createSpacer(field);
-          if (spacerEl) form.appendChild(spacerEl);
           return;
         }
         else if (field.type === 'hidden') {
