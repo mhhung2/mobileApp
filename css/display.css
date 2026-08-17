@@ -1,26 +1,30 @@
 /* ==========================================
    GridRow 容器
    ========================================== */
+/* 確保 GridRow 容器不換行 */
 .ui-grid-row {
-  width: 100%;
-  box-sizing: border-box;
+  display: grid !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-/* 每一個獨立網格 */
 .ui-grid-col {
-  display: flex;
-  flex-direction: column;
-  gap: 4px; /* 格內多個元件的間距 */
-  min-width: 0; /* 防止子元素撐爆 Grid 寬度 */
+  min-width: 0 !important; /* 關鍵：防止內容超長破版 */
+  word-break: break-word;  /* 允許過長單字/網址換行 */
 }
 
-/* 確保格內的按鈕或圖片不會超出邊界 */
-.ui-grid-col .btn, 
-.ui-grid-col img {
-  max-width: 100%;
-  white-space: normal; /* 允許文字自動換行 */
+/* 清除格內子元件可能導致換行或撐開的 margin */
+.ui-grid-col > * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+.ui-grid-col .btn {
+  width: 100% !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  font-size: 0.85rem !important; /* 避免格內按鈕字太大 */
+}
 
 /* ==========================================
    Card & Card Group 容器
