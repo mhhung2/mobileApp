@@ -723,7 +723,7 @@ createSearchBar(item) {
     return container;
   },
 
-// 建立跨平台 Carousel (支援電腦滑鼠拖曳、箭頭導航、Padding 與自動輪播 Autoplay)
+// 建立跨平台 Carousel (完美支援 iOS Safari 自動輪播 + 電腦滑鼠拖曳 + 箭頭導航)
   createCarousel(item) {
     const container = document.createElement('div');
     const peekClass = item.peek ? 'peek' : '';
@@ -807,14 +807,17 @@ createSearchBar(item) {
         const dot = document.createElement('div');
         dot.className = `carousel-dot ${idx === 0 ? 'active' : ''}`;
         dot.onclick = () => {
-          slideEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+          const slideWidth = slideEl.clientWidth || (track.clientWidth * (item.peek ? 0.85 : 1));
+          track.scrollTo({ left: idx * (slideWidth + 12), behavior: 'smooth' });
         };
         dotsContainer.appendChild(dot);
       });
 
-      // 1. 監聽 Track 滾動更新指示點
+      // 1. 監聽 Track 滾動更新指示點 (iOS 友善的指數計算)
       track.addEventListener('scroll', () => {
-        const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : track.clientWidth;
+        const firstChild = track.firstElementChild;
+        if (!firstChild) return;
+        const slideWidth = firstChild.clientWidth + 12; // 加上 gap: 12px
         const activeIndex = Math.round(track.scrollLeft / slideWidth);
         const dots = dotsContainer.querySelectorAll('.carousel-dot');
         dots.forEach((dot, i) => {
@@ -822,7 +825,7 @@ createSearchBar(item) {
         });
       }, { passive: true });
 
-      // 2. 電腦版滑鼠拖曳 (Mouse Drag to Scroll) 邏輯
+      // 2. 電腦版滑鼠拖曳 (Mouse Drag to Scroll)
       let isMouseDown = false;
       let startX, scrollLeft;
 
@@ -852,25 +855,30 @@ createSearchBar(item) {
         track.scrollLeft = scrollLeft - walk;
       });
 
-      // 3. 電腦版點擊左右箭頭按鈕切換
+      // 3. 切換下一步／上一步核心計算 (相容 iOS Safari)
       const scrollNext = () => {
-        const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : 300;
+        const firstChild = track.firstElementChild;
+        if (!firstChild) return;
+        const slideWidth = firstChild.clientWidth + 12;
         const maxScrollLeft = track.scrollWidth - track.clientWidth;
-        
-        // 若到達最右端，自動平滑滾回起點 (實現無限循環)
-        if (track.scrollLeft >= maxScrollLeft - 10) {
+
+        // 若滑到最右側，平滑返回開頭
+        if (track.scrollLeft >= maxScrollLeft - 15) {
           track.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-          track.scrollBy({ left: slideWidth, behavior: 'smooth' });
+          track.scrollTo({ left: track.scrollLeft + slideWidth, behavior: 'smooth' });
         }
       };
 
       const scrollPrev = () => {
-        const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : 300;
-        if (track.scrollLeft <= 10) {
+        const firstChild = track.firstElementChild;
+        if (!firstChild) return;
+        const slideWidth = firstChild.clientWidth + 12;
+
+        if (track.scrollLeft <= 15) {
           track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
         } else {
-          track.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+          track.scrollTo({ left: track.scrollLeft - slideWidth, behavior: 'smooth' });
         }
       };
 
@@ -878,16 +886,16 @@ createSearchBar(item) {
       nextBtn.onclick = scrollNext;
 
       // ==========================================
-      // 4. 自動輪播 (Auto-Play) 核心邏輯
+      // 4. 自動輪播 (iOS Safari 強化版)
       // ==========================================
       const isAutoplay = item.autoplay === true || item.autoPlay === true;
-      const intervalTime = item.autoplayInterval || item.interval || 3500; // 預設 3.5 秒切換一次
+      const intervalTime = item.autoplayInterval || item.interval || 3500;
 
       if (isAutoplay && slidesData.length > 1) {
         let autoplayTimer = null;
 
         const startAutoplay = () => {
-          if (autoplayTimer) clearInterval(autoplayTimer);
+          stopAutoplay();
           autoplayTimer = setInterval(() => {
             scrollNext();
           }, intervalTime);
@@ -903,11 +911,24 @@ createSearchBar(item) {
         // 啟動自動輪播
         startAutoplay();
 
-        // 人性化防護：當滑鼠移入、觸控操作或拖曳時自動暫停，離開時還原
+        // 電腦版懸停暫停
         container.addEventListener('mouseenter', stopAutoplay);
         container.addEventListener('mouseleave', startAutoplay);
-        container.addEventListener('touchstart', stopAutoplay, { passive: true });
-        container.addEventListener('touchend', startAutoplay, { passive: true });
+
+        // iOS 移動端手勢優化：只有使用者真的「觸控滑動」時才暫停，放開時 2 秒後恢復輪播
+        let userInteractTimeout = null;
+        track.addEventListener('touchstart', () => {
+          stopAutoplay();
+          if (userInteractTimeout) clearTimeout(userInteractTimeout);
+        }, { passive: true });
+
+        track.addEventListener('touchend', () => {
+          if (userInteractTimeout) clearTimeout(userInteractTimeout);
+          // 使用者手放開 2 秒後重新自動開始輪播
+          userInteractTimeout = setTimeout(() => {
+            startAutoplay();
+          }, 2000);
+        }, { passive: true });
       }
     }
 
