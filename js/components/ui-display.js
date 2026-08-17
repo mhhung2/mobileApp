@@ -31,40 +31,53 @@ Object.assign(UI, {
     return element;
   },
 
-  createGridRow(item) {
+createGridRow(item) {
     const container = document.createElement('div');
     container.className = `ui-grid-row ${item.className || ''}`;
 
-    // 使用 CSS Grid，預設切分為 4 等份
+    // 使用 CSS Grid 網格佈局
     const totalColumns = item.totalColumns || 4;
     container.style.display = 'grid';
     container.style.gridTemplateColumns = `repeat(${totalColumns}, 1fr)`;
-    container.style.gap = item.gap || '8px'; // 預設間距 8px
-    container.style.alignItems = item.alignItems || 'start'; // 垂直對齊方式
+    container.style.gap = item.gap || '8px';
+    container.style.alignItems = item.alignItems || 'start';
+    container.style.width = '100%';
+    container.style.boxSizing = 'border-box';
 
     if (Array.isArray(item.cols)) {
       item.cols.forEach(colData => {
         const colEl = document.createElement('div');
         colEl.className = 'ui-grid-col';
 
-        // 處理合併儲存格 (Span)
+        // 處理跨格跨欄 (Span)
         const span = colData.span || 1;
         colEl.style.gridColumn = `span ${span}`;
+        colEl.style.minWidth = '0'; // 防止 Grid 子項目被長文字撐破
+        colEl.style.boxSizing = 'border-box';
+        colEl.style.display = 'flex';
+        colEl.style.flexDirection = 'column';
+        colEl.style.gap = colData.gap || '4px';
 
-        // 處理內容對齊 (如：'center', 'right')
-        if (colData.align) {
-          colEl.style.textAlign = colData.align;
-          colEl.style.display = 'flex';
-          colEl.style.flexDirection = 'column';
-          if (colData.align === 'center') colEl.style.alignItems = 'center';
-          if (colData.align === 'right') colEl.style.alignItems = 'flex-end';
+        // 處理對齊
+        if (colData.align === 'center') {
+          colEl.style.alignItems = 'center';
+          colEl.style.textAlign = 'center';
+        } else if (colData.align === 'right') {
+          colEl.style.alignItems = 'flex-end';
+          colEl.style.textAlign = 'right';
         }
 
-        // 遞迴渲染內部嵌套的 UI 元件
+        // 遞迴渲染內部子元件
         if (Array.isArray(colData.items)) {
           colData.items.forEach(child => {
             const childEl = this.createComponent(child);
-            if (childEl) colEl.appendChild(childEl);
+            if (childEl) {
+              // 修正：重置子元件在 Grid 格內的寬度與邊距，防止被推到下一行
+              childEl.style.width = '100%';
+              childEl.style.boxSizing = 'border-box';
+              childEl.style.margin = '0';
+              colEl.appendChild(childEl);
+            }
           });
         }
 
