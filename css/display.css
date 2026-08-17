@@ -46,11 +46,27 @@
 .item-text     { font-size: 14px; line-height: 1.5; color: #3a3a3c; margin-bottom: 8px; }
 
 .item-quote { font-size: 13px; line-height: 1.5; padding: 10px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; box-sizing: border-box; }
-.quote-success { border-left: 4px solid #34c759; background-color: #f0faf1; color: #1e7e34; }
-.quote-warning { border-left: 4px solid #ffd700; background-color: #fffdf0; color: #8a6d00; }
-.quote-caution { border-left: 4px solid #ff9500; background-color: #fff7ed; color: #c2410c; }
-.quote-danger  { border-left: 4px solid #ff3b30; background-color: #fef2f2; color: #991b1b; }
-.quote-info    { border-left: 4px solid #007aff; background-color: #f0f7ff; color: #1d4ed8; }
+.quote-success   { border-left: 4px solid #34c759; background-color: #f0faf1; color: #1e7e34; }
+.quote-warning   { border-left: 4px solid #ffd700; background-color: #fffdf0; color: #8a6d00; }
+.quote-caution   { border-left: 4px solid #ff9500; background-color: #fff7ed; color: #c2410c; }
+.quote-danger    { border-left: 4px solid #ff3b30; background-color: #fef2f2; color: #991b1b; }
+.quote-info      { border-left: 4px solid #007aff; background-color: #f0f7ff; color: #1d4ed8; }
+.quote-note      { border-left: 4px solid #af52de; background-color: #fcf5ff; color: #6b21a8; }
+.quote-tip       { border-left: 4px solid #14b8a6; background-color: #f0fdfa; color: #0f766e; }
+.quote-dark      { border-left: 4px solid #8e8e93; background-color: #1c1c1e; color: #f2f2f7; }
+.quote-midnight  { border-left: 4px solid #38bdf8; background-color: #0f172a; color: #e2e8f0; }
+.quote-gold      { border-left: 4px solid #ffd700; background-color: #2a2415; color: #fef08a; }
+.quote-black     { border-left: 4px solid #ffffff; background-color: #000000; color: #ffffff; }
+.quote-neon-lime { border-left: 4px solid #84cc16; background-color: #f7fee7; color: #3f6212; }
+.quote-neon-cyan { border-left: 4px solid #06b6d4; background-color: #ecfeff; color: #164e63; }
+.quote-neon-pink { border-left: 4px solid #ec4899; background-color: #fdf2f8; color: #9d174d; }
+.quote-cream     { border-left: 4px solid #eab308; background-color: #fefce8; color: #713f12; }
+.quote-gradient-border {border-left: 4px solid transparent; border-image: linear-gradient(180deg, #ff7e5f, #feb47b) 1; background-color: #fff9f6; color: #4a2c20;}
+.quote-minimal {border-left: 2px solid #d1d1d6; background-color: transparent;color: #636366;padding-left: 10px;}
+.quote-top-border { border-top: 3px solid #007aff; border-left: none; border-radius: 8px; background-color: #f8f8fb; color: #3a3a3c;}
+.quote-dotted { border-left: 3px dotted #8e8e93; background-color: #fafafa; color: #555555;}
+.quote-box { border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color); border-radius: 8px; background-color: #ffffff; color: #1c1c1e;}
+
 
 .badge-group { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-bottom: 8px; width: 100%; }
 .badge-group.align-left   { justify-content: flex-start; }
