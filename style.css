@@ -1363,6 +1363,23 @@ input[type="date"]::-webkit-date-and-time-value {
   box-sizing: border-box;
 }
 
+/* 2. 強制修復圖片容器：移除預設上下 margin 與圖片底部的空白縫隙 */
+.carousel-slide-content .media-preview-container {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.carousel-slide-content .media-preview-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important; /* 確保圖片完美填滿，不變形 */
+}
+
 /* 核心修復：專屬於文字/卡片內容的強制 Padding */
 .carousel-text-body {
   padding: 16px !important; /* 強制留出 16px 邊距 */
