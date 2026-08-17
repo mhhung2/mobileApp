@@ -724,6 +724,7 @@ createSearchBar(item) {
   },
 
   // 建立手勢滑動輪播模組 (Carousel)
+// 建立手勢滑動輪播模組 (自動為文字/卡片加上舒適 Padding)
   createCarousel(item) {
     const container = document.createElement('div');
     const peekClass = item.peek ? 'peek' : '';
@@ -739,39 +740,56 @@ createSearchBar(item) {
 
     if (Array.isArray(slidesData) && slidesData.length > 0) {
       slidesData.forEach((slideData, idx) => {
-        // 1. Slide 容器
         const slideEl = document.createElement('div');
         slideEl.className = 'carousel-slide';
 
         const contentEl = document.createElement('div');
         contentEl.className = 'carousel-slide-content';
 
-        // 如果 Slide 裡面是 items 陣列，動態繪製 UI 元件
-        if (Array.isArray(slideData.items)) {
-          slideData.items.forEach(child => {
-            const childEl = this.createComponent(child);
-            if (childEl) contentEl.appendChild(childEl);
-          });
-        } 
-        // 簡易模式：圖片輪播 (如橫幅 Banner)
-        else if (slideData.image || slideData.src) {
+        // A. 如果是純圖片/媒體輪播：滿版貼邊，不加 Padding
+        if (slideData.image || slideData.src) {
           const mediaEl = this.createMediaPreview({
             type: 'mediaPreview',
             src: slideData.image || slideData.src,
             caption: slideData.caption || slideData.title
           });
           if (mediaEl) contentEl.appendChild(mediaEl);
-        }
-        // 純文字卡片輪播
+        } 
+        // B. 如果包含 items 文字/UI 元件：包覆 .carousel-text-body 加上 16px Padding
+        else if (Array.isArray(slideData.items)) {
+          const textBody = document.createElement('div');
+          textBody.className = 'carousel-text-body';
+
+          slideData.items.forEach(child => {
+            const childEl = this.createComponent(child);
+            if (childEl) textBody.appendChild(childEl);
+          });
+          contentEl.appendChild(textBody);
+        } 
+        // C. 如果是標準卡片資料：預設使用 .carousel-text-body
         else {
-          const cardEl = this.createComponent({ type: 'card', ...slideData });
-          if (cardEl) contentEl.appendChild(cardEl);
+          const textBody = document.createElement('div');
+          textBody.className = 'carousel-text-body';
+
+          if (slideData.title) {
+            const titleEl = document.createElement('div');
+            titleEl.className = 'item-title';
+            titleEl.innerText = slideData.title;
+            textBody.appendChild(titleEl);
+          }
+          if (slideData.text || slideData.content) {
+            const textEl = document.createElement('div');
+            textEl.className = 'item-text';
+            textEl.innerText = slideData.text || slideData.content;
+            textBody.appendChild(textEl);
+          }
+          contentEl.appendChild(textBody);
         }
 
         slideEl.appendChild(contentEl);
         track.appendChild(slideEl);
 
-        // 2. 指示圓點 (Dot)
+        // 指示圓點 (Dot)
         const dot = document.createElement('div');
         dot.className = `carousel-dot ${idx === 0 ? 'active' : ''}`;
         dot.onclick = () => {
@@ -780,7 +798,7 @@ createSearchBar(item) {
         dotsContainer.appendChild(dot);
       });
 
-      // 3. 監聽滾動，自動高亮當前的可視圓點
+      // 監聽滾動，自動高亮當前圓點
       track.addEventListener('scroll', () => {
         const slideWidth = track.firstElementChild ? track.firstElementChild.clientWidth : track.clientWidth;
         const activeIndex = Math.round(track.scrollLeft / slideWidth);
