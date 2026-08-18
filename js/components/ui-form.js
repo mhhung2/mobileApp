@@ -153,6 +153,8 @@ Object.assign(UI, {
             input.inputMode = 'numeric';
             input.pattern = '[0-9]*';
             input.oninput = (e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); };
+          } else if (field.type === 'inputText' || field.type === 'text') {
+            input.type = 'text'; // 強制轉回標準 HTML 的 'text'
           } else {
             input.type = field.type || 'text';
           }
