@@ -148,7 +148,7 @@ Object.assign(UI, {
           input.className = 'form-control';
           input.name = field.name;
           input.placeholder = field.placeholder || '';
-          if (field.type === 'number_text') {
+          if (field.type === 'inputNumberText') {
             input.type = 'text';
             input.inputMode = 'numeric';
             input.pattern = '[0-9]*';
