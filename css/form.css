@@ -144,3 +144,28 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 
 .btn-group .btn-inline {
   width: auto; min-width: fit-content; height: 40px; padding: 0 16px; font-size: 14px; margin-bottom: 0; flex-grow: 0;
 }
+
+/* 按鈕 Loading 動畫 */
+button.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+button.loading::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.75s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes button-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
