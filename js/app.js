@@ -65,7 +65,7 @@ function handleLogout(isDirectToLoginPage = true) {
   
   // 更新 Header 並重新載入 Schema
   updateHeaderuserID();
-  if(isDirectToLoginPage) GASClient.loadFormSchema(false, 'login');
+  if(isDirectToLoginPage) GASClient.loadFormSchema(false, 'app');
 }
 
 
