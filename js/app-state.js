@@ -23,6 +23,16 @@ const AppState = {
         console.error(`[AppState] 解析動態函數 ${fnName} 失敗:`, err);
       }
     });
+
+    // 若 Schema 包含 onLoaded 動態函數，則在渲染完成前/後自動即時執行！
+    if (typeof this.functions['onLoaded'] === 'function') {
+      try {
+        // 傳入當前的 AppState 變數供 onLoaded 呼叫使用
+        this.functions['onLoaded'](this.variables);
+      } catch (err) {
+        console.error('[AppState] 執行 onLoaded 發生錯誤:', err);
+      }
+    }
   },
 
   // 2. 讀取全域變數
