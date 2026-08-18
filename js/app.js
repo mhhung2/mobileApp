@@ -17,7 +17,7 @@ function updateHeaderuserID() {
   const loggedUser = localStorage.getItem('loggedUser');
   const userRole = localStorage.getItem('userRole') || '';
 
-  console.log(loggedUser,userRole)
+  console.log("[App.js] Logged User and Role: ", loggedUser,userRole)
 
   // 搜尋 Header 相關的 DOM 節點
   //const userDisplayEl = document.getElementById('header-user-id');
