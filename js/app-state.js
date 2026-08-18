@@ -7,6 +7,17 @@ const AppState = {
 
   // 1. 存入後端傳回的資料
   init(variables = {}, functions = {}) {
+    //清理上一頁掛載在 window 上的動態函數，防止舊頁面 onLoaded 殘留
+    Object.keys(this.functions).forEach(fnName => {
+      if (window[fnName] === this.functions[fnName]) {
+        delete window[fnName]; // 從全域 window 中移除舊函數
+      }
+    });
+
+    //關鍵修復 2：重置內部 functions 字典
+    this.functions = {};
+    this.variables = {};
+    
     // 儲存全域變數
     this.variables = { ...this.variables, ...variables };
 
