@@ -75,7 +75,7 @@ const GASClient = {
    * 2. 通用 POST 數據傳送請求
    */
   async request(action, data = {}, options = {}) {
-    const { showToast = true, loadingMessage = null } = options;
+    const { showToast = false, loadingMessage = null } = options;
 
     if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
       UI.showLoading(true, loadingMessage);
@@ -114,7 +114,7 @@ const GASClient = {
       }
       return { success: false, error: err.message };
     } finally {
-       if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+       if (showToast && typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
       // 觸發外部 UI 回呼（如：關閉按鈕轉圈）
       if (typeof onComplete === 'function') onComplete();
     }
