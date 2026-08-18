@@ -2,9 +2,68 @@
  * 應用程式初始化進入點
  */
 document.addEventListener('DOMContentLoaded', () => {
+  //初始化頂部 Header 狀態
+  updateHeaderuserID();
+  
   // 觸發 GASClient 進行頁面 Schema 載入
   GASClient.loadFormSchema(false, 'app');
 });
+
+/**
+ * 更新頂部 Header 用戶資訊與登入狀態
+ */
+function updateHeaderuserID() {
+  // 從 localStorage 讀取已登入的 userID
+  const loggedUser = localStorage.getItem('loggedUser');
+  const userRole = localStorage.getItem('userRole') || '';
+
+  // 搜尋 Header 相關的 DOM 節點
+  const userDisplayEl = document.getElementById('header-user-id');
+  const userRoleEl = document.getElementById('header-user-role');
+  const loginBtnEl = document.getElementById('header-login-btn');
+  const logoutBtnEl = document.getElementById('header-logout-btn');
+
+  if (loggedUser) {
+    // 🌟 已登入狀態：顯示 userID 與 Role
+    if (userDisplayEl) {
+      userDisplayEl.innerText = loggedUser;
+      userDisplayEl.style.display = 'inline-block';
+    }
+    if (userRoleEl) {
+      userRoleEl.innerText = userRole ? `(${userRole})` : '';
+      userRoleEl.style.display = 'inline-block';
+    }
+    if (loginBtnEl) loginBtnEl.style.display = 'none';
+    if (logoutBtnEl) logoutBtnEl.style.display = 'inline-block';
+  } else {
+    // 🌟 未登入狀態：清空顯示資訊，回到登入按鈕
+    if (userDisplayEl) {
+      userDisplayEl.innerText = '';
+      userDisplayEl.style.display = 'none';
+    }
+    if (userRoleEl) {
+      userRoleEl.innerText = '';
+      userRoleEl.style.display = 'none';
+    }
+    if (loginBtnEl) loginBtnEl.style.display = 'inline-block';
+    if (logoutBtnEl) logoutBtnEl.style.display = 'none';
+  }
+}
+
+/**
+ * 登出處理 Helper
+ */
+function handleLogout() {
+  localStorage.removeItem('loggedUser');
+  localStorage.removeItem('userRole');
+
+  // 切換網址列為登入頁
+  window.history.pushState({}, '', '?page=login');
+  
+  // 更新 Header 並重新載入 Schema
+  updateHeaderuserID();
+  GASClient.loadFormSchema(false, 'app');
+}
 
 
 //展示用
