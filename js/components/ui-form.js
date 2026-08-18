@@ -7,8 +7,7 @@ Object.assign(UI, {
     cardContainer.className = 'app-card';
     const form = document.createElement('form');
 
-    // 🌟 1. 同時支援 items 或 fields 屬性
-    const fields = item.items || item.fields || [];
+    const fields = item.items || [];
 
     if (Array.isArray(fields)) {
       fields.forEach(field => {
@@ -19,8 +18,7 @@ Object.assign(UI, {
           'spacer', 'divider', 'accordion', 'carousel'
         ];
 
-        // 🌟 2. 只有「沒有 name」的純展示元件，才呼叫 createComponent
-        if (!field.name && nonInputTypes.includes(field.type)) {
+        if ( nonInputTypes.includes(field.type)) {
           const nonInputEl = this.createComponent(field);
           if (nonInputEl) form.appendChild(nonInputEl);
           return;
@@ -36,7 +34,6 @@ Object.assign(UI, {
           return;
         }
 
-        // 🌟 3. 建立 Form Group 與 Label
         const group = document.createElement('div');
         group.className = 'form-group';
         group.style.marginBottom = '16px';
@@ -58,7 +55,6 @@ Object.assign(UI, {
         }
         if (labelText) group.appendChild(labelEl);
         
-        // 🌟 4. 核心修復：由 createForm 本身原生 Handle 所有 輸入控制項 (包含 inputText, inputNumberText)
         if (field.type === 'select') {
           const select = document.createElement('select');
           select.className = 'form-control';
