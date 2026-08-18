@@ -95,10 +95,6 @@ const GASClient = {
         body: JSON.stringify(payload)
       });
 
-      if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
-        UI.showLoading(false);
-      }
-
       if (!response.ok) throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
 
       const result = await response.json();
@@ -113,11 +109,14 @@ const GASClient = {
 
     } catch (err) {
       console.error(`[GASClient Request Error] Action: ${action}`, err);
-      if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
       if (typeof UI !== 'undefined' && UI.showToast) {
         UI.showToast(`操作失敗: ${err.message}`, 'danger');
       }
       return { success: false, error: err.message };
+    } finally {
+       if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+      // 觸發外部 UI 回呼（如：關閉按鈕轉圈）
+      if (typeof onComplete === 'function') onComplete();
     }
   },
 
