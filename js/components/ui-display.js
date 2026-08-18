@@ -194,11 +194,14 @@ Object.assign(UI, {
     btn.type = 'button';
     btn.className = `btn btn-${item.variant || 'primary'}`;
     btn.innerText = item.text || '按鈕';
-    if (item.disabled) {
-      btn.disabled = true;
-    } else if (item.onClick && typeof window[item.onClick] === 'function') {
-      btn.onclick = window[item.onClick];
-    }
+
+    
+    if (item.disabled) btn.disabled = true;
+    btn.onclick = (e) => {
+      if (item.onClick && typeof window[item.onClick] === 'function') {
+        window[item.onClick](item.data || null, e);
+      }
+    };
     return btn;
   },
 
@@ -212,7 +215,12 @@ Object.assign(UI, {
         btn.className = `btn btn-inline btn-${btnData.variant || 'primary'}`;
         btn.innerText = btnData.text || '按鈕';
         if (btnData.disabled) btn.disabled = true;
-        else if (btnData.onClick && typeof window[btnData.onClick] === 'function') btn.onclick = window[btnData.onClick];
+        btn.onclick = (e) => {
+          if (btnConfig.onClick && typeof window[btnConfig.onClick] === 'function') {
+            window[btnConfig.onClick](btnConfig.data || null, e);
+          }
+        };        
+
         container.appendChild(btn);
       });
     }
