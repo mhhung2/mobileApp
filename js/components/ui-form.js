@@ -215,7 +215,7 @@ Object.assign(UI, {
 
       try {
         if (window[item.onSubmit] && typeof window[item.onSubmit] === 'function') {
-          await window[item.onSubmit](data);
+          await window[item.onSubmit](data,e);
         }
       } catch (err) {
         console.error('表單提交錯誤:', err);
