@@ -7,8 +7,8 @@ Object.assign(UI, {
     cardContainer.className = 'app-card';
     const form = document.createElement('form');
 
-    if (Array.isArray(item.fields)) {
-      item.fields.forEach(field => {
+    if (Array.isArray(item.items)) {
+      item.items.forEach(field => {
         const nonInputTypes = [
           'title', 'subtitle', 'text', 'quote', 'badge', 'badgeGroup', 
           'button', 'buttonGroup', 'kpiGroup', 'timeline', 'mediaPreview', 
