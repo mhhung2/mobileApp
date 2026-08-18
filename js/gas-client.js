@@ -109,7 +109,7 @@ const GASClient = {
 
     } catch (err) {
       console.error(`[GASClient Request Error] Action: ${action}`, err);
-      if (typeof UI !== 'undefined' && UI.showToast) {
+      if (showToast && typeof UI !== 'undefined' && UI.showToast) {
         UI.showToast(`操作失敗: ${err.message}`, 'danger');
       }
       return { success: false, error: err.message };
