@@ -61,7 +61,7 @@ function handleLogout(isDirectToLoginPage = true) {
   localStorage.removeItem('userRole');
 
   // 切換網址列為登入頁
-  //window.history.pushState({}, '', '?page=login');
+  window.history.pushState({}, '', '?page=login');
   
   // 更新 Header 並重新載入 Schema
   updateHeaderuserID();
