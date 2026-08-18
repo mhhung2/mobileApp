@@ -444,12 +444,17 @@ Object.assign(UI, {
     this.startCountdownTimer(secondsDisplay, refreshIcon);
     this.bindVisibilityAndFocusEvents(secondsDisplay, refreshIcon);
 
-    refreshBtn.onclick = () => {
+    refreshBtn.onclick = async () => {
+      if (refreshBtn.disabled) return; // 防止連點
+
+      // 清除現有的自動倒數計時器，避免手動更新與自動更新衝突
       if (this.refreshIntervalId) {
         clearInterval(this.refreshIntervalId);
         this.refreshIntervalId = null;
       }
-      this.triggerRefresh(refreshIcon);
+
+      // 執行修復後的刷新機制（並將按鈕與數字顯示傳入，方便最後統一重置）
+      await this.triggerRefresh(refreshIcon, secondsDisplay, refreshBtn);
     };
 
     return container;
@@ -497,23 +502,45 @@ Object.assign(UI, {
     window.addEventListener('focus', handleAppResume);
   },
 
-  triggerRefresh(iconEl) {
-    if (iconEl) iconEl.classList.add('spinning');
-    this.remainingSeconds = this.totalIntervalSeconds;
-    this.lastFetchTimestamp = Date.now();
-    const now = new Date();
-    this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  async triggerRefresh(iconEl) {
+    // 1. 防重複點擊：如果已經在轉動中，直接跳出
+    if (!iconEl || iconEl.classList.contains('spinning')) return;
 
-    const lastUpdatedEl = document.getElementById('timer-last-updated');
-    if (lastUpdatedEl) lastUpdatedEl.innerText = `上次更新：${this.lastUpdatedStr}`;
+    // 2. 啟動旋轉圖示動畫
+    iconEl.classList.add('spinning');
 
-    const currentSecondsEl = document.getElementById('timer-seconds-display');
-    if (currentSecondsEl) currentSecondsEl.innerText = `${this.remainingSeconds} 秒後自動更新`;
+    try {
+      // 3. 確實使用 await 等待非同步的 loadForm 完成
+      // 傳入 true 代表靜默更新（不要跳出全螢幕大黑罩，只轉動這個定時器按鈕）
+      if (typeof loadForm === 'function') {
+        await loadForm(true); 
+      }
+    } catch (err) {
+      console.error('[UI Interactive] refreshTimer 刷新資料失敗:', err);
+    } finally {
+      // 網絡一有結果，立刻移除旋轉動畫，完美解決停不下來的問題！
+      iconEl.classList.remove('spinning');
 
-    this.startCountdownTimer(currentSecondsEl, iconEl);
+      // 5. 重置時間與倒數計時狀態
+      this.remainingSeconds = this.totalIntervalSeconds;
+      this.lastFetchTimestamp = Date.now();
+      const now = new Date();
+      this.lastUpdatedStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-    if (typeof loadForm === 'function') {
-      loadForm(true);
+      // 更新畫面的上次更新時間
+      const lastUpdatedEl = document.getElementById('timer-last-updated');
+      if (lastUpdatedEl) {
+        lastUpdatedEl.innerText = `上次更新：${this.lastUpdatedStr}`;
+      }
+
+      // 更新畫面的倒數秒數文字
+      const currentSecondsEl = document.getElementById('timer-seconds-display');
+      if (currentSecondsEl) {
+        currentSecondsEl.innerText = `${this.remainingSeconds} 秒後自動更新`;
+      }
+
+      // 重新啟動倒數計時器
+      this.startCountdownTimer(currentSecondsEl, iconEl);
     }
   },
 
