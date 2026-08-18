@@ -17,12 +17,15 @@ function updateHeaderuserID() {
   const loggedUser = localStorage.getItem('loggedUser');
   const userRole = localStorage.getItem('userRole') || '';
 
-  // 搜尋 Header 相關的 DOM 節點
-  const userDisplayEl = document.getElementById('header-user-id');
-  const userRoleEl = document.getElementById('header-user-role');
-  const loginBtnEl = document.getElementById('header-login-btn');
-  const logoutBtnEl = document.getElementById('header-logout-btn');
+  console.log(loggedUser,userRole)
 
+  // 搜尋 Header 相關的 DOM 節點
+  //const userDisplayEl = document.getElementById('header-user-id');
+  //const userRoleEl = document.getElementById('header-user-role');
+  //const loginBtnEl = document.getElementById('header-login-btn');
+  //const logoutBtnEl = document.getElementById('header-logout-btn');
+
+  /*
   if (loggedUser) {
     // 🌟 已登入狀態：顯示 userID 與 Role
     if (userDisplayEl) {
@@ -47,7 +50,7 @@ function updateHeaderuserID() {
     }
     if (loginBtnEl) loginBtnEl.style.display = 'inline-block';
     if (logoutBtnEl) logoutBtnEl.style.display = 'none';
-  }
+  }*/
 }
 
 /**
