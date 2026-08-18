@@ -122,7 +122,7 @@ const GASClient = {
       }
       return { success: false, error: err.message };
     } finally {
-      if (showToast && typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+      if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
       // 觸發外部 UI 回呼（如：關閉按鈕轉圈）
       if (typeof onComplete === 'function') {
         try {
