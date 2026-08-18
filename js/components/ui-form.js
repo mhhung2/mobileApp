@@ -1,5 +1,5 @@
 /**
- * Form 表單生成器與動態提交邏輯 (強固修復版)
+ * Form 表單生成器與動態提交邏輯
  */
 Object.assign(UI, {
   createForm(item) {
@@ -7,24 +7,20 @@ Object.assign(UI, {
     cardContainer.className = 'app-card';
     const form = document.createElement('form');
 
-    const fields = item.items || [];
-
-    if (Array.isArray(fields)) {
-      fields.forEach(field => {
-        // 純文字/標籤等展示型元件（僅在「沒有 name 屬性」且屬於非輸入型時，才交給 UI 二級元件處理）
+    if (Array.isArray(item.fields)) {
+      item.fields.forEach(field => {
         const nonInputTypes = [
           'title', 'subtitle', 'text', 'quote', 'badge', 'badgeGroup', 
           'button', 'buttonGroup', 'kpiGroup', 'timeline', 'mediaPreview', 
           'spacer', 'divider', 'accordion', 'carousel'
         ];
 
-        if ( nonInputTypes.includes(field.type)) {
+        if (nonInputTypes.includes(field.type)) {
           const nonInputEl = this.createComponent(field);
           if (nonInputEl) form.appendChild(nonInputEl);
           return;
         }
 
-        // 隱藏欄位處理
         if (field.type === 'hidden') {
           const hiddenInput = document.createElement('input');
           hiddenInput.type = 'hidden';
@@ -36,8 +32,8 @@ Object.assign(UI, {
 
         const group = document.createElement('div');
         group.className = 'form-group';
-        group.style.marginBottom = '16px';
 
+        // 若 field.isHtml 為 true，則使用 HTML 組合 label，否則將純文字轉義或插入
         const labelText = field.label || '';
         const requiredMark = field.required ? ' <span style="color:#ff3b30">*</span>' : '';
         const labelEl = document.createElement('label');
@@ -53,7 +49,7 @@ Object.assign(UI, {
             labelEl.appendChild(reqSpan);
           }
         }
-        if (labelText) group.appendChild(labelEl);
+        group.appendChild(labelEl);
         
         if (field.type === 'select') {
           const select = document.createElement('select');
@@ -85,27 +81,86 @@ Object.assign(UI, {
           if (field.required) textarea.required = true;
           group.appendChild(textarea);
         }
+        else if (field.type === 'radio' || field.type === 'checkbox') {
+          const optGroup = document.createElement('div');
+          optGroup.className = `option-group ${field.inline ? 'inline' : ''}`;
+          if (Array.isArray(field.options)) {
+            field.options.forEach((opt, idx) => {
+              const val = opt.value !== undefined ? opt.value : opt;
+              const labelText = opt.label !== undefined ? opt.label : opt;
+              const labelEl = document.createElement('label');
+              labelEl.className = 'option-label';
+              const inputEl = document.createElement('input');
+              inputEl.type = field.type;
+              inputEl.name = field.name;
+              inputEl.value = val;
+              if (field.defaultValue !== undefined) {
+                if (Array.isArray(field.defaultValue)) {
+                  if (field.defaultValue.map(String).includes(String(val))) inputEl.checked = true;
+                } else if (String(val) === String(field.defaultValue)) {
+                  inputEl.checked = true;
+                }
+              }
+              if (field.required && field.type === 'radio' && idx === 0) inputEl.required = true;
+              labelEl.appendChild(inputEl);
+              labelEl.appendChild(document.createTextNode(labelText));
+              optGroup.appendChild(labelEl);
+            });
+          }
+          group.appendChild(optGroup);
+        }
+        else if (field.type === 'switch') {
+          const switchContainer = document.createElement('div');
+          switchContainer.className = 'switch-group';
+          const textSpan = document.createElement('span');
+          textSpan.className = 'switch-label-text';
+          textSpan.innerText = field.label || '';
+          const switchLabel = document.createElement('label');
+          switchLabel.className = 'switch-toggle';
+          const inputEl = document.createElement('input');
+          inputEl.type = 'checkbox';
+          inputEl.name = field.name;
+          inputEl.value = field.value || 'true';
+          if (field.defaultValue === true || field.defaultValue === 'true' || field.defaultValue === 'ON') {
+            inputEl.checked = true;
+          }
+          const sliderSpan = document.createElement('span');
+          sliderSpan.className = 'switch-slider';
+          switchLabel.appendChild(inputEl);
+          switchLabel.appendChild(sliderSpan);
+          switchContainer.appendChild(textSpan);
+          switchContainer.appendChild(switchLabel);
+          group.innerHTML = '';
+          group.appendChild(switchContainer);
+        }
+        else if (field.type === 'file') {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.className = 'form-control';
+          fileInput.name = field.name;
+          if (field.accept) fileInput.accept = field.accept;
+          if (field.multiple) fileInput.multiple = true;
+          if (field.required) fileInput.required = true;
+          group.appendChild(fileInput);
+        }
         else {
-          // 處理所有 <input> 控制項 (包含 inputText, inputNumberText 及標準 HTML types)
           const input = document.createElement('input');
           input.className = 'form-control';
-          input.name = field.name || '';
+          input.name = field.name;
           input.placeholder = field.placeholder || '';
-
-          if (field.type === 'inputNumberText') {
+          if (field.type === 'number_text') {
             input.type = 'text';
             input.inputMode = 'numeric';
             input.pattern = '[0-9]*';
             input.oninput = (e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); };
-          } else if (field.type === 'inputText') {
-            input.type = 'text'; // 將自訂的 inputText 轉為標準 html input[type="text"]
           } else {
             input.type = field.type || 'text';
           }
-
           if (field.defaultValue !== undefined) input.value = field.defaultValue;
           if (field.maxLength) input.maxLength = field.maxLength;
           if (field.minLength) input.minLength = field.minLength;
+          if (field.min) input.min = field.min;
+          if (field.max) input.max = field.max;
           if (field.required) input.required = true;
           group.appendChild(input);
         }
@@ -114,20 +169,26 @@ Object.assign(UI, {
       });
     }
 
-    // 提交按鈕組
     const btnGroup = document.createElement('div');
     btnGroup.className = 'btn-group align-left';
-    btnGroup.style.marginTop = '16px';
-
     const submitBtn = document.createElement('button');
     submitBtn.type = 'submit';
     submitBtn.className = 'btn btn-inline btn-primary';
     submitBtn.innerText = item.submitText || '提交';
     btnGroup.appendChild(submitBtn);
 
+    if (item.showReset || item.resetText) {
+      const resetBtn = document.createElement('button');
+      resetBtn.type = 'reset';
+      resetBtn.className = 'btn btn-inline btn-secondary';
+      resetBtn.innerText = item.resetText || '清除重置';
+      if (item.onReset && typeof window[item.onReset] === 'function') {
+        resetBtn.onclick = () => window[item.onReset](form);
+      }
+      btnGroup.appendChild(resetBtn);
+    }
     form.appendChild(btnGroup);
 
-    // 表單提交監聽事件
     form.onsubmit = async (e) => {
       e.preventDefault();
       if (form.dataset.submitting === 'true') return;
@@ -135,7 +196,12 @@ Object.assign(UI, {
       const formData = new FormData(form);
       const data = {};
       for (let [key, val] of formData.entries()) {
-        data[key] = val;
+        if (data[key]) {
+          if (!Array.isArray(data[key])) data[key] = [data[key]];
+          data[key].push(val);
+        } else {
+          data[key] = val;
+        }
       }
 
       form.dataset.submitting = 'true';
@@ -145,7 +211,7 @@ Object.assign(UI, {
 
       try {
         if (window[item.onSubmit] && typeof window[item.onSubmit] === 'function') {
-          await window[item.onSubmit](data, e);
+          await window[item.onSubmit](data);
         }
       } catch (err) {
         console.error('表單提交錯誤:', err);
