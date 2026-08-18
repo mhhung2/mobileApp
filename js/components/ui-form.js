@@ -7,8 +7,9 @@ Object.assign(UI, {
     cardContainer.className = 'app-card';
     const form = document.createElement('form');
 
-    if (Array.isArray(item.fields)) {
-      item.fields.forEach(field => {
+    const fields = item.items
+    if (Array.isArray(fields)) {
+      fields.forEach(field => {
         const nonInputTypes = [
           'title', 'subtitle', 'text', 'quote', 'badge', 'badgeGroup', 
           'button', 'buttonGroup', 'kpiGroup', 'timeline', 'mediaPreview', 
@@ -148,7 +149,10 @@ Object.assign(UI, {
           input.className = 'form-control';
           input.name = field.name;
           input.placeholder = field.placeholder || '';
-          if (field.type === 'number_text') {
+          if (field.type === 'inputText') {
+            input.type = 'text';
+          }
+          else if (field.type === 'inputNumberText') {
             input.type = 'text';
             input.inputMode = 'numeric';
             input.pattern = '[0-9]*';
