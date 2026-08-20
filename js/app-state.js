@@ -9,7 +9,7 @@ const AppState = {
   init(variables = {}, functions = {}) {
 
     this.variables = {...variables};
-    initAuth();
+    this.initAuth();
 
     //清理上一頁掛載在 window 上的動態函數，防止舊頁面 onLoaded 殘留
     Object.keys(this.functions).forEach(fnName => {
