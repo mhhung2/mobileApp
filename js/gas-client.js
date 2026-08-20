@@ -89,8 +89,8 @@ const GASClient = {
       UI.showLoading(true, loadingMessage);
     }
 
-    const userID = localStorage.getItem('loggedUser');
-    const sessionKey = localStorage.getItem('sessionKey');
+    const userID = AppState.getUserID();
+    const sessionKey = AppState.getSessionKey();
 
     const payload = {
       action: action,
