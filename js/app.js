@@ -57,15 +57,29 @@ function updateHeaderuserID() {
  * 登出處理 Helper
  */
 function handleLogout(isDirectToLoginPage = true) {
+  const userID = localStorage.getItem('loggedUser');
+  const sessionKey = localStorage.getItem('sessionKey');
+
+  // 若存在憑證，發送後端作廢 Session
+  if (userID && sessionKey && typeof GASClient !== 'undefined') {
+    GASClient.request('LOGOUT', {}, { showToast: false });
+  }
+
+  // 清空前端所有 Token 與 User 資料
   localStorage.removeItem('loggedUser');
   localStorage.removeItem('userRole');
+  localStorage.removeItem('sessionKey');
+
+  // 更新 Header 顯示狀態
+  updateHeaderuserID();
 
   // 切換網址列為登入頁
   window.history.pushState({}, '', '?page=login');
   
-  // 更新 Header 並重新載入 Schema
-  updateHeaderuserID();
-  if(isDirectToLoginPage) GASClient.loadFormSchema(false, 'app');
+  // 重新載入 Schema
+  if (isDirectToLoginPage && typeof GASClient !== 'undefined') {
+    GASClient.loadFormSchema(false, 'app');
+  }
 }
 
 
