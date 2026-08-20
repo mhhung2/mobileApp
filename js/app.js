@@ -14,10 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function updateHeaderuserID() {
   // 從 localStorage 讀取已登入的 userID
-  const loggedUser = localStorage.getItem('loggedUser');
-  const userRole = localStorage.getItem('userRole') || '';
+  const loggedUser = AppState.getUserID();
+  const userName = AppState.getUserName();
+  const userRole = AppState.getUserRole();
 
-  console.log("[App.js] Logged User: ", loggedUser, " Role:",  userRole)
+  console.log("[App.js] Logged User: ", loggedUser, userName, " Role:",  userRole)
 
   // 搜尋 Header 相關的 DOM 節點
   //const userDisplayEl = document.getElementById('header-user-id');
