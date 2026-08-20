@@ -89,8 +89,13 @@ const GASClient = {
       UI.showLoading(true, loadingMessage);
     }
 
+    const userID = localStorage.getItem('loggedUser');
+    const sessionKey = localStorage.getItem('sessionKey');
+
     const payload = {
       action: action,
+      userID: userID,
+      sessionKey: sessionKey,
       sheetName: options.sheetName || null,
       data: data,
       timestamp: new Date().toISOString()
@@ -108,6 +113,11 @@ const GASClient = {
       const result = await response.json();
 
       if (!result.success) throw new Error(result.error || result.message || '後端處理失敗');
+
+      //自動無感更新 SessionKey
+      if (result.newSessionKey) {
+        localStorage.setItem('sessionKey', result.newSessionKey);
+      }
 
       if (showToast && options.successMessage && typeof UI !== 'undefined' && UI.showToast) {
         UI.showToast(options.successMessage, 'success');
