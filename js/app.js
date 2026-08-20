@@ -58,8 +58,8 @@ function updateHeaderuserID() {
  * 登出處理 Helper
  */
 function handleLogout(isDirectToLoginPage = true) {
-  const userID = localStorage.getItem('loggedUser');
-  const sessionKey = localStorage.getItem('sessionKey');
+  const userID = AppState.getUserID();
+  const sessionKey = AppState.getSessionKey();
 
   // 若存在憑證，發送後端作廢 Session
   if (userID && sessionKey && typeof GASClient !== 'undefined') {
@@ -67,9 +67,7 @@ function handleLogout(isDirectToLoginPage = true) {
   }
 
   // 清空前端所有 Token 與 User 資料
-  localStorage.removeItem('loggedUser');
-  localStorage.removeItem('userRole');
-  localStorage.removeItem('sessionKey');
+  AppState.clearAuth()
 
   // 更新 Header 顯示狀態
   updateHeaderuserID();
