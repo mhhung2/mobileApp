@@ -5,8 +5,12 @@ const AppState = {
   variables: {},
   functions: {},
 
-  // 1. 存入後端傳回的資料
+  // 初始化及存入後端傳回的資料
   init(variables = {}, functions = {}) {
+
+    this.variables = {...variables};
+    initAuth();
+
     //清理上一頁掛載在 window 上的動態函數，防止舊頁面 onLoaded 殘留
     Object.keys(this.functions).forEach(fnName => {
       if (window[fnName] === this.functions[fnName]) {
@@ -14,12 +18,7 @@ const AppState = {
       }
     });
 
-    //關鍵修復 2：重置內部 functions 字典
     this.functions = {};
-    this.variables = {};
-    
-    // 儲存全域變數
-    this.variables = { ...this.variables, ...variables };
 
     // 註冊與解析動態函數 (將 JSON 中的 function 程式碼字串轉為可呼叫的函數)
     Object.keys(functions).forEach(fnName => {
@@ -46,17 +45,54 @@ const AppState = {
     }
   },
 
-  // 2. 讀取全域變數
+  // 初始化 User 身分與 Session
+  initAuth() {
+    this.variables.userID = localStorage.getItem('userID') || null;
+    this.variables.userName = localStorage.getItem('userName') || null;
+    this.variables.userRole = localStorage.getItem('userRole') || null;
+    this.variables.sessionKey = localStorage.getItem('sessionKey') || null;
+  },
+
+  // 登入時同步更新 AppState 與 localStorage
+  setAuth(userID, userName, userRole, sessionKey) {
+    this.variables.userID = userID;
+    this.variables.userName = userName;
+    this.variables.userRole = userRole;
+    this.variables.sessionKey = sessionKey;
+
+    localStorage.setItem('userID', userID);
+    localStorage.setItem('userName', userName);
+    localStorage.setItem('userRole', userRole);
+    localStorage.setItem('sessionKey', sessionKey);
+  },
+
+  // 登出時一併清空
+  clearAuth() {
+    this.variables.userID = null;
+    this.variables.userName = null;
+    this.variables.userRole = null;
+    this.variables.sessionKey = null;
+
+    localStorage.removeItem('userID');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('sessionKey');
+  },
+
+  getSessionKey() {return this.variables.sessionKey || localStorage.getItem('sessionKey');},
+  getUserID()     {return this.variables.userID || localStorage.getItem('userID');},
+  getUserName()   {return this.variables.userName || localStorage.getItem('userName');},
+  getUserRole()   {return this.variables.userRole || localStorage.getItem('userRole');},
   getVar(key, defaultValue = null) {
     return this.variables[key] !== undefined ? this.variables[key] : defaultValue;
   },
 
-  // 3. 設定/更新全域變數
+  //設定/更新全域變數
   setVar(key, value) {
     this.variables[key] = value;
   },
 
-  // 4. 呼叫動態函數
+  // 呼叫動態函數
   callFunc(fnName, ...args) {
     if (typeof this.functions[fnName] === 'function') {
       return this.functions[fnName](...args);
