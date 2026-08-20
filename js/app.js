@@ -19,8 +19,9 @@ function updateHeaderuserID() {
   const loggedUser = AppState.getUserID();
   const userName = AppState.getUserName();
   const userRole = AppState.getUserRole();
+  const sessionKey = AppState.getSessionKey();
 
-  console.log("[App.js] Logged User: ", loggedUser, userName, " Role:",  userRole)
+  console.log("[App.js] Logged User: ", loggedUser, userName, " Role:",  userRole, " Key:", sessionKey);
 
   // 搜尋 Header 相關的 DOM 節點
   //const userDisplayEl = document.getElementById('header-user-id');
