@@ -2,6 +2,8 @@
  * 應用程式初始化進入點
  */
 document.addEventListener('DOMContentLoaded', () => {
+  AppState.initAuth();
+  
   //初始化頂部 Header 狀態
   updateHeaderuserID();
   
