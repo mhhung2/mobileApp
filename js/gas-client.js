@@ -74,7 +74,7 @@ const GASClient = {
   /**
    * 2. 通用 POST 數據傳送請求
    */
-  async request(app, action, data = {}, options = {}) {
+  async request(action, data = {}, options = {}) {
     const { showToast = false, loadingMessage = null, onStart, onComplete } = options;
     
     if (typeof onStart === 'function') {
@@ -88,7 +88,7 @@ const GASClient = {
     if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
       UI.showLoading(true, loadingMessage);
     }
-
+    const app = AppState.getApp();
     const userID = AppState.getUserID();
     const sessionKey = AppState.getSessionKey();
 
@@ -155,14 +155,9 @@ const GASClient = {
       UI.showLoading(true, '載入系統中...');
     }
 
-    // 從 localStorage 讀取憑證 (密匿放置於 POST Body)
-    const app = AppState.getApp();
-    const userID = AppState.getUserID();
-    const sessionKey = AppState.getSessionKey();
-
     try {
       // 呼叫通用 request，動作為 'INIT_APP'
-      const result = await this.request(app, 'INIT_APP', {}, {
+      const result = await this.request('INIT_APP', {}, {
         showToast: false
       });
 
