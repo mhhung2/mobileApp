@@ -177,10 +177,9 @@ const GASClient = {
         if ((result.variables || result.functions) && typeof AppState !== 'undefined') {
           AppState.init(result.variables, result.functions);
         }
-
-        // 切換網址列為登入頁
-        const app = AppState.getApp();
-        if(app) {
+        
+        if(result.app) {
+          AppState.setApp(result.app);
           window.history.pushState({}, '', '?app=' + app);
         }
         else {
