@@ -145,6 +145,56 @@ const GASClient = {
     }
   },
 
+  /**
+   * 🌟 1. 應用程式安全初始化 (透過 POST 直達 Main Page，不在網址暴露 SessionKey)
+   */
+  async initAppSchema(containerId = 'app') {
+    const container = document.getElementById(containerId);
+
+    if (typeof UI !== 'undefined' && UI.showLoading) {
+      UI.showLoading(true, '載入系統中...');
+    }
+
+    // 從 localStorage 讀取憑證 (密匿放置於 POST Body)
+    const app = AppState.getApp();
+    const userID = AppState.getUserID();
+    const sessionKey = AppState.getSessionKey();
+
+    try {
+      // 呼叫通用 request，動作為 'INIT_APP'
+      const result = await this.request('INIT_APP', {}, {
+        showToast: false
+      });
+
+      if (result.success && result.schema) {
+        // 若 session 已失效被引導回登入頁，清空無效存儲
+        if (!result.isLoggedIn) {
+          AppState.clearAuth();
+          if (typeof updateHeaderuserID === 'function') updateHeaderuserID();
+        }
+
+        // 初始化變數與動態函數
+        if ((result.variables || result.functions) && typeof AppState !== 'undefined') {
+          AppState.init(result.variables, result.functions);
+        }
+
+        // 渲染對應頁面 (Main Page 或 Login Page)
+        if (typeof UI !== 'undefined' && UI.render) {
+          UI.render(containerId, result.schema);
+        }
+
+        return result;
+      } else {
+        throw new Error(result.message || '初始化失敗');
+      }
+
+    } catch (error) {
+      console.error('[GASClient] initAppSchema 失敗:', error);
+      if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+      return { success: false, error: error.message };
+    }
+  },
+
     /*
   // ----------------------------------------------------
   // 快捷 Helper 函數 (方便前端/動態按鈕點擊時呼叫)
