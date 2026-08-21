@@ -64,7 +64,7 @@ function updateHeaderuserID() {
 /**
  * 登出處理 Helper
  */
-function handleLogout() {
+async function handleLogout() {
   if (typeof UI !== 'undefined' && UI.showLoading) {
     UI.showLoading(true, '登出中，請稍候...');
   }
