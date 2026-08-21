@@ -117,6 +117,8 @@ const GASClient = {
         body: JSON.stringify(payload)
       });
 
+      consle.log("GAS-CLIENT get requst response", response);
+
       if (!response.ok) throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
 
       const result = await response.json();
