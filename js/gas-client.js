@@ -178,6 +178,15 @@ const GASClient = {
           AppState.init(result.variables, result.functions);
         }
 
+        // 切換網址列為登入頁
+        const app = AppState.getApp();
+        if(app) {
+          window.history.pushState({}, '', '?app=' + app);
+        }
+        else {
+          window.history.pushState({}, '', '');
+        }
+
         // 渲染對應頁面 (Main Page 或 Login Page)
         if (typeof UI !== 'undefined' && UI.render) {
           UI.render(containerId, result.schema);
