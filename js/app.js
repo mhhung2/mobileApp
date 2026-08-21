@@ -71,7 +71,7 @@ function handleLogout(isDirectToLoginPage = true) {
 
   // 若存在憑證，發送後端作廢 Session
   if (userID && sessionKey && typeof GASClient !== 'undefined') {
-    GASClient.request(app, 'LOGOUT', {}, { showToast: false });
+    GASClient.request('LOGOUT', {}, { showToast: false });
   }
 
   // 清空前端所有 Token 與 User 資料
