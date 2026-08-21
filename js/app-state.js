@@ -47,6 +47,7 @@ const AppState = {
 
   // 初始化 User 身分與 Session
   initAuth() {
+    this.variables.app = localStorage.getItem('app') || null;
     this.variables.userID = localStorage.getItem('userID') || null;
     this.variables.userName = localStorage.getItem('userName') || null;
     this.variables.userRole = localStorage.getItem('userRole') || null;
@@ -54,12 +55,13 @@ const AppState = {
   },
 
   // 登入時同步更新 AppState 與 localStorage
-  setAuth(userID, userName, userRole, sessionKey) {
+  setAuth(app, userID, userName, userRole, sessionKey) {
+    this.variables.app = app;
     this.variables.userID = userID;
     this.variables.userName = userName;
     this.variables.userRole = userRole;
     this.variables.sessionKey = sessionKey;
-
+    localStorage.setItem('app', app);
     localStorage.setItem('userID', userID);
     localStorage.setItem('userName', userName);
     localStorage.setItem('userRole', userRole);
@@ -79,6 +81,7 @@ const AppState = {
     localStorage.removeItem('sessionKey');
   },
 
+  getApp()        {return this.variables.app || localStorage.getItem('app');},
   getSessionKey() {return this.variables.sessionKey || localStorage.getItem('sessionKey');},
   getUserID()     {return this.variables.userID || localStorage.getItem('userID');},
   getUserName()   {return this.variables.userName || localStorage.getItem('userName');},
