@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHeaderuserID();
   
   // 觸發 GASClient 進行頁面 Schema 載入
-  GASClient.loadFormSchema(false, 'app');
+  GASClient.loadSchema(false, 'app');
 });
 
 /**
@@ -82,7 +82,7 @@ function handleLogout(isDirectToLoginPage = true) {
   
   // 重新載入 Schema
   if (isDirectToLoginPage && typeof GASClient !== 'undefined') {
-    GASClient.loadFormSchema(false, 'app');
+    GASClient.loadSchema(false, 'app');
   }
 }
 
