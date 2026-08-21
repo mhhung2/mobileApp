@@ -7,8 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
   //初始化頂部 Header 狀態
   updateHeaderuserID();
   
-  // 觸發 GASClient 進行頁面 Schema 載入
-  GASClient.loadSchema(false, 'app');
+  // 採用 GET, 觸發 GASClient 進行頁面 Schema 載入
+  //GASClient.loadSchema(false, 'app');
+
+  // 採用 POST 一趟安全初始化
+  GASClient.initAppSchema('app');
 });
 
 /**
