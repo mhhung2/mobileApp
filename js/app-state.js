@@ -47,38 +47,24 @@ const AppState = {
 
   // 初始化 User 身分與 Session
   initAuth() {
-    this.variables.app = localStorage.getItem('app') || null;
-    this.variables.userID = localStorage.getItem('userID') || null;
-    this.variables.userName = localStorage.getItem('userName') || null;
-    this.variables.userRole = localStorage.getItem('userRole') || null;
-    this.variables.sessionKey = localStorage.getItem('sessionKey') || null;
+    ['app','userID', 'userName', 'userRole', 'seesionKey'].forEach((item) => { this.variables[item] = localStorage.getItem(item) || null; });
   },
 
   // 登入時同步更新 AppState 與 localStorage
   setAuth(app, userID, userName, userRole, sessionKey) {
-    this.variables.app = app;
-    this.variables.userID = userID;
-    this.variables.userName = userName;
-    this.variables.userRole = userRole;
-    this.variables.sessionKey = sessionKey;
-    localStorage.setItem('app', app);
-    localStorage.setItem('userID', userID);
-    localStorage.setItem('userName', userName);
-    localStorage.setItem('userRole', userRole);
-    localStorage.setItem('sessionKey', sessionKey);
+    const a = {app: app, userID: userID, userName: userName, userRole: userRole, sessionKey: sessionKey};
+    Object.entries(a).forEach(([key, val]) => { 
+      this.variables[key] = val;
+      localStorage.setItem(key, val);
+    });
   },
 
   // 登出時一併清空
   clearAuth() {
-    this.variables.userID = null;
-    this.variables.userName = null;
-    this.variables.userRole = null;
-    this.variables.sessionKey = null;
-
-    localStorage.removeItem('userID');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('sessionKey');
+    ['app','userID', 'userName', 'userRole', 'seesionKey'].forEach((item) => {
+      this.variables[item] = null;
+      localStorage.removeItem(item);
+    });
   },
 
   getApp()        {return this.variables.app || localStorage.getItem('app');},
