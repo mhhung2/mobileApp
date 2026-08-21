@@ -55,7 +55,7 @@ const AppState = {
   setApp(app){
     this.variables.app= app;
     localStorage.setItem('app', app);
-  }
+  },
   setAuth(app, userID, userName, userRole, sessionKey) {
     const a = {app: app, userID: userID, userName: userName, userRole: userRole, sessionKey: sessionKey};
     Object.entries(a).forEach(([key, val]) => { 
