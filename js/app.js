@@ -94,7 +94,7 @@ function handleLogout() {
   
   // 重新載入 Schema
   if (typeof GASClient !== 'undefined') {
-    GASClient.initAppSchema();
+    await GASClient.initAppSchema('app', '登出中，請稍候...');
   }
 }
 
