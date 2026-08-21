@@ -76,7 +76,7 @@ const GASClient = {
    * 2. 通用 POST 數據傳送請求
    */
   async request(action, data = {}, options = {}) {
-    const { showToast = false, loadingMessage = null, onStart, onComplete } = options;
+    const { showToast = false, loadingMessage = null, skipLoading = false, onStart, onComplete } = options;
     
     if (typeof onStart === 'function') {
       try {
@@ -86,7 +86,7 @@ const GASClient = {
       }
     }
 
-    if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
+    if (!skipLoading && loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
       UI.showLoading(true, loadingMessage);
     }
 
@@ -141,7 +141,9 @@ const GASClient = {
       }
       return { success: false, error: err.message };
     } finally {
-      if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
+      if (!skipLoading && typeof UI !== 'undefined' && UI.showLoading) {
+        UI.showLoading(false);
+      }
       // 觸發外部 UI 回呼（如：關閉按鈕轉圈）
       if (typeof onComplete === 'function') {
         try {
@@ -153,18 +155,15 @@ const GASClient = {
     }
   },
 
-  async initAppSchema(containerId = 'app') {
+  async initAppSchema(containerId = 'app', loadingText = '載入系統中...') {
     const container = document.getElementById(containerId);
 
     if (typeof UI !== 'undefined' && UI.showLoading) {
-      UI.showLoading(true, '載入系統中...');
+      UI.showLoading(true, loadingText);
     }
 
     try {
-      // 呼叫通用 request，動作為 'INIT_APP'
-      const result = await this.request('INIT_APP', {}, {
-        showToast: false
-      });
+      const result = await this.request('INIT_APP', {}, { showToast: false, skipLoading: true });
 
       if (result.success && result.schema) {
         // 若 session 已失效被引導回登入頁，清空無效存儲
