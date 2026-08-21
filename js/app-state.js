@@ -47,7 +47,7 @@ const AppState = {
 
   // 初始化 User 身分與 Session
   initAuth() {
-    ['app','userID', 'userName', 'userRole', 'seesionKey'].forEach((item) => { 
+    ['app','userID', 'userName', 'userRole', 'sessionKey'].forEach((item) => { 
       this.variables[item] = localStorage.getItem(item) || null; 
     });
   },
@@ -63,7 +63,7 @@ const AppState = {
 
   // 登出時一併清空
   clearAuth() {
-    ['app','userID', 'userName', 'userRole', 'seesionKey'].forEach((item) => {
+    ['app','userID', 'userName', 'userRole', 'sessionKey'].forEach((item) => {
       this.variables[item] = null;
       localStorage.removeItem(item);
     });
