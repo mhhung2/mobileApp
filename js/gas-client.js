@@ -191,6 +191,7 @@ const GASClient = {
         if (typeof UI !== 'undefined' && UI.render) {
           UI.render(containerId, result.schema);
         }
+        updateHeaderuserID();
 
         return result;
       } else {
