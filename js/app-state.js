@@ -47,7 +47,9 @@ const AppState = {
 
   // 初始化 User 身分與 Session
   initAuth() {
-    ['app','userID', 'userName', 'userRole', 'seesionKey'].forEach((item) => { this.variables[item] = localStorage.getItem(item) || null; });
+    ['app','userID', 'userName', 'userRole', 'seesionKey'].forEach((item) => { 
+      this.variables[item] = localStorage.getItem(item) || null; 
+    });
   },
 
   // 登入時同步更新 AppState 與 localStorage
