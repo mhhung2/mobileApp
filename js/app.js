@@ -90,7 +90,7 @@ function handleLogout(isDirectToLoginPage = true) {
   
   // 重新載入 Schema
   if (isDirectToLoginPage && typeof GASClient !== 'undefined') {
-    GASClient.loadSchema(false, 'app');
+    GASClient.initAppSchema();
   }
 }
 
