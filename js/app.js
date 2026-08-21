@@ -61,12 +61,13 @@ function updateHeaderuserID() {
  * 登出處理 Helper
  */
 function handleLogout(isDirectToLoginPage = true) {
+  const app = AppState.getApp();
   const userID = AppState.getUserID();
   const sessionKey = AppState.getSessionKey();
 
   // 若存在憑證，發送後端作廢 Session
   if (userID && sessionKey && typeof GASClient !== 'undefined') {
-    GASClient.request('LOGOUT', {}, { showToast: false });
+    GASClient.request(app, 'LOGOUT', {}, { showToast: false });
   }
 
   // 清空前端所有 Token 與 User 資料
