@@ -10,7 +10,7 @@ const GASClient = {
    * @param {boolean} silent - 是否靜默更新 (true 時不顯示全螢幕 Loading)
    * @param {string} containerId - 渲染的主容器 ID (預設 'app')
    */
-  async loadFormSchema(silent = false, containerId = 'app') {
+  async loadSchema(silent = false, containerId = 'app') {
     const container = document.getElementById(containerId);
 
     // 非靜默載入時顯示 UI Loading 提示
@@ -50,7 +50,7 @@ const GASClient = {
       }
 
     } catch (error) {
-      console.error('[GASClient] loadFormSchema 失敗:', error);
+      console.error('[GASClient] loadSchema 失敗:', error);
 
       if (!silent) {
         if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
@@ -59,7 +59,7 @@ const GASClient = {
             <div style="padding: 30px; text-align: center; color: #ff3b30;">
               <h4>⚠️ 載入失敗</h4>
               <p>${error.message || error}</p>
-              <button onclick="GASClient.loadFormSchema(false, '${containerId}')" style="padding: 8px 16px; background: #007aff; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;">重新載入</button>
+              <button onclick="GASClient.loadSchema(false, '${containerId}')" style="padding: 8px 16px; background: #007aff; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;">重新載入</button>
             </div>`;
         }
       } else {
