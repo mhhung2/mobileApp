@@ -64,7 +64,11 @@ function updateHeaderuserID() {
 /**
  * 登出處理 Helper
  */
-function handleLogout(isDirectToLoginPage = true) {
+function handleLogout() {
+  if (typeof UI !== 'undefined' && UI.showLoading) {
+    UI.showLoading(true, '登出中，請稍候...');
+  }
+  
   const app = AppState.getApp();
   const userID = AppState.getUserID();
   const sessionKey = AppState.getSessionKey();
@@ -89,7 +93,7 @@ function handleLogout(isDirectToLoginPage = true) {
   }
   
   // 重新載入 Schema
-  if (isDirectToLoginPage && typeof GASClient !== 'undefined') {
+  if (typeof GASClient !== 'undefined') {
     GASClient.initAppSchema();
   }
 }
