@@ -201,6 +201,10 @@ const GASClient = {
       console.error('[GASClient] initAppSchema 失敗:', error);
       if (typeof UI !== 'undefined' && UI.showLoading) UI.showLoading(false);
       return { success: false, error: error.message };
+    } finally {
+      if (typeof UI !== 'undefined' && UI.showLoading) {
+        UI.showLoading(false);
+      }
     }
   },
 
