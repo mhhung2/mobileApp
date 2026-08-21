@@ -179,8 +179,8 @@ const GASClient = {
         }
         
         if(result.app) {
-          AppState.setAuth(result.app, null, null, null, null);
-          window.history.pushState({}, '', '?app=' + app);
+          AppState.setApp(result.app);
+          window.history.pushState({}, '', '?app=' + result.app);
         }
         else {
           window.history.pushState({}, '', '');
