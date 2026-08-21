@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   //GASClient.loadSchema(false, 'app');
 
   // 採用 POST 一趟安全初始化
-  GASClient.initAppSchema('app');
+  GASClient.initAppSchema();
 });
 
 /**
