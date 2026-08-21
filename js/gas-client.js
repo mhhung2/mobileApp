@@ -162,7 +162,7 @@ const GASClient = {
 
     try {
       // 呼叫通用 request，動作為 'INIT_APP'
-      const result = await this.request('INIT_APP', {}, {
+      const result = await this.request(app, 'INIT_APP', {}, {
         showToast: false
       });
 
