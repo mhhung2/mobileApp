@@ -18,7 +18,7 @@ const GASClient = {
       UI.showLoading(true, '系統介面載入中...');
     }
 
-    // 自動讀取 URL 網址列參數 (?type=leave 等)
+    // 自動讀取 URL 網址列參數 (?app=default 等)
     const urlParams = new URLSearchParams(window.location.search);
     const queryParamsString = urlParams.toString();
     const requestUrl = queryParamsString ? `${this.baseUrl}?${queryParamsString}` : this.baseUrl;
