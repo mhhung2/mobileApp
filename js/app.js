@@ -81,7 +81,12 @@ function handleLogout(isDirectToLoginPage = true) {
   updateHeaderuserID();
 
   // 切換網址列為登入頁
-  window.history.pushState({}, '', '?app=' + app);
+  if(app) {
+    window.history.pushState({}, '', '?app=' + app);
+  }
+  else {
+    window.history.pushState({}, '', '');
+  }
   
   // 重新載入 Schema
   if (isDirectToLoginPage && typeof GASClient !== 'undefined') {
