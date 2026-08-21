@@ -91,8 +91,10 @@ const GASClient = {
     const app = AppState.getApp();
     const userID = AppState.getUserID();
     const sessionKey = AppState.getSessionKey();
-
+    const urlParams = new URLSearchParams(window.location.search);
+    
     const payload = {
+      urlApp: urlParams.get('app'),
       app: app,
       action: action,
       userID: userID,
