@@ -147,9 +147,6 @@ const GASClient = {
     }
   },
 
-  /**
-   * 🌟 1. 應用程式安全初始化 (透過 POST 直達 Main Page，不在網址暴露 SessionKey)
-   */
   async initAppSchema(containerId = 'app') {
     const container = document.getElementById(containerId);
 
