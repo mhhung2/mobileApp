@@ -74,7 +74,7 @@ const GASClient = {
   /**
    * 2. 通用 POST 數據傳送請求
    */
-  async request(action, data = {}, options = {}) {
+  async request(app, action, data = {}, options = {}) {
     const { showToast = false, loadingMessage = null, onStart, onComplete } = options;
     
     if (typeof onStart === 'function') {
@@ -93,10 +93,11 @@ const GASClient = {
     const sessionKey = AppState.getSessionKey();
 
     const payload = {
+      app: app,
       action: action,
       userID: userID,
       sessionKey: sessionKey,
-      sheetName: options.sheetName || null,
+      options: options,
       data: data,
       timestamp: new Date().toISOString()
     };
@@ -144,6 +145,7 @@ const GASClient = {
     }
   },
 
+    /*
   // ----------------------------------------------------
   // 快捷 Helper 函數 (方便前端/動態按鈕點擊時呼叫)
   // ----------------------------------------------------
@@ -164,4 +166,5 @@ const GASClient = {
   async delete(sheetName, targetId, idColIndex, successMsg = '已成功刪除！') {
     return this.request('delete', { targetId, idColIndex }, { sheetName, successMessage: successMsg, loadingMessage: '刪除中...' });
   }
+  */
 };
