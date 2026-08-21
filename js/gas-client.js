@@ -89,16 +89,15 @@ const GASClient = {
     if (loadingMessage && typeof UI !== 'undefined' && UI.showLoading) {
       UI.showLoading(true, loadingMessage);
     }
-    const app = AppState.getApp();
-    const userID = AppState.getUserID();
-    const sessionKey = AppState.getSessionKey();
-    const urlParams = new URLSearchParams(window.location.search);
 
-    const requestApp = urlParams.get('app');
-    if (requestApp && requestApp != app){
-      app = requestApp;
-      userID = null;
-      sessionKey = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    var app = urlParams.get('app');
+    var userID = null;
+    var sessionKey = null;
+    var sessionApp = AppState.getApp();
+    if(!app || app==sessionApp){
+      userID = AppState.getUserID();
+      sessionKey = AppState.getSessionKey();
     }
     
     const payload = {
