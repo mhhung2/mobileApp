@@ -184,10 +184,8 @@ const GASClient = {
         }
 
         // 渲染對應頁面 (Main Page 或 Login Page)
-        if (typeof UI !== 'undefined' && UI.render) {
-          UI.render(containerId, result.schema);
-        }
-        updateHeaderuserID();
+        if (typeof UI !== 'undefined' && UI.render) {UI.render(containerId, result.schema);}
+        if (typeof updateHeaderuserID === 'function') updateHeaderuserID();
 
         return result;
       } else {
