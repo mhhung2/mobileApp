@@ -27,12 +27,11 @@ async function handleLogout() {
   if (typeof UI !== 'undefined' && UI.showLoading) {
     UI.showLoading(true, '登出中，請稍候...');
   }
-  clearAuth();
-  
   // 若存在憑證，發送後端作廢 Session
   if (typeof GASClient !== 'undefined') {
     GASClient.request('DESTROY_SESSION', {}, { showToast: false });
   }
+  clearAuth();
   // 重新載入 Schema
   if (typeof GASClient !== 'undefined') {
     await GASClient.initAppSchema('app', '登出中，請稍候...');
