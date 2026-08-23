@@ -127,7 +127,6 @@ const GASClient = {
       if (result.newSessionKey) {localStorage.setItem('sessionKey', result.newSessionKey); }
       if (result.isLoggedIn === false) {
         clearAuth();
-        if (typeof updateHeaderuserID === 'function') updateHeaderuserID();
         UI.showToast(options.message, 'warning');
         console.error(options.message)
       }
