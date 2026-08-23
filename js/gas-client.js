@@ -118,14 +118,14 @@ const GASClient = {
       });
       
       if (!response.ok) throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
-
       const result = await response.json();
-
       if (!result.success) throw new Error(result.error || result.message || '後端處理失敗');
 
-      //自動無感更新 SessionKey
-      if (result.newSessionKey) {
-        localStorage.setItem('sessionKey', result.newSessionKey);
+      //處理BackEnd 傳回額外資訊
+      if (result.newSessionKey) {localStorage.setItem('sessionKey', result.newSessionKey); }
+      if (result.isLoggedIn === false) {
+        App.clearAuth();
+        UI.showToast(options.message, 'warning');
       }
 
       if (showToast && options.successMessage && typeof UI !== 'undefined' && UI.showToast) {
