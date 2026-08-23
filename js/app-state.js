@@ -66,7 +66,7 @@ const AppState = {
 
   // 登出時一併清空
   clearAuth() {
-    ['app','userID', 'userName', 'userRole', 'sessionKey'].forEach((item) => {
+    ['userID', 'userName', 'userRole', 'sessionKey'].forEach((item) => {
       this.variables[item] = null;
       localStorage.removeItem(item);
     });
