@@ -30,11 +30,13 @@ async function handleLogout() {
   const app = AppState.getApp();
   const userID = AppState.getUserID();
   const sessionKey = AppState.getSessionKey();
+
+  clearAuth();
+  
   // 若存在憑證，發送後端作廢 Session
   if (app & userID && sessionKey && typeof GASClient !== 'undefined') {
     GASClient.request('DESTROY_SESSION', {}, { showToast: false });
   }
-  clearAuth();
   // 重新載入 Schema
   if (typeof GASClient !== 'undefined') {
     await GASClient.initAppSchema('app', '登出中，請稍候...');
