@@ -130,7 +130,6 @@ const GASClient = {
         UI.showToast(options.message, 'warning');
         console.error(options.message)
       }
-      if (typeof updateHeaderuserID === 'function') updateHeaderuserID();
 
       if (showToast && options.successMessage && typeof UI !== 'undefined' && UI.showToast) {
         UI.showToast(options.successMessage, 'success');
