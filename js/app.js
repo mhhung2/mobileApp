@@ -47,7 +47,7 @@ async function handleLogout() {
   if (typeof GASClient !== 'undefined') {
     await GASClient.initAppSchema('app', '登出中，請稍候...');
   }
-},
+}
 
 function clearAuth(){
   AppState.clearAuth(); // 清空前端所有 Token 與 User 資料
