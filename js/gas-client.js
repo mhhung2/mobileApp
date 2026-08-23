@@ -10,6 +10,7 @@ const GASClient = {
    * @param {boolean} silent - 是否靜默更新 (true 時不顯示全螢幕 Loading)
    * @param {string} containerId - 渲染的主容器 ID (預設 'app')
    */
+  /*
   //TODO: TO BE OBSOLETED
   async loadSchema(silent = false, containerId = 'app') {
     const container = document.getElementById(containerId);
@@ -71,6 +72,7 @@ const GASClient = {
       return { success: false, error: error.message };
     }
   },
+  */
 
   /**
    * 2. 通用 POST 數據傳送請求
