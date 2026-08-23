@@ -127,8 +127,10 @@ const GASClient = {
       if (result.newSessionKey) {localStorage.setItem('sessionKey', result.newSessionKey); }
       if (result.isLoggedIn === false) {
         clearAuth();
-        UI.showToast(options.message, 'warning');
-        console.error(options.message)
+        if(options.message){
+          UI.showToast(options.message, 'warning');
+          console.error(options.message)
+        }
       }
 
       if (showToast && options.successMessage && typeof UI !== 'undefined' && UI.showToast) {
