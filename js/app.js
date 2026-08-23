@@ -44,6 +44,7 @@ async function handleLogout() {
 function clearAuth(){
   AppState.clearAuth(); // 清空前端所有 Token 與 User 資料
   updateHeaderuserID(); // 更新 Header 顯示狀態
+  const app = AppState.getApp();
   app? window.history.pushState({}, '', '?app=' + app) : window.history.pushState({}, '', ''); // 切換網址列為登入頁
 }
 
