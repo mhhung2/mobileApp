@@ -27,14 +27,10 @@ async function handleLogout() {
   if (typeof UI !== 'undefined' && UI.showLoading) {
     UI.showLoading(true, '登出中，請稍候...');
   }
-  const app = AppState.getApp();
-  const userID = AppState.getUserID();
-  const sessionKey = AppState.getSessionKey();
-
   clearAuth();
   
   // 若存在憑證，發送後端作廢 Session
-  if (app && userID && sessionKey && typeof GASClient !== 'undefined') {
+  if (typeof GASClient !== 'undefined') {
     GASClient.request('DESTROY_SESSION', {}, { showToast: false });
   }
   // 重新載入 Schema
