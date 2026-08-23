@@ -125,8 +125,12 @@ const GASClient = {
 
       //處理BackEnd 傳回額外資訊
       if (result.newSessionKey) {localStorage.setItem('sessionKey', result.newSessionKey); }
+      console.log("GAS-client BEFORE");
       if (result.isLoggedIn === false) {
+         console.log("GAS-client INSIDE");
         clearAuth();
+         console.log("GAS-client INSIDE2");
+        console.log(options);
         if(options.message){
           UI.showToast(options.message, 'warning');
           console.error(options.message)
