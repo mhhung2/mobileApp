@@ -127,6 +127,7 @@ const GASClient = {
       if (result.newSessionKey) {localStorage.setItem('sessionKey', result.newSessionKey); }
       if (result.isLoggedIn === false) {
         clearAuth();
+        if (typeof updateHeaderuserID === 'function') updateHeaderuserID();
         UI.showToast(options.message, 'warning');
         console.error(options.message)
       }
@@ -169,11 +170,6 @@ const GASClient = {
       const result = await this.request('INIT_APP', {}, { showToast: false, skipLoading: true });
 
       if (result.success && result.schema) {
-        // 若 session 已失效被引導回登入頁，清空無效存儲
-        if (!result.isLoggedIn) {
-          AppState.clearAuth();
-          if (typeof updateHeaderuserID === 'function') updateHeaderuserID();
-        }
 
         // 初始化變數與動態函數
         if ((result.variables || result.functions) && typeof AppState !== 'undefined') {
