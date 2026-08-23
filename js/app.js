@@ -40,7 +40,7 @@ async function handleLogout() {
   const sessionKey = AppState.getSessionKey();
   // 若存在憑證，發送後端作廢 Session
   if (app & userID && sessionKey && typeof GASClient !== 'undefined') {
-    GASClient.request('LOGOUT', {}, { showToast: false });
+    GASClient.request('DESTROY_SESSION', {}, { showToast: false });
   }
   clearAuth();
   // 重新載入 Schema
