@@ -34,7 +34,7 @@ async function handleLogout() {
   clearAuth();
   
   // 若存在憑證，發送後端作廢 Session
-  if (app & userID && sessionKey && typeof GASClient !== 'undefined') {
+  if (app && userID && sessionKey && typeof GASClient !== 'undefined') {
     GASClient.request('DESTROY_SESSION', {}, { showToast: false });
   }
   // 重新載入 Schema
