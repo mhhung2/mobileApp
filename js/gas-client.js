@@ -126,7 +126,7 @@ const GASClient = {
       //處理BackEnd 傳回額外資訊
       if (result.newSessionKey) {localStorage.setItem('sessionKey', result.newSessionKey); }
       if (result.isLoggedIn === false) {
-        App.clearAuth();
+        clearAuth();
         UI.showToast(options.message, 'warning');
         console.error(options.message)
       }
