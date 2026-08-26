@@ -54,6 +54,7 @@ Object.assign(UI, {
         
         if (field.type === 'select') {
           const select = document.createElement('select');
+		  if (field.id) select.id = field.id;
           select.className = 'form-control';
           select.name = field.name;
           if (field.required) select.required = true;
@@ -72,6 +73,7 @@ Object.assign(UI, {
         }
         else if (field.type === 'textarea') {
           const textarea = document.createElement('textarea');
+		  if (field.id) textarea.id = field.id;
           textarea.className = 'form-control';
           textarea.name = field.name;
           textarea.rows = field.rows || 3;
@@ -146,6 +148,7 @@ Object.assign(UI, {
         }
         else {
           const input = document.createElement('input');
+		  if (field.id) input.id = field.id;
           input.className = 'form-control';
           input.name = field.name;
           input.placeholder = field.placeholder || '';
