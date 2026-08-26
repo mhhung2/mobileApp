@@ -95,6 +95,10 @@ const UI = {
 
     if (element) {
       this.bindTabCategory(element, item);
+	  
+	  if (item.id) {
+        element.id = item.id;
+      }
     }
     return element;
   }
