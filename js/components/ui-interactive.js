@@ -428,7 +428,7 @@ Object.assign(UI, {
 		})): [];
 
 	// 實體化 UI.Timer (純邏輯運作)
-	const timerInstance = new UI.Timer({
+	const timerInstance = new UITimer({
 		mode: item.mode || 'countdown',
 		startSeconds: item.startSeconds,
 		endSeconds: item.endSeconds,
