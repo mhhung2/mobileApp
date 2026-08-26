@@ -81,7 +81,8 @@ const UI = {
       case 'kpiGroup':     element = this.createKPIGroup(item); break;
       case 'timeline':     element = this.createTimeline(item); break;
       case 'mediaPreview': element = this.createMediaPreview(item); break;
-      case 'refreshTimer': element = this.createRefreshTimer(item); break;
+      //case 'refreshTimer': element = this.createRefreshTimer(item); break;
+	  case 'timer':		   return this.createTimerComponent(item); break;
       case 'spacer':       element = this.createSpacer(item); break;
       case 'divider':      element = this.createDivider(item); break;
       case 'actionCard':   element = this.createActionCard(item); break;
