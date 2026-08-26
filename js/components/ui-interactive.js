@@ -411,6 +411,7 @@ Object.assign(UI, {
     return container;
   },
 
+/*
   createRefreshTimer(item) {
     this.totalIntervalSeconds = item.intervalSeconds || 60;
     this.remainingSeconds = this.totalIntervalSeconds;
@@ -459,6 +460,43 @@ Object.assign(UI, {
 
     return container;
   },
+  */
+  
+  createTimerComponent(item) {
+    // 將 Schema 中的字串函數名稱轉為真正的 Function 引用
+	const resolveFn = (fnName) => {
+		if (typeof fnName === 'function') return fnName;
+		if (typeof fnName === 'string' && typeof window[fnName] === 'function') {
+		  return window[fnName];
+		}
+		return null;
+	};
+
+	// 解析多個 targets
+	const parsedTargets = Array.isArray(item.targets) ? item.targets.map(t => ({
+		second: t.second,
+		callback: resolveFn(t.callback)
+		})): [];
+
+	// 實體化 UI.Timer (純邏輯運作)
+	const timerInstance = new UI.Timer({
+		mode: item.mode || 'countdown',
+		startSeconds: item.startSeconds,
+		endSeconds: item.endSeconds,
+		autoStart: item.autoStart !== false,
+		targets: parsedTargets,
+		onTick: resolveFn(item.onTick),
+		onEnd: resolveFn(item.onEnd)
+	});
+
+	// 如果 Schema 有給 id，方便後端或 Client Side 後續存取 Instance
+	if (item.id) {
+		window[`timer_${item.id}`] = timerInstance;
+	}
+
+	// 💡 純邏輯 Timer 不需要渲染任何 DOM 節點，回傳 null 即可
+	return null;
+  }
 
   startCountdownTimer(secondsDisplay, refreshIcon) {
     if (this.refreshIntervalId) clearInterval(this.refreshIntervalId);
