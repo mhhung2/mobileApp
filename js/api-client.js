@@ -99,6 +99,7 @@ const APIClient = {
 			if(result.app) {
 			  AppState.setApp(result.app);
 			  window.history.pushState({}, '', '?app=' + result.app);
+			  if(result.sysName) document.title = result.sysName;
 			}
 			else {
 			  window.history.pushState({}, '', '');
