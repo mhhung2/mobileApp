@@ -155,6 +155,9 @@ Object.assign(UI, {
           if (field.type === 'inputText') {
             input.type = 'text';
           }
+		  else if (field.type === 'password' || field.type === 'inputPassword') {
+            input.type = 'password';
+          }
           else if (field.type === 'inputNumberText') {
             input.type = 'text';
             input.inputMode = 'numeric';
