@@ -251,3 +251,31 @@ Object.assign(UI, {
     return cardContainer;
   }
 });
+
+const formTypes = [
+	'select', 'inputText', 'inputNumberText', 'inputPassword', 
+	'password', 'textarea', 'radio', 'checkbox', 'switch', 'file'
+];
+  
+// 暫存原有的 createComponent
+const originalCreateComponent = UI.createComponent;
+  
+UI.createComponent = function(item) {
+  if (!item || !item.type) return null;
+
+  // 如果遇到表單欄位型別，利用微型 Form 容器來複用 ui-form 的渲染邏輯
+  if (formTypes.includes(item.type)) {
+	const dummyForm = UI.createForm({ items: [item] });
+	// 提取 Form 內部產生的 form-group 節點
+	const formGroup = dummyForm.querySelector('.form-group');
+	if (formGroup) {
+	  if (item.category) formGroup.dataset.category = item.category;
+	  if (item.groupId) formGroup.dataset.groupId = item.groupId;
+	  if (item.id) formGroup.id = item.id;
+	  return formGroup;
+	}
+  }
+
+  // 其他型別交回原本的 createComponent 處理
+  return originalCreateComponent.call(this, item);
+};
