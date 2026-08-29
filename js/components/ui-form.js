@@ -13,7 +13,7 @@ Object.assign(UI, {
         const nonInputTypes = [
           'title', 'subtitle', 'text', 'quote', 'badge', 'badgeGroup', 
           'button', 'buttonGroup', 'kpiGroup', 'timeline', 'mediaPreview', 
-          'spacer', 'divider', 'accordion', 'carousel'
+          'spacer', 'divider', 'accordion', 'carousel','gridRow'
         ];
 
         if (nonInputTypes.includes(field.type)) {
