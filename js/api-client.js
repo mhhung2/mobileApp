@@ -138,6 +138,9 @@ const APIClient = {
         
 		if (result.schema && typeof UI !== 'undefined') {
 		  UI.render(containerId, result.schema);
+		  
+		  //確保 DOM 渲染完畢後，再觸發 onLoaded！
+		  requestAnimationFrame(() => {AppState.triggerOnLoaded();});
 		}
 
         return result;
