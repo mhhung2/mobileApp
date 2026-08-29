@@ -45,17 +45,6 @@ const AppState = {
       }
     }
 	*/
-	
-	triggerOnLoaded() {
-      if (typeof this.functions['onLoaded'] === 'function') {
-		try {
-          // 傳入當前的 AppState 變數供 onLoaded 呼叫使用
-	      this.functions['onLoaded'](this.variables);
-		} catch (err) {
-		  console.error('[AppState] 執行 onLoaded 發生錯誤:', err);
-		}
-	  }
-	},
   },
  
 
@@ -109,5 +98,16 @@ const AppState = {
     } else {
       console.warn(`[AppState] 找不到動態函數: ${fnName}`);
     }
+  },
+  
+  triggerOnLoaded() {
+    if (typeof this.functions['onLoaded'] === 'function') {
+      try {
+        // 傳入當前的 AppState 變數供 onLoaded 呼叫使用
+        this.functions['onLoaded'](this.variables);
+      } catch (err) {
+	    console.error('[AppState] 執行 onLoaded 發生錯誤:', err);
+	  }
+	}
   }
 };
