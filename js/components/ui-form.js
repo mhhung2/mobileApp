@@ -21,8 +21,8 @@ Object.assign(UI, {
           if (nonInputEl) form.appendChild(nonInputEl);
           return;
         }
-
 		if(!field.type) return;
+
         if (field.type === 'hidden') {
           const hiddenInput = document.createElement('input');
           hiddenInput.type = 'hidden';
@@ -173,6 +173,20 @@ Object.assign(UI, {
           if (field.min) input.min = field.min;
           if (field.max) input.max = field.max;
           if (field.required) input.required = true;
+		  if (field.pattern) input.pattern = field.pattern;
+		  input.oninvalid = (e) => {
+            if (e.target.validity.patternMismatch) {
+              e.target.setCustomValidity(field.patternError || '輸入格式不正確');
+            }
+          };
+		  input.oninput = (e) => {
+            if (field.type === 'inputNumberText') {
+              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            }
+            e.target.setCustomValidity('');
+          };
+		  
+		  
           group.appendChild(input);
         }
 
