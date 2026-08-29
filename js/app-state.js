@@ -34,6 +34,7 @@ const AppState = {
       }
     });
 
+	/*
     // 若 Schema 包含 onLoaded 動態函數，則在渲染完成前/後自動即時執行！
     if (typeof this.functions['onLoaded'] === 'function') {
       try {
@@ -43,7 +44,20 @@ const AppState = {
         console.error('[AppState] 執行 onLoaded 發生錯誤:', err);
       }
     }
+	*/
+	
+	triggerOnLoaded() {
+      if (typeof this.functions['onLoaded'] === 'function') {
+		try {
+          // 傳入當前的 AppState 變數供 onLoaded 呼叫使用
+	      this.functions['onLoaded'](this.variables);
+		} catch (err) {
+		  console.error('[AppState] 執行 onLoaded 發生錯誤:', err);
+		}
+	  }
+	},
   },
+ 
 
   // 初始化 User 身分與 Session
   initAuth() {
