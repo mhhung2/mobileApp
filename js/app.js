@@ -16,8 +16,6 @@ function updateHeaderuserID() {
   const userName = AppState.getUserName();
   const userRole = AppState.getUserRole();
   const sessionKey = AppState.getSessionKey();
-
-  console.log("[App.js] App: ", app, ", Logged User: ", loggedUser, userName, ", Role:",  userRole, ", Key:", sessionKey);
 }
 
 /**
