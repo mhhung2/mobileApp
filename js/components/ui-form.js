@@ -22,6 +22,7 @@ Object.assign(UI, {
           return;
         }
 
+		if(!field.type) return;
         if (field.type === 'hidden') {
           const hiddenInput = document.createElement('input');
           hiddenInput.type = 'hidden';
