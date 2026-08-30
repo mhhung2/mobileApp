@@ -214,6 +214,7 @@ Object.assign(UI, {
 
     form.onsubmit = async (e) => {
       e.preventDefault();
+	  if (!form.reportValidity()) return;
       if (form.dataset.submitting === 'true') return;
 
       const formData = new FormData(form);
