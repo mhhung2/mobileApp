@@ -157,8 +157,7 @@ Object.assign(UI, {
           else if (field.type === 'inputNumberText') {
             input.type = 'text';
             input.inputMode = 'numeric';
-            input.pattern = '[0-9]*';
-            input.oninput = (e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); };
+            //input.pattern = '[0-9]*';
           } else {
             input.type = field.type || 'text';
           }
@@ -170,11 +169,12 @@ Object.assign(UI, {
           if (field.required) input.required = true;
 		  if (field.pattern) input.pattern = field.pattern;
 		  input.oninvalid = (e) => {
-            if (e.target.validity.patternMismatch) {
-              e.target.setCustomValidity(field.patternError || '輸入格式不正確');
+            if (e.target.validity.patternMismatch && field.patternError) {
+              e.target.setCustomValidity(field.patternError);
             }
           };
-		  input.oninput = (e) => {
+
+          input.oninput = (e) => {
             if (field.type === 'inputNumberText') {
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
             }
