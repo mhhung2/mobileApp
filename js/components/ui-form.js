@@ -11,7 +11,7 @@ Object.assign(UI, {
     if (Array.isArray(fields)) {
       fields.forEach(field => {
         const nonInputTypes = [
-          'title', 'subtitle', 'text', 'quote', 'badge', 'badgeGroup', 
+          'title', 'subtitle', 'text', 'quote', 'label', 'badge', 'badgeGroup', 
           'button', 'buttonGroup', 'kpiGroup', 'timeline', 'mediaPreview', 
           'spacer', 'divider', 'accordion', 'carousel','gridRow'
         ];
@@ -26,6 +26,7 @@ Object.assign(UI, {
         if (field.type === 'hidden') {
           const hiddenInput = document.createElement('input');
           hiddenInput.type = 'hidden';
+		  if(field.id) hiddenInput.id = field.id;
           hiddenInput.name = field.name;
           hiddenInput.value = field.defaultValue !== undefined ? field.defaultValue : (field.value || '');
           form.appendChild(hiddenInput);
@@ -35,23 +36,17 @@ Object.assign(UI, {
         const group = document.createElement('div');
         group.className = 'form-group';
 
-        // 若 field.isHtml 為 true，則使用 HTML 組合 label，否則將純文字轉義或插入
-        const labelText = field.label || '';
-        const requiredMark = field.required ? ' <span style="color:#ff3b30">*</span>' : '';
-        const labelEl = document.createElement('label');
-
-        if (field.isHtml === true) {
-          labelEl.innerHTML = labelText + requiredMark;
-        } else {
-          labelEl.innerText = labelText;
-          if (field.required) {
-            const reqSpan = document.createElement('span');
-            reqSpan.style.color = '#ff3b30';
-            reqSpan.innerText = ' *';
-            labelEl.appendChild(reqSpan);
-          }
-        }
-        group.appendChild(labelEl);
+		if(field.label){
+			const labelEl = document.createElement('label');
+			labelEl.innerText = field.label;
+			if (field.required) {
+			  const reqSpan = document.createElement('span');
+			  reqSpan.style.color = '#ff3b30';
+			  reqSpan.innerText = ' *';
+			  labelEl.appendChild(reqSpan);
+		    }
+			group.appendChild(labelEl);
+		}
         
         if (field.type === 'select') {
           const select = document.createElement('select');
