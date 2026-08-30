@@ -169,8 +169,19 @@ Object.assign(UI, {
           if (field.required) input.required = true;
 		  if (field.pattern) input.pattern = field.pattern;
 		  input.oninvalid = (e) => {
-            if (e.target.validity.patternMismatch && field.patternError) {
-              e.target.setCustomValidity(field.patternError);
+            const target = e.target;
+          
+            if (target.validity.valueMissing) {
+              target.setCustomValidity('請填寫此欄位');
+            } 
+            else if (target.validity.tooShort) {
+              target.setCustomValidity(`請輸入至少 ${field.minLength} 個字元/位元 (目前 ${target.value.length} 個)`);
+            } 
+            else if (target.validity.patternMismatch) {
+              target.setCustomValidity(field.patternError || '輸入格式不正確');
+            } 
+            else {
+              target.setCustomValidity('');
             }
           };
 
