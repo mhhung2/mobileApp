@@ -169,25 +169,72 @@ Object.assign(UI, {
           if (field.required) input.required = true;
 		  if (field.pattern) input.pattern = field.pattern;
 		  
-		  input.oninvalid = (e) => {
-            if (e.target.validity.patternMismatch && field.patternError) {
-              e.target.setCustomValidity(field.patternError);
-            } 
-          };
+		  // -------------------------------------------------------------
+          // 情況 A：針對 inputNumberText（純數字欄位）進行專屬增強處理
+          // -------------------------------------------------------------
+          if (field.type === 'inputNumberText') {
+            // 動態生成 pattern 解決 minLength 不生效問題
+            if (!field.pattern && (field.minLength || field.maxLength)) {
+              const minLen = field.minLength || 0;
+              const maxLen = field.maxLength || '';
+              input.pattern = `^\\d{${minLen},${maxLen}}$`;
+            }
 
-          input.oninput = (e) => {
-            if (field.type === 'inputNumberText') {
+            // 僅對純數字欄位客製化 oninvalid 提示
+            input.oninvalid = (e) => {
+              const target = e.target;
+              const valNum = Number(target.value);
+
+              if (target.validity.valueMissing) {
+                target.setCustomValidity('請填寫此欄位');
+              }
+              else if (field.min !== undefined && target.value !== '' && valNum < Number(field.min)) {
+                target.setCustomValidity(`數值不能小於 ${field.min}`);
+              }
+              else if (field.max !== undefined && target.value !== '' && valNum > Number(field.max)) {
+                target.setCustomValidity(`數值不能大於 ${field.max}`);
+              }
+              else if (target.validity.patternMismatch) {
+                if (field.patternError) {
+                  target.setCustomValidity(field.patternError);
+                } else if (field.minLength && field.maxLength && field.minLength === field.maxLength) {
+                  target.setCustomValidity(`請輸入恰好 ${field.minLength} 位數字`);
+                } else if (field.minLength) {
+                  target.setCustomValidity(`請輸入至少 ${field.minLength} 位數字`);
+                } else {
+                  target.setCustomValidity('輸入格式不正確');
+                }
+              }
+              else {
+                target.setCustomValidity('');
+              }
+            };
+
+            // 純數字欄位即時過濾非數字字元 (含貼上) 與重置 CustomValidity
+            input.oninput = (e) => {
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            }
-			if (e.target.validity.customError) {
               e.target.setCustomValidity('');
+            };
+          } 
+          // -------------------------------------------------------------
+          // 情況 B：其餘普通輸入框 (inputText, password 等)
+          // -------------------------------------------------------------
+          else {
+            // 若普通輸入框有設定自訂 patternError，才掛載極簡的 pattern 提示
+            if (field.patternError) {
+              input.oninvalid = (e) => {
+                if (e.target.validity.patternMismatch) {
+                  e.target.setCustomValidity(field.patternError);
+                }
+              };
+              input.oninput = (e) => {
+                e.target.setCustomValidity('');
+              };
             }
-          };
-		  
-		  
+          }
+
           group.appendChild(input);
         }
-
         form.appendChild(group);
       });
     }
