@@ -69,6 +69,7 @@ const UI = {
       case 'subtitle':
       case 'text':
       case 'quote':       element = this.createTextItem(item); break;
+	  case 'label':		  element = this.createLabel(item); break;
       case 'badge':       element = this.createBadge(item); break;
       case 'badgeGroup':  element = this.createBadgeGroup(item); break;
 
