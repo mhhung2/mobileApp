@@ -168,28 +168,20 @@ Object.assign(UI, {
           if (field.max) input.max = field.max;
           if (field.required) input.required = true;
 		  if (field.pattern) input.pattern = field.pattern;
+		  
 		  input.oninvalid = (e) => {
-            const target = e.target;
-          
-            if (target.validity.valueMissing) {
-              target.setCustomValidity('請填寫此欄位');
+            if (e.target.validity.patternMismatch && field.patternError) {
+              e.target.setCustomValidity(field.patternError);
             } 
-            else if (target.validity.tooShort) {
-              target.setCustomValidity(`請輸入至少 ${field.minLength} 個字元/位元 (目前 ${target.value.length} 個)`);
-            } 
-            else if (target.validity.patternMismatch) {
-              target.setCustomValidity(field.patternError || '輸入格式不正確');
-            } 
-            else {
-              target.setCustomValidity('');
-            }
           };
 
           input.oninput = (e) => {
             if (field.type === 'inputNumberText') {
               e.target.value = e.target.value.replace(/[^0-9]/g, '');
             }
-            e.target.setCustomValidity('');
+			if (e.target.validity.customError) {
+              e.target.setCustomValidity('');
+            }
           };
 		  
 		  
