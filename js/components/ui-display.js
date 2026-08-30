@@ -156,6 +156,16 @@ Object.assign(UI, {
     element.appendChild(bodyDiv);
     return element;
   },
+  
+  createLabel(item) {
+    const el = document.createElement('label');
+    if (item.isHtml === true) {
+      el.innerHTML = item.text || '';
+    } else {
+      el.innerText = item.text || '';
+    }
+    return el;
+  },
 
   createTextItem(item) {
     const el = document.createElement('div');
