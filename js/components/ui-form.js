@@ -173,49 +173,71 @@ Object.assign(UI, {
           // 情況 A：針對 inputNumberText（純數字欄位）進行專屬增強處理
           // -------------------------------------------------------------
           if (field.type === 'inputNumberText') {
-            // 動態生成 pattern 解決 minLength 不生效問題
-            if (!field.pattern && (field.minLength || field.maxLength)) {
-              const minLen = field.minLength || 0;
-              const maxLen = field.maxLength || '';
-              input.pattern = `^\\d{${minLen},${maxLen}}$`;
-            }
+            
+            // 統一驗證核心：依照優先順序判斷所有規則 (必填 -> 長度 -> 數值範圍 -> 自訂Pattern)
+            const validateInputNumberText = (target) => {
+              const val = target.value.trim();
 
-            // 僅對純數字欄位客製化 oninvalid 提示
-            input.oninvalid = (e) => {
-              const target = e.target;
-              const valNum = Number(target.value);
-
-              if (target.validity.valueMissing) {
+              // 1. 必填檢查 (required)
+              if (field.required && val === '') {
                 target.setCustomValidity('請填寫此欄位');
+                return;
               }
-              else if (field.min !== undefined && target.value !== '' && valNum < Number(field.min)) {
-                target.setCustomValidity(`數值不能小於 ${field.min}`);
-              }
-              else if (field.max !== undefined && target.value !== '' && valNum > Number(field.max)) {
-                target.setCustomValidity(`數值不能大於 ${field.max}`);
-              }
-              else if (target.validity.patternMismatch) {
-                if (field.patternError) {
-                  target.setCustomValidity(field.patternError);
-                } else if (field.minLength && field.maxLength && field.minLength === field.maxLength) {
-                  target.setCustomValidity(`請輸入恰好 ${field.minLength} 位數字`);
-                } else if (field.minLength) {
-                  target.setCustomValidity(`請輸入至少 ${field.minLength} 位數字`);
-                } else {
-                  target.setCustomValidity('輸入格式不正確');
+
+              if (val !== '') {
+                const len = val.length;
+                const valNum = Number(val);
+
+                // 2. 長度檢查 (minLength)
+                if (field.minLength && len < Number(field.minLength)) {
+                  if (field.minLength === field.maxLength) {
+                    target.setCustomValidity(`請輸入恰好 ${field.minLength} 位數字`);
+                  } else {
+                    target.setCustomValidity(`請輸入至少 ${field.minLength} 位數字 (目前 ${len} 位)`);
+                  }
+                  return;
+                }
+
+                // 3. 數值下限檢查 (min)
+                if (field.min !== undefined && valNum < Number(field.min)) {
+                  target.setCustomValidity(`數值不能小於 ${field.min}`);
+                  return;
+                }
+
+                // 4. 數值上限檢查 (max)
+                if (field.max !== undefined && valNum > Number(field.max)) {
+                  target.setCustomValidity(`數值不能大於 ${field.max}`);
+                  return;
+                }
+
+                // 5. 自訂 Pattern 檢查 (若有傳入 field.pattern)
+                if (field.pattern) {
+                  const reg = new RegExp(field.pattern);
+                  if (!reg.test(val)) {
+                    target.setCustomValidity(field.patternError || '輸入格式不正確');
+                    return;
+                  }
                 }
               }
-              else {
-                target.setCustomValidity('');
-              }
+
+              // 通過所有驗證，清空錯誤
+              target.setCustomValidity('');
             };
 
-            // 純數字欄位即時過濾非數字字元 (含貼上) 與重置 CustomValidity
+            // 1. 即時輸入事件 (oninput)：自動過濾非數字字元 + 即時重新校驗所有規則
             input.oninput = (e) => {
-              e.target.value = e.target.value.replace(/[^0-9]/g, '');
-              e.target.setCustomValidity('');
+              const target = e.target;
+              // 清除所有非數字字元 (含貼上)
+              target.value = target.value.replace(/[^0-9]/g, '');
+              // 執行全能校驗
+              validateInputNumberText(target);
             };
-          } 
+
+            // 2. 提交觸發事件 (oninvalid)：確保點擊提交時能抓到最新的驗證訊息
+            input.oninvalid = (e) => {
+              validateInputNumberText(e.target);
+            };
+          }
           // -------------------------------------------------------------
           // 情況 B：其餘普通輸入框 (inputText, password 等)
           // -------------------------------------------------------------
