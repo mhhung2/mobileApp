@@ -304,7 +304,7 @@ UI.createComponent = function(item) {
 	if (formGroup) {
 	  if (item.category) formGroup.dataset.category = item.category;
 	  if (item.groupId) formGroup.dataset.groupId = item.groupId;
-	  if (item.id) formGroup.id = item.id;
+	  //if (item.id) formGroup.id = item.id;
 	  return formGroup;
 	}
   }
