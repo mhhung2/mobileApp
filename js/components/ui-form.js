@@ -180,7 +180,7 @@ Object.assign(UI, {
               const isNumberType = field.type === 'inputNumberText';
 
               // 2. 長度檢查 (minLength) - 不受 pattern 影響，優先攔截
-              if ((target.minLength!=='' || target.minLength !== undefined) && len < Number(target.minLength)) {
+              if (!(target.minLength==='' || target.minLength === undefined) && len < Number(target.minLength)) {
                 if (target.minLength === target.maxLength) {
                   target.setCustomValidity(`請輸入恰好 ${target.minLength} 個${isNumberType ? '位數字' : '字元'}`);
                 } else {
@@ -192,11 +192,11 @@ Object.assign(UI, {
               // 3. 數值範圍檢查 (僅對數字欄位生效)
               if (isNumberType) {
                 const valNum = Number(val);
-                if ((target.min!=='' || target.min !== undefined) && valNum < Number(target.min)) {
+                if (!(target.min==='' || target.min === undefined) && valNum < Number(target.min)) {
                   target.setCustomValidity(`數值不能小於 ${target.min}`);
                   return;
                 }
-                if ((target.max!=='' || target.max !== undefined) && valNum > Number(target.max)) {
+                if (!(target.max==='' || target.max === undefined) && valNum > Number(target.max)) {
                   target.setCustomValidity(`數值不能大於 ${target.max}`);
                   return;
                 }
