@@ -169,92 +169,57 @@ Object.assign(UI, {
           if (field.required) input.required = true;
 		  if (field.pattern) input.pattern = field.pattern;
 		  
-		  // -------------------------------------------------------------
-          // 情況 A：針對 inputNumberText（純數字欄位）進行專屬增強處理
-          // -------------------------------------------------------------
-          if (field.type === 'inputNumberText') {
-            
-            // 統一驗證核心：依照優先順序判斷所有規則 (必填 -> 長度 -> 數值範圍 -> 自訂Pattern)
-            const validateInputNumberText = (target) => {
-              const val = target.value.trim();
+          const validateInput = (target) => {
+            const rawVal = target.value;
+            const val = rawVal.trim();
 
-              // 1. 必填檢查 (required)
-              if (field.required && val === '') {
-                target.setCustomValidity('請填寫此欄位');
+            // 1. 必填檢查 (required)
+            if (field.required && val === '') {target.setCustomValidity('請填寫此欄位');return;}
+            if (val !== '') {
+              const len = rawVal.length; // 文字欄位保留空格計算長度
+              const isNumberType = field.type === 'inputNumberText';
+
+              // 2. 長度檢查 (minLength) - 不受 pattern 影響，優先攔截
+              if (field.minLength && len < Number(field.minLength)) {
+                if (field.minLength === field.maxLength) {
+                  target.setCustomValidity(`請輸入恰好 ${field.minLength} 個${isNumberType ? '位數字' : '字元'}`);
+                } else {
+                  target.setCustomValidity(`請輸入至少 ${field.minLength} 個${isNumberType ? '位數字' : '字元'} (目前 ${len} 個)`);
+                }
                 return;
               }
 
-              if (val !== '') {
-                const len = val.length;
+              // 3. 數值範圍檢查 (僅對數字欄位生效)
+              if (isNumberType) {
                 const valNum = Number(val);
-
-                // 2. 長度檢查 (minLength)
-                if (field.minLength && len < Number(field.minLength)) {
-                  if (field.minLength === field.maxLength) {
-                    target.setCustomValidity(`請輸入恰好 ${field.minLength} 位數字`);
-                  } else {
-                    target.setCustomValidity(`請輸入至少 ${field.minLength} 位數字 (目前 ${len} 位)`);
-                  }
-                  return;
-                }
-
-                // 3. 數值下限檢查 (min)
                 if (field.min !== undefined && valNum < Number(field.min)) {
                   target.setCustomValidity(`數值不能小於 ${field.min}`);
                   return;
                 }
-
-                // 4. 數值上限檢查 (max)
                 if (field.max !== undefined && valNum > Number(field.max)) {
                   target.setCustomValidity(`數值不能大於 ${field.max}`);
                   return;
                 }
-
-                // 5. 自訂 Pattern 檢查 (若有傳入 field.pattern)
-                if (field.pattern) {
-                  const reg = new RegExp(field.pattern);
-                  if (!reg.test(val)) {
-                    target.setCustomValidity(field.patternError || '輸入格式不正確');
-                    return;
-                  }
-                }
               }
 
-              // 通過所有驗證，清空錯誤
-              target.setCustomValidity('');
-            };
-
-            // 1. 即時輸入事件 (oninput)：自動過濾非數字字元 + 即時重新校驗所有規則
-            input.oninput = (e) => {
-              const target = e.target;
-              // 清除所有非數字字元 (含貼上)
-              target.value = target.value.replace(/[^0-9]/g, '');
-              // 執行全能校驗
-              validateInputNumberText(target);
-            };
-
-            // 2. 提交觸發事件 (oninvalid)：確保點擊提交時能抓到最新的驗證訊息
-            input.oninvalid = (e) => {
-              validateInputNumberText(e.target);
-            };
-          }
-          // -------------------------------------------------------------
-          // 情況 B：其餘普通輸入框 (inputText, password 等)
-          // -------------------------------------------------------------
-          else {
-            // 若普通輸入框有設定自訂 patternError，才掛載極簡的 pattern 提示
-            if (field.patternError) {
-              input.oninvalid = (e) => {
-                if (e.target.validity.patternMismatch) {
-                  e.target.setCustomValidity(field.patternError);
+              // 4. 正則表達式檢查 (field.pattern)
+              if (field.pattern) {
+                const reg = new RegExp(field.pattern);
+                if (!reg.test(rawVal)) {
+                  target.setCustomValidity(field.patternError || '輸入格式不正確');
+                  return;
                 }
-              };
-              input.oninput = (e) => {
-                e.target.setCustomValidity('');
-              };
+              }
             }
-          }
+            target.setCustomValidity('');
+          };
 
+          input.oninput = (e) => {
+            const target = e.target;
+            if (field.type === 'inputNumberText') {target.value = target.value.replace(/[^0-9]/g, '');}
+            validateInput(target);
+          };
+          input.oninvalid = (e) => {validateInput(e.target);};
           group.appendChild(input);
         }
         form.appendChild(group);
