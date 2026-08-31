@@ -1,322 +1,245 @@
-/**
- * BottomBarNav - 固定底部導覽列類別
- */
-class BottomBarNav {
-  constructor(config = {}) {
-    this.items = config.items || [];
-    this.maxVisible = config.maxVisible || 5;
-    this.activeId = config.activeId || '';
-    this.containerId = config.containerId || null;
-    this.overlayEl = null;
-    this.barEl = null;
+/* ==========================================
+   Tab 頁籤與搜尋列 SearchBar
+   ========================================== */
+.tab-container { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 4px; margin-bottom: 12px; width: 100%; }
+.tab-btn { flex-shrink: 0; white-space: nowrap; padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 16px; border: 1px solid var(--border-color); background-color: var(--card-bg); color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+.tab-btn.active { background-color: var(--primary-color); color: #ffffff; border-color: var(--primary-color); }
 
-    this.init();
-  }
+.search-bar-container { margin-bottom: 12px; width: 100%; box-sizing: border-box; }
+.search-input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+.search-input { width: 100%; height: 40px; padding: 8px 36px; font-size: 15px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--card-bg); outline: none; box-sizing: border-box; appearance: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.search-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1); }
+.search-icon { position: absolute; left: 12px; width: 16px; height: 16px; fill: none; stroke: var(--secondary-text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.search-clear-btn { position: absolute; right: 10px; width: 20px; height: 20px; background: #c7c7cc; border: none; border-radius: 50%; color: #fff; font-size: 12px; line-height: 20px; text-align: center; cursor: pointer; display: none; padding: 0; }
+.search-hidden { display: none !important; }
 
-  static MORE_ICON = `<svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm6 6h4v-4h-4v4z"/></svg>`;
+/* ==========================================
+   ActionCard, Accordion & Carousel
+   ========================================== */
+.action-card-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; text-align: center; width: 100%; box-sizing: border-box; }
+.action-card-icon { font-size: 36px; margin-bottom: 10px; line-height: 1; }
+.action-card-title { font-size: 16px; font-weight: 700; color: var(--text-color); margin-bottom: 6px; }
+.action-card-text { font-size: 13px; color: var(--secondary-text); margin-bottom: 14px; max-width: 320px; line-height: 1.4; }
+.action-card-container .btn { margin-bottom: 0; }
 
-init() {
-    const existing = document.getElementById('bottom-bar-nav-root');
-    if (existing) existing.remove();
+.app-accordion { width: 100%; margin-bottom: 12px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); border: 1px solid var(--border-color); box-sizing: border-box; }
+.accordion-item { border-bottom: 1px solid var(--border-color); }
+.accordion-item:last-child { border-bottom: none; }
+.accordion-header { padding: 14px 16px; font-size: 15px; font-weight: 600; color: var(--text-color); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; background-color: #ffffff; transition: background-color 0.2s ease; }
+.accordion-header:active { background-color: #f2f2f7; }
+.accordion-icon { font-size: 12px; color: var(--secondary-text); transition: transform 0.25s ease; }
+.accordion-item.active .accordion-icon { transform: rotate(180deg); }
+.accordion-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), padding 0.25s ease; font-size: 14px; line-height: 1.5; color: #3a3a3c; background-color: #fafafc; }
+.accordion-item.active .accordion-body { padding: 12px 16px; max-height: 1000px; transition: max-height 0.35s ease-in-out, padding 0.25s ease; }
 
-    const rootContainer = document.createElement('div');
-    rootContainer.id = 'bottom-bar-nav-root';
+.app-carousel-container { position: relative; width: 100%; margin-bottom: 16px; box-sizing: border-box; }
+.carousel-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; gap: 12px; padding: 4px 2px 12px 2px; scrollbar-width: none; cursor: grab; user-select: none; }
+.carousel-track:active { cursor: grabbing; }
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-slide { flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; }
+.app-carousel-container.peek .carousel-slide { flex: 0 0 85%; }
 
-    let visibleItems = [];
-    let overflowItems = [];
+.carousel-slide-content { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border-color); overflow: hidden; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; }
+.carousel-slide-content .media-preview-container { margin: 0 !important; border: none !important; border-radius: 0 !important; width: 100% !important; height: 100% !important; display: flex !important; flex-direction: column !important; }
+.carousel-slide-content .media-preview-image { display: block !important; width: 100% !important; height: 100% !important; object-fit: cover !important; }
 
-    if (this.items.length <= this.maxVisible) {
-      visibleItems = this.items;
-    } else {
-      visibleItems = this.items.slice(0, this.maxVisible - 1);
-      overflowItems = this.items.slice(this.maxVisible - 1);
-    }
+.carousel-text-body { padding: 16px !important; box-sizing: border-box !important; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
+.carousel-text-body .item-title, .carousel-text-body .item-text, .carousel-text-body .item-badge, .carousel-text-body .badge-group { margin-left: 0; margin-right: 0; }
 
-    // 1. 建立主導覽列 (只放頭幾個)
-    this.barEl = document.createElement('nav');
-    this.barEl.className = 'bottom-bar-nav';
+.carousel-nav-btn { display: none; position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; background: rgba(255, 255, 255, 0.9); border: 1px solid var(--border-color); border-radius: 50%; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); cursor: pointer; z-index: 10; align-items: center; justify-content: center; font-size: 14px; color: var(--text-color); transition: all 0.2s ease; }
+.carousel-nav-btn:hover { background: #ffffff; transform: translateY(-50%) scale(1.1); }
+.carousel-nav-btn.prev { left: -10px; }
+.carousel-nav-btn.next { right: -10px; }
+@media (min-width: 601px) { .carousel-nav-btn { display: flex; } }
 
-    visibleItems.forEach(item => {
-      this.barEl.appendChild(this.createItemBtn(item));
-    });
+.carousel-dots { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 4px; }
+.carousel-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #c7c7cc; cursor: pointer; transition: all 0.25s ease; }
+.carousel-dot.active { width: 16px; border-radius: 4px; background-color: var(--primary-color); }
 
-    // 2. 當有項目溢出時，加入「更多」按鈕
-    if (overflowItems.length > 0) {
-      const moreBtn = this.createItemBtn({
-        id: '_more',
-        label: '更多',
-        icon: BottomBarNav.MORE_ICON,
-        onClick: () => this.toggleMoreMenu(true)
-      });
-      this.barEl.appendChild(moreBtn);
+/* ==========================================
+    Modal & Toast
+   ========================================== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-container { background: var(--card-bg); width: 100%; max-width: 500px; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px 20px 24px 20px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
+.modal-overlay.center .modal-container { align-self: center; border-radius: 16px; transform: scale(0.9); width: 90%; }
+.modal-overlay.active .modal-container { transform: translateY(0) scale(1); }
+.modal-handle { width: 36px; height: 5px; background-color: #d1d1d6; border-radius: 3px; margin: 0 auto 12px auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.modal-title { font-size: 17px; font-weight: 700; color: var(--text-color); }
+.modal-close-btn { background: #e5e5ea; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; color: var(--secondary-text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-      // 💡 關鍵修改：傳入完整的 this.items，讓「更多」彈出面板顯示所有選擇項目
-      this.createMoreOverlay(this.items, rootContainer);
-    }
+.toast-container { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 2000; width: calc(100% - 32px); max-width: 420px; padding: 12px 16px; border-radius: 12px; background-color: #1c1c1e; color: #ffffff; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); display: flex; align-items: center; justify-content: space-between; transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.toast-container.active { transform: translateX(-50%) translateY(0); }
+.toast-content { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+.toast-info    { border-left: 4px solid #007aff; }
+.toast-success { border-left: 4px solid #34c759; }
+.toast-warning { border-left: 4px solid #ff9500; }
+.toast-danger  { border-left: 4px solid #ff3b30; }
 
-    rootContainer.appendChild(this.barEl);
+.loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 999; }
 
-    const target = this.containerId ? document.getElementById(this.containerId) : document.body;
-    if (target) target.appendChild(rootContainer);
-  }
+/* ==========================================
+    Bottom Bar Nav
+	 底列導覽主容器：固定在可視視窗最下方 
+   ========================================== */
+/* 1. 修改主容器：加上內容最大寬度限制與中央對齊 */
+.bottom-bar-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: center; /* 核心：改為中央對齊，不再向兩側強行拉開 */
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
-  createItemBtn(item) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `bottom-bar-item ${this.activeId === item.id ? 'active' : ''}`;
-    btn.dataset.id = item.id;
+/* 2. 修改選項按鈕：限制每個圖標的最小與最大寬度 */
+.bottom-bar-item {
+  flex: 1;
+  min-width: 60px;  /* 避免手機上太擠 */
+  max-width: 90px;  /* 核心：限制最大寬度！即使螢幕超寬，4個圖標也會緊湊聚在中間 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 6px 0;
+  margin: 0;
+  cursor: pointer;
+  color: #666666;
+  text-decoration: none;
+  user-select: none;
+  transition: color 0.2s ease;
+  line-height: 1;
+}
 
-    const iconWrapper = document.createElement('div');
-    iconWrapper.className = 'bottom-bar-icon-wrapper';
-	// 💡 自動解析：如果是常用圖標名稱則從 UI_ICONS 抓，否則當作原始 SVG 字串
-	let iconContent = item.icon || '';
-    if (typeof UI_ICONS !== 'undefined' && UI_ICONS[item.icon]) {
-      iconContent = UI_ICONS[item.icon];
-    }
-    iconWrapper.innerHTML = iconContent;
+/* 選取/高亮狀態 */
+.bottom-bar-item:active,
+.bottom-bar-item.active {
+  color: #ff4d4f; /* 預設主題高亮色 */
+}
 
-    if (item.badge !== undefined && item.badge !== null && item.badge !== '') {
-      const badgeEl = document.createElement('span');
-      badgeEl.className = 'bottom-bar-badge';
-      if (item.badge === true) {
-        badgeEl.classList.add('dot-only');
-      } else {
-        badgeEl.textContent = String(item.badge);
-      }
-      iconWrapper.appendChild(badgeEl);
-    }
+/* SVG 圖示與 Badge 容器 */
+.bottom-bar-icon-wrapper {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    const labelEl = document.createElement('span');
-    labelEl.className = 'bottom-bar-label';
-    labelEl.textContent = item.label;
+.bottom-bar-icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
 
-    btn.appendChild(iconWrapper);
-    btn.appendChild(labelEl);
+/* 鮮色小圓點 / Badge 數字 */
+.bottom-bar-badge {
+  position: absolute;
+  top: -3px;
+  right: -6px;
+  background-color: #ff4d4f;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 8px;
+  min-height: 8px;
+  border: 1.5px solid #ffffff;
+  text-align: center;
+  white-space: nowrap;
+}
 
-    btn.addEventListener('click', (e) => {
-      if (item.id !== '_more') {
-        this.setActive(item.id);
-        this.toggleMoreMenu(false);
-      }
-      if (typeof item.onClick === 'function') {
-        // 如果 onClick傳入的是字串（例如全域函式名稱），自動幫忙執行
-        if (typeof item.onClick === 'string' && typeof window[item.onClick] === 'function') {
-          window[item.onClick](item, e);
-        } else {
-          item.onClick(item, e);
-        }
-      }
-    });
+/* 僅顯示純紅點 */
+.bottom-bar-badge.dot-only {
+  padding: 0;
+  min-width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
 
-    return btn;
-  }
+/* 按鈕文字 */
+.bottom-bar-label {
+  font-size: 11px;
+  margin-top: 2px;
+  line-height: 1.2;
+}
 
-  createMoreOverlay(overflowItems, parentEl) {
-    this.overlayEl = document.createElement('div');
-    this.overlayEl.className = 'bottom-bar-more-overlay';
+/* 「更多」彈出層背景 (Overlay) */
+.bottom-bar-more-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
 
-    const menuEl = document.createElement('div');
-    menuEl.className = 'bottom-bar-more-menu';
+.bottom-bar-more-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-    overflowItems.forEach(item => {
-      menuEl.appendChild(this.createItemBtn(item));
-    });
+/* 「更多」彈出面板 */
+.bottom-bar-more-menu {
+  width: 100%;
+  max-width: 600px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px;
+  box-sizing: border-box;
 
-    this.overlayEl.appendChild(menuEl);
+  /* 核心：改為 Flexbox 自動流式排版 */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 16px 0;
 
-    this.overlayEl.addEventListener('click', (e) => {
-      if (e.target === this.overlayEl) {
-        this.toggleMoreMenu(false);
-      }
-    });
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
 
-    parentEl.appendChild(this.overlayEl);
-  }
+/* 根據畫面寬度自動響應：設定每列圖標數 */
+.bottom-bar-more-menu .bottom-bar-item {
+  /* 預設（窄螢幕/手機）：一列 4 個 */
+  flex: 0 0 25%;
+  max-width: 25%;
+}
 
-  toggleMoreMenu(show) {
-    if (this.overlayEl) {
-      if (show) {
-        this.overlayEl.classList.add('show');
-      } else {
-        this.overlayEl.classList.remove('show');
-      }
-    }
-  }
-
-  setActive(id) {
-    this.activeId = id;
-    const allBtns = document.querySelectorAll('#bottom-bar-nav-root .bottom-bar-item');
-    allBtns.forEach(btn => {
-      if (btn.dataset.id === id) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-  }
-
-  updateBadge(id, badgeValue) {
-    const itemObj = this.items.find(i => i.id === id);
-    if (itemObj) itemObj.badge = badgeValue;
-    
-    const btn = document.querySelector(`#bottom-bar-nav-root .bottom-bar-item[data-id="${id}"]`);
-    if (btn) {
-      const wrapper = btn.querySelector('.bottom-bar-icon-wrapper');
-      let badgeEl = wrapper.querySelector('.bottom-bar-badge');
-      
-      if (badgeValue === undefined || badgeValue === null || badgeValue === '') {
-        if (badgeEl) badgeEl.remove();
-      } else {
-        if (!badgeEl) {
-          badgeEl = document.createElement('span');
-          badgeEl.className = 'bottom-bar-badge';
-          wrapper.appendChild(badgeEl);
-        }
-        if (badgeValue === true) {
-          badgeEl.className = 'bottom-bar-badge dot-only';
-          badgeEl.textContent = '';
-        } else {
-          badgeEl.className = 'bottom-bar-badge';
-          badgeEl.textContent = String(badgeValue);
-        }
-      }
-    }
+/* 螢幕寬度 >= 480px（大手機 / 平板）：自動切換為一列 5 個 */
+@media (min-width: 480px) {
+  .bottom-bar-more-menu .bottom-bar-item {
+    flex: 0 0 20%;
+    max-width: 20%;
   }
 }
 
-const UI_ICONS = {
-  // 1. 主頁 / 首頁
-  home: `<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`,
+.bottom-bar-more-overlay.show .bottom-bar-more-menu {
+  transform: translateY(0);
+}
 
-  // 2. 搜尋
-  search: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-
-  // 3. 訊息 / 對話
-  message: `<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>`,
-
-  // 4. 購物車
-  cart: `<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
-
-  // 5. 個人 / 用戶
-  user: `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`,
-
-  // 6. 收藏 / 追蹤
-  star: `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`,
-
-  // 7. 地圖 / 鄰近
-  location: `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
-
-  // 8. 設定
-  settings: `<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>`,
-
-  // 9. 通知 / 鈴鐺
-  bell: `<svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`
-  
-  // 10. 升降機 (Elevator / Lift)
-  elevator: `<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6V5h12v14zM8.5 13H11v3.5h1.5V13H15l-3.25-3.5L8.5 13zM12 7.5L8.5 11H11V7.5z"/></svg>`,
-
-  // 11. USER ROLE 頁面權限設定 (User Role / Permission Shield)
-  rolePermission: `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-5.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>`,
-
-  // 12. 對講機 (Walkie Talkie)
-  walkieTalkie: `<svg viewBox="0 0 24 24"><path d="M10 2h2v3h-2V2zm-3 4h10c1.1 0 2 .9 2 2v13c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2zm2 3v2h6V9H9zm0 4v2h6v-2H9zm0 4v2h4v-2H9z"/></svg>`,
-
-  // 13. 交通 (Traffic / Bus)
-  traffic: `<svg viewBox="0 0 24 24"><path d="M12 2c-4.42 0-8 .5-8 4v10c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4zm-4.5 13c-.83 0-1.5-.67-1.5-1.5S6.67 12 7.5 12s1.5.67 1.5 1.5S8.33 15 7.5 15zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v3z"/></svg>`,
-
-  // 14. 考場狀況 (Exam Center / Assignment)
-  examStatus: `<svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`,
-
-  // 15. 急救 (First Aid / Red Cross Kit)
-  firstAid: `<svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm6 9h-3v3h-2v-3H8v-2h3V9h2v2h3v2z"/></svg>`,
-
-  // 16. 小組實務急救 (Group First Aid Practical)
-  groupFirstAid: `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5zM12 2v3H9v2h3v3h2V7h3V5h-3V2h-2z"/></svg>`,
-
-  // 17. 民安隊 LOGO (CAS Emblem Style - 盾牌雙翼與十字)
-  casLogo: `<svg viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5.25 3.4 10.12 8 11.5 4.6-1.38 8-6.25 8-11.5V5l-8-3zm-1 5h2v3h3v2h-3v3h-2v-3H8v-2h3V7zm-6 4.5c0-3.1 1.9-5.8 4.6-6.9L12 3.8l2.4.8c2.7 1.1 4.6 3.8 4.6 6.9 0 3.8-2.6 7.4-7 8.8-4.4-1.4-7-5-7-8.8z"/></svg>`,
-
-  // 18. 香港紅十字會 LOGO (Red Cross Emblem)
-  redCrossLogo: `<svg viewBox="0 0 24 24"><path d="M10 2h4v7h7v4h-7v9h-4v-9H3V9h7V2z"/></svg>`,
-
-  // 19. 時鐘 (Clock)
-  clock: `<svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
-
-  // 20. 腳印 (Footprints / Patrol)
-  footprints: `<svg viewBox="0 0 24 24"><path d="M19.5 8.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm-3-3c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm-11 5C4.67 10.5 4 11.17 4 12s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm3-3C7.67 7.5 7 8.17 7 9s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5S9.33 7.5 8.5 7.5zm4 7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-7 3c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
-
-  // 21. 揚聲器 / 廣播 (Megaphone / Loudspeaker)
-  megaphone: `<svg viewBox="0 0 24 24"><path d="M18 11c0-1.6-.9-3.1-2.3-3.8l1.4-1.4C18.9 6.9 20 8.8 20 11s-1.1 4.1-2.9 5.2l-1.4-1.4c1.4-.7 2.3-2.2 2.3-3.8zM15.5 11c0-.8-.4-1.5-1.1-1.9l1.5-1.5c1.1.9 1.6 2.1 1.6 3.4s-.5 2.5-1.6 3.4l-1.5-1.5c.7-.4 1.1-1.1 1.1-1.9zM3 9v6h4l5 5V4L7 9H3zm7 7.17L7.83 14H5v-4h2.83L10 7.83v8.34z"/></svg>`,
-
-  // 22. 意見反映 (Feedback / Speech Bubble with Pen)
-  feedback: `<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 12H7v-2h10v2zm0-3H7V9h10v2zm0-3H7V6h10v2z"/></svg>`,
-
-  // 23. 人力安排 (Manpower / Roster Management)
-  manpower: `<svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>`,
-
-  // 24. 語言設定 (Language / Translate)
-  language: `<svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2.1l1.1-3h4.6l1.1 3H23l-4.5-12zm-2.62 7l1.62-4.41L19.12 17h-3.24z"/></svg>`,
-
-  // 25. 使用條款 / 服務協議 (Terms of Service / Contract)
-  terms: `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`,
-
-  // 26. 警報 / 緊急 (Alert / Warning Triangle)
-  alert: `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`,
-
-  // 27. 地圖導航 (Navigation / Compass)
-  navigation: `<svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>`,
-
-  // 28. 日曆 / 派更 (Calendar)
-  calendar: `<svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>`,
-
-  // 29. 歷史紀錄 / 日誌 (History / Logs)
-  history: `<svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>`,
-
-  // 30. 下載 / 匯出 (Download)
-  download: `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`,
-
-  // 31. 上傳 / 匯入 (Upload)
-  upload: `<svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>`,
-
-  // 32. 掃瞄 QR Code (Scan QR)
-  qrScan: `<svg viewBox="0 0 24 24"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-14h-4V3h4c1.1 0 2 .9 2 2v4h-2V5zM7 7h4v4H7zm0 6h4v4H7zm6-6h4v4h-4zm0 6h4v4h-4z"/></svg>`,
-
-  // 33. 相機 / 拍照備份 (Camera)
-  camera: `<svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>`,
-
-  // 34. 檔案庫 / 文件 (Document / File)
-  file: `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`,
-
-  // 35. 統計圖表 (Analytics / Chart)
-  chart: `<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>`,
-
-  // 36. 鎖頭 / 密碼安全 (Security / Lock)
-  lock: `<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
-
-  // 37. 電話 / 聯絡 (Phone)
-  phone: `<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`,
-
-  // 38. 電子郵件 (Email)
-  email: `<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`,
-
-  // 39. 重新整理 / 更新 (Sync / Refresh)
-  sync: `<svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>`,
-
-  // 40. 登出 (Logout)
-  logout: `<svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>`,
-
-  // 41. 登入 (Login)
-  login: `<svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>`,
-
-  // 42. 連結 / 網址 (Link)
-  link: `<svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`,
-
-  // 43. 垃圾桶 / 刪除 (Trash / Delete)
-  trash: `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`,
-
-  // 44. 編輯 / 筆 (Edit / Pencil)
-  edit: `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`,
-
-  // 45. 眼睛 / 檢視 (View / Eye)
-  eye: `<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`
-};
+/* 💡 避免頁面最底部的內容被 Fixed 導覽列遮擋 */
+body {
+  padding-bottom: 60px;
+}
