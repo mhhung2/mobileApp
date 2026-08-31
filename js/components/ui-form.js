@@ -174,17 +174,17 @@ Object.assign(UI, {
             const val = rawVal.trim();
 
             // 1. 必填檢查 (required)
-            if (field.required && val === '') {target.setCustomValidity('請填寫此欄位');return;}
+            if (target.required && val === '') {target.setCustomValidity('請填寫此欄位');return;}
             if (val !== '') {
               const len = rawVal.length; // 文字欄位保留空格計算長度
               const isNumberType = field.type === 'inputNumberText';
 
               // 2. 長度檢查 (minLength) - 不受 pattern 影響，優先攔截
-              if (field.minLength && len < Number(field.minLength)) {
-                if (field.minLength === field.maxLength) {
-                  target.setCustomValidity(`請輸入恰好 ${field.minLength} 個${isNumberType ? '位數字' : '字元'}`);
+              if ((target.minLength!=='' || target.minLength !== undefined) && len < Number(target.minLength)) {
+                if (target.minLength === target.maxLength) {
+                  target.setCustomValidity(`請輸入恰好 ${target.minLength} 個${isNumberType ? '位數字' : '字元'}`);
                 } else {
-                  target.setCustomValidity(`請輸入至少 ${field.minLength} 個${isNumberType ? '位數字' : '字元'} (目前 ${len} 個)`);
+                  target.setCustomValidity(`請輸入至少 ${target.minLength} 個${isNumberType ? '位數字' : '字元'} (目前 ${len} 個)`);
                 }
                 return;
               }
@@ -192,21 +192,21 @@ Object.assign(UI, {
               // 3. 數值範圍檢查 (僅對數字欄位生效)
               if (isNumberType) {
                 const valNum = Number(val);
-                if (field.min !== undefined && valNum < Number(field.min)) {
-                  target.setCustomValidity(`數值不能小於 ${field.min}`);
+                if ((target.min!=='' || target.min !== undefined) && valNum < Number(target.min)) {
+                  target.setCustomValidity(`數值不能小於 ${target.min}`);
                   return;
                 }
-                if (field.max !== undefined && valNum > Number(field.max)) {
-                  target.setCustomValidity(`數值不能大於 ${field.max}`);
+                if ((target.max!=='' || target.max !== undefined) && valNum > Number(target.max)) {
+                  target.setCustomValidity(`數值不能大於 ${target.max}`);
                   return;
                 }
               }
 
               // 4. 正則表達式檢查 (field.pattern)
-              if (field.pattern) {
-                const reg = new RegExp(field.pattern);
+              if (target.pattern) {
+                const reg = new RegExp(target.pattern);
                 if (!reg.test(rawVal)) {
-                  target.setCustomValidity(field.patternError || '輸入格式不正確');
+                  target.setCustomValidity(target.patternError || '輸入格式不正確');
                   return;
                 }
               }
@@ -304,7 +304,6 @@ UI.createComponent = function(item) {
 	if (formGroup) {
 	  if (item.category) formGroup.dataset.category = item.category;
 	  if (item.groupId) formGroup.dataset.groupId = item.groupId;
-	  //if (item.id) formGroup.id = item.id;
 	  return formGroup;
 	}
   }
