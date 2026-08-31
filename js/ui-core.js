@@ -11,6 +11,9 @@ const UI = {
   lastUpdatedStr: '',
   onRefreshCallbackName: null,
   visibilityListenersBound: false,
+  
+  // 存放全域 BottomBar
+  bottomBarInstance: null,
 
   /**
    * 頁面渲染入口
@@ -47,6 +50,16 @@ const UI = {
     if (item.category) element.dataset.category = item.category;
     if (item.groupId) element.dataset.groupId = item.groupId;
     return element;
+  },
+  
+  createBottomBarNav(item) {
+    this.bottomBarInstance = new BottomBarNav({
+      items: item.items || [],
+      maxVisible: item.maxVisible || 5,
+      activeId: item.activeId || '',
+      containerId: item.containerId || null
+    });
+    return null;
   },
 
   /**
@@ -89,7 +102,8 @@ const UI = {
       case 'actionCard':   element = this.createActionCard(item); break;
       case 'accordion':    element = this.createAccordion(item); break;
       case 'carousel':     element = this.createCarousel(item); break;
-
+	  // BottomBar 固定底列
+      case 'bottomBarNav': return this.createBottomBarNav(item); break;
       default:
         console.warn(`[UI Engine] 未知元件類型: ${item.type}`);
         return null;
