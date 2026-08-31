@@ -1,171 +1,226 @@
 /* ==========================================
-   Form 表單控制項樣式
+   Tab 頁籤與搜尋列 SearchBar
    ========================================== */
-.form-group { margin-bottom: 14px; }
-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #636366;
-}
+.tab-container { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 4px; margin-bottom: 12px; width: 100%; }
+.tab-btn { flex-shrink: 0; white-space: nowrap; padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 16px; border: 1px solid var(--border-color); background-color: var(--card-bg); color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+.tab-btn.active { background-color: var(--primary-color); color: #ffffff; border-color: var(--primary-color); }
 
-.form-control {
+.search-bar-container { margin-bottom: 12px; width: 100%; box-sizing: border-box; }
+.search-input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+.search-input { width: 100%; height: 40px; padding: 8px 36px; font-size: 15px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--card-bg); outline: none; box-sizing: border-box; appearance: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.search-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1); }
+.search-icon { position: absolute; left: 12px; width: 16px; height: 16px; fill: none; stroke: var(--secondary-text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.search-clear-btn { position: absolute; right: 10px; width: 20px; height: 20px; background: #c7c7cc; border: none; border-radius: 50%; color: #fff; font-size: 12px; line-height: 20px; text-align: center; cursor: pointer; display: none; padding: 0; }
+.search-hidden { display: none !important; }
+
+/* ==========================================
+   ActionCard, Accordion & Carousel
+   ========================================== */
+.action-card-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; text-align: center; width: 100%; box-sizing: border-box; }
+.action-card-icon { font-size: 36px; margin-bottom: 10px; line-height: 1; }
+.action-card-title { font-size: 16px; font-weight: 700; color: var(--text-color); margin-bottom: 6px; }
+.action-card-text { font-size: 13px; color: var(--secondary-text); margin-bottom: 14px; max-width: 320px; line-height: 1.4; }
+.action-card-container .btn { margin-bottom: 0; }
+
+.app-accordion { width: 100%; margin-bottom: 12px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); border: 1px solid var(--border-color); box-sizing: border-box; }
+.accordion-item { border-bottom: 1px solid var(--border-color); }
+.accordion-item:last-child { border-bottom: none; }
+.accordion-header { padding: 14px 16px; font-size: 15px; font-weight: 600; color: var(--text-color); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; background-color: #ffffff; transition: background-color 0.2s ease; }
+.accordion-header:active { background-color: #f2f2f7; }
+.accordion-icon { font-size: 12px; color: var(--secondary-text); transition: transform 0.25s ease; }
+.accordion-item.active .accordion-icon { transform: rotate(180deg); }
+.accordion-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), padding 0.25s ease; font-size: 14px; line-height: 1.5; color: #3a3a3c; background-color: #fafafc; }
+.accordion-item.active .accordion-body { padding: 12px 16px; max-height: 1000px; transition: max-height 0.35s ease-in-out, padding 0.25s ease; }
+
+.app-carousel-container { position: relative; width: 100%; margin-bottom: 16px; box-sizing: border-box; }
+.carousel-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; gap: 12px; padding: 4px 2px 12px 2px; scrollbar-width: none; cursor: grab; user-select: none; }
+.carousel-track:active { cursor: grabbing; }
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-slide { flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; }
+.app-carousel-container.peek .carousel-slide { flex: 0 0 85%; }
+
+.carousel-slide-content { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border-color); overflow: hidden; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; }
+.carousel-slide-content .media-preview-container { margin: 0 !important; border: none !important; border-radius: 0 !important; width: 100% !important; height: 100% !important; display: flex !important; flex-direction: column !important; }
+.carousel-slide-content .media-preview-image { display: block !important; width: 100% !important; height: 100% !important; object-fit: cover !important; }
+
+.carousel-text-body { padding: 16px !important; box-sizing: border-box !important; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
+.carousel-text-body .item-title, .carousel-text-body .item-text, .carousel-text-body .item-badge, .carousel-text-body .badge-group { margin-left: 0; margin-right: 0; }
+
+.carousel-nav-btn { display: none; position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; background: rgba(255, 255, 255, 0.9); border: 1px solid var(--border-color); border-radius: 50%; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); cursor: pointer; z-index: 10; align-items: center; justify-content: center; font-size: 14px; color: var(--text-color); transition: all 0.2s ease; }
+.carousel-nav-btn:hover { background: #ffffff; transform: translateY(-50%) scale(1.1); }
+.carousel-nav-btn.prev { left: -10px; }
+.carousel-nav-btn.next { right: -10px; }
+@media (min-width: 601px) { .carousel-nav-btn { display: flex; } }
+
+.carousel-dots { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 4px; }
+.carousel-dot { width: 6px; height: 6px; border-radius: 50%; background-color: #c7c7cc; cursor: pointer; transition: all 0.25s ease; }
+.carousel-dot.active { width: 16px; border-radius: 4px; background-color: var(--primary-color); }
+
+/* ==========================================
+    Modal & Toast
+   ========================================== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-container { background: var(--card-bg); width: 100%; max-width: 500px; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px 20px 24px 20px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
+.modal-overlay.center .modal-container { align-self: center; border-radius: 16px; transform: scale(0.9); width: 90%; }
+.modal-overlay.active .modal-container { transform: translateY(0) scale(1); }
+.modal-handle { width: 36px; height: 5px; background-color: #d1d1d6; border-radius: 3px; margin: 0 auto 12px auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.modal-title { font-size: 17px; font-weight: 700; color: var(--text-color); }
+.modal-close-btn { background: #e5e5ea; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; color: var(--secondary-text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.toast-container { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 2000; width: calc(100% - 32px); max-width: 420px; padding: 12px 16px; border-radius: 12px; background-color: #1c1c1e; color: #ffffff; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); display: flex; align-items: center; justify-content: space-between; transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.toast-container.active { transform: translateX(-50%) translateY(0); }
+.toast-content { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+.toast-info    { border-left: 4px solid #007aff; }
+.toast-success { border-left: 4px solid #34c759; }
+.toast-warning { border-left: 4px solid #ff9500; }
+.toast-danger  { border-left: 4px solid #ff3b30; }
+
+.loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 999; }
+
+/* ==========================================
+    Bottom Bar Nav
+	 底列導覽主容器：固定在可視視窗最下方 
+   ========================================== */
+/* 1. 修改主容器：加上內容最大寬度限制與中央對齊 */
+.bottom-bar-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  height: 44px;
-  padding: 10px 12px;
-  font-size: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: #fff;
-  outline: none;
-  box-sizing: border-box;
-  appearance: none;
-  transition: border-color 0.2s ease;
-}
-
-.form-control:focus { border-color: var(--primary-color); }
-
-select.form-control {
-  padding-right: 36px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px 16px;
-  cursor: pointer;
-}
-select.form-control::-ms-expand { display: none; }
-
-textarea.form-control {
-  height: auto;
-  min-height: 80px;
-  resize: vertical;
-  line-height: 1.4;
-}
-
-.option-group { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-.option-group.inline { flex-direction: row; flex-wrap: wrap; gap: 12px 16px; }
-
-.option-label {
-  display: inline-flex;
-  align-items: center;
-  font-size: 15px;
-  color: var(--text-color);
-  cursor: pointer;
-  user-select: none;
-}
-
-.option-label input[type="radio"],
-.option-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin: 0 8px 0 0;
-  accent-color: var(--primary-color);
-  cursor: pointer;
-}
-
-input[type="file"].form-control { height: auto; padding: 8px 12px; font-size: 14px; color: #636366; background-color: #fafafc; }
-input[type="file"]::file-selector-button {
-  padding: 6px 12px;
-  margin-right: 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
+  height: 60px;
   background-color: #ffffff;
-  color: var(--text-color);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: center; /* 核心：改為中央對齊，不再向兩側強行拉開 */
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-input[type="date"].form-control,
-input[type="datetime-local"].form-control,
-input[type="time"].form-control { max-width: 100%; min-width: 0; box-sizing: border-box; display: block; }
-input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 20px; }
-
-/* Switch 開關 */
-.switch-group { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
-.switch-label-text { font-size: 15px; color: var(--text-color); }
-.switch-toggle { position: relative; display: inline-block; width: 51px; height: 31px; flex-shrink: 0; }
-.switch-toggle input { opacity: 0; width: 0; height: 0; }
-.switch-slider {
-  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #e5e5ea; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 31px;
-}
-.switch-slider:before {
-  position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
-  background-color: white; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-.switch-toggle input:checked + .switch-slider { background-color: var(--primary-color); }
-.switch-toggle input:checked + .switch-slider:before { transform: translateX(20px); }
-
-/* 按鈕與按鈕組 */
-.btn {
-  width: 100%;
-  height: 48px;
+/* 2. 修改選項按鈕：限制每個圖標的最小與最大寬度 */
+.bottom-bar-item {
+  flex: 1;
+  min-width: 60px;  /* 避免手機上太擠 */
+  max-width: 90px;  /* 核心：限制最大寬度！即使螢幕超寬，4個圖標也會緊湊聚在中間 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
   border: none;
-  border-radius: var(--radius);
-  font-size: 16px;
-  font-weight: 600;
+  padding: 6px 0;
+  margin: 0;
   cursor: pointer;
+  color: #666666;
+  text-decoration: none;
+  user-select: none;
+  transition: color 0.2s ease;
+  line-height: 1;
+}
+
+/* 選取/高亮狀態 */
+.bottom-bar-item:active,
+.bottom-bar-item.active {
+  color: #ff4d4f; /* 預設主題高亮色 */
+}
+
+/* SVG 圖示與 Badge 容器 */
+.bottom-bar-icon-wrapper {
+  position: relative;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
 }
 
-.btn-primary   { background-color: var(--primary-color); color: #fff; }
-.btn-secondary { background-color: #e5e5ea; color: var(--text-color); }
-.btn-success   { background-color: #34c759; color: #ffffff; }
-.btn-warning   { background-color: #ffd700; color: #1c1c1e; }
-.btn-caution   { background-color: #ff9500; color: #ffffff; }
-.btn-danger    { background-color: #ff3b30; color: #ffffff; }
-.btn-outline   { background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
-
-.btn:disabled, .btn.disabled {
-  background-color: #e5e5ea !important;
-  color: #aeaeb2 !important;
-  border-color: #e5e5ea !important;
-  cursor: not-allowed !important;
-  opacity: 0.7;
-  pointer-events: none;
-  box-shadow: none !important;
+.bottom-bar-icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
 }
 
-.btn:last-child { margin-bottom: 0; }
-.btn:active     { opacity: 0.85; }
-
-.btn-group { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 12px; width: 100%; }
-.btn-group.align-left   { justify-content: flex-start; }
-.btn-group.align-center { justify-content: center; }
-.btn-group.align-right  { justify-content: flex-end; }
-
-.btn-group .btn-inline {
-  width: auto; min-width: fit-content; height: 40px; padding: 0 16px; font-size: 14px; margin-bottom: 0; flex-grow: 0;
+/* 鮮色小圓點 / Badge 數字 */
+.bottom-bar-badge {
+  position: absolute;
+  top: -3px;
+  right: -6px;
+  background-color: #ff4d4f;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 8px;
+  min-height: 8px;
+  border: 1.5px solid #ffffff;
+  text-align: center;
+  white-space: nowrap;
 }
 
-/* 按鈕 Loading 動畫 */
-button.loading {
-  position: relative;
-  pointer-events: none;
-  opacity: 0.8;
-}
-
-button.loading::after {
-  content: "";
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-left: 8px;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
+/* 僅顯示純紅點 */
+.bottom-bar-badge.dot-only {
+  padding: 0;
+  min-width: 8px;
+  height: 8px;
   border-radius: 50%;
-  animation: button-spin 0.75s linear infinite;
-  vertical-align: middle;
 }
 
-@keyframes button-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* 按鈕文字 */
+.bottom-bar-label {
+  font-size: 11px;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* 「更多」彈出層背景 (Overlay) */
+.bottom-bar-more-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.bottom-bar-more-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 「更多」彈出面板 */
+.bottom-bar-more-menu {
+  width: 100%;
+  max-width: 500px;
+  max-height: 70vh; /* 避免超過畫面高度 70% */
+  overflow-y: auto;  /* 項目過多時可垂直滾動 */
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 8px;
+  box-sizing: border-box;
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.bottom-bar-more-overlay.show .bottom-bar-more-menu {
+  transform: translateY(0);
+}
+
+/* 💡 避免頁面最底部的內容被 Fixed 導覽列遮擋 */
+body {
+  padding-bottom: 60px;
 }
