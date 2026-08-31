@@ -157,7 +157,6 @@ Object.assign(UI, {
           else if (field.type === 'inputNumberText') {
             input.type = 'text';
             input.inputMode = 'numeric';
-            //input.pattern = '[0-9]*';
           } else {
             input.type = field.type || 'text';
           }
@@ -168,6 +167,7 @@ Object.assign(UI, {
           if (field.max) input.max = field.max;
           if (field.required) input.required = true;
 		  if (field.pattern) input.pattern = field.pattern;
+		  if (field.pattern) input.dataset.patternError = field.patternError;
 		  
           const validateInput = (target) => {
             const rawVal = target.value;
@@ -206,7 +206,7 @@ Object.assign(UI, {
               if (target.pattern) {
                 const reg = new RegExp(target.pattern);
                 if (!reg.test(rawVal)) {
-                  target.setCustomValidity(target.patternError || '輸入格式不正確');
+                  target.setCustomValidity(target.dataset.patternError || '輸入格式不正確');
                   return;
                 }
               }
