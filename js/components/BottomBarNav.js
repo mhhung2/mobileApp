@@ -15,7 +15,7 @@ class BottomBarNav {
 
   static MORE_ICON = `<svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm6 6h4v-4h-4v4z"/></svg>`;
 
-  init() {
+init() {
     const existing = document.getElementById('bottom-bar-nav-root');
     if (existing) existing.remove();
 
@@ -32,6 +32,7 @@ class BottomBarNav {
       overflowItems = this.items.slice(this.maxVisible - 1);
     }
 
+    // 1. 建立主導覽列 (只放頭幾個)
     this.barEl = document.createElement('nav');
     this.barEl.className = 'bottom-bar-nav';
 
@@ -39,6 +40,7 @@ class BottomBarNav {
       this.barEl.appendChild(this.createItemBtn(item));
     });
 
+    // 2. 當有項目溢出時，加入「更多」按鈕
     if (overflowItems.length > 0) {
       const moreBtn = this.createItemBtn({
         id: '_more',
@@ -48,7 +50,8 @@ class BottomBarNav {
       });
       this.barEl.appendChild(moreBtn);
 
-      this.createMoreOverlay(overflowItems, rootContainer);
+      // 💡 關鍵修改：傳入完整的 this.items，讓「更多」彈出面板顯示所有選擇項目
+      this.createMoreOverlay(this.items, rootContainer);
     }
 
     rootContainer.appendChild(this.barEl);
