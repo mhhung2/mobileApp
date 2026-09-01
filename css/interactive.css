@@ -79,11 +79,12 @@
 
 .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 999; }
 
+
 /* ==========================================
-    Bottom Bar Nav
-	 底列導覽主容器：固定在可視視窗最下方 
+   Bottom Bar Nav - 固定底部導覽列
    ========================================== */
-/* 1. 修改主容器：加上內容最大寬度限制與中央對齊 */
+
+/* 1. 底列導覽主容器 */
 .bottom-bar-nav {
   position: fixed;
   bottom: 0;
@@ -93,18 +94,18 @@
   background-color: #ffffff;
   border-top: 1px solid #e5e5e5;
   display: flex;
-  justify-content: center; /* 核心：改為中央對齊，不再向兩側強行拉開 */
+  justify-content: center; /* 項目中央對齊 */
   align-items: center;
   z-index: 1000;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 2. 修改選項按鈕：限制每個圖標的最小與最大寬度 */
+/* 2. 底列選項按鈕 */
 .bottom-bar-item {
   flex: 1;
-  min-width: 60px;  /* 避免手機上太擠 */
-  max-width: 90px;  /* 核心：限制最大寬度！即使螢幕超寬，4個圖標也會緊湊聚在中間 */
+  min-width: 60px;
+  max-width: 90px; /* 限制單個按鈕最大寬度 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -121,10 +122,10 @@
   line-height: 1;
 }
 
-/* 選取/高亮狀態 */
+/* 選取 / 高亮狀態 */
 .bottom-bar-item:active,
 .bottom-bar-item.active {
-  color: #ff4d4f; /* 預設主題高亮色 */
+  color: #ff4d4f;
 }
 
 /* SVG 圖示與 Badge 容器 */
@@ -143,11 +144,11 @@
   fill: currentColor;
 }
 
-/* 鮮色小圓點 / Badge 數字 */
+/* 數字 Badge / 純點 Badge */
 .bottom-bar-badge {
   position: absolute;
   top: -3px;
-  right: -6px;
+  right: -10px;
   background-color: #ff4d4f;
   color: #ffffff;
   font-size: 10px;
@@ -162,7 +163,6 @@
   white-space: nowrap;
 }
 
-/* 僅顯示純紅點 */
 .bottom-bar-badge.dot-only {
   padding: 0;
   min-width: 8px;
@@ -177,7 +177,11 @@
   line-height: 1.2;
 }
 
-/* 「更多」彈出層背景 (Overlay) */
+/* ==========================================
+   「更多」彈出面板 (Overlay & Menu)
+   ========================================== */
+
+/* 1. 遮罩背景 */
 .bottom-bar-more-overlay {
   position: fixed;
   top: 0;
@@ -199,47 +203,70 @@
   pointer-events: auto;
 }
 
-/* 「更多」彈出面板 */
+/* 2. 彈出的選單卡片容器 (修正：移除無效的 Flex 屬性) */
 .bottom-bar-more-menu {
   width: 100%;
   max-width: 600px;
   max-height: 70vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* 滑動順暢 */
   background: #ffffff;
   border-radius: 16px 16px 0 0;
   padding: 20px 16px;
   box-sizing: border-box;
 
-  /* 核心：改為 Flexbox 自動流式排版 */
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 16px 0;
-
   transform: translateY(100%);
   transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-}
-
-/* 根據畫面寬度自動響應：設定每列圖標數 */
-.bottom-bar-more-menu .bottom-bar-item {
-  /* 預設（窄螢幕/手機）：一列 4 個 */
-  flex: 0 0 25%;
-  max-width: 25%;
-}
-
-/* 螢幕寬度 >= 480px（大手機 / 平板）：自動切換為一列 5 個 */
-@media (min-width: 480px) {
-  .bottom-bar-more-menu .bottom-bar-item {
-    flex: 0 0 20%;
-    max-width: 20%;
-  }
 }
 
 .bottom-bar-more-overlay.show .bottom-bar-more-menu {
   transform: translateY(0);
 }
 
-/* 💡 避免頁面最底部的內容被 Fixed 導覽列遮擋 */
+/* 3. GROUP 組別樣式 */
+.bottom-bar-group-section {
+  width: 100%;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.bottom-bar-group-title {
+  width: 100%;
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+  padding: 8px 12px;
+  background-color: #f2f2f2;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* 4. GROUP 圖標網格 (標準 Grid 佈局) */
+.bottom-bar-group-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 手機版預設 4 欄 */
+  gap: 16px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 螢幕寬度 >= 480px (大手機 / 平板 / 電腦)：自動切換為一列 5 欄 */
+@media (min-width: 480px) {
+  .bottom-bar-group-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 5. 展開選單內的圖標按鈕對齊重置 (統一精簡寫法) */
+.bottom-bar-more-menu .bottom-bar-item {
+  width: 100%;
+  max-width: 100%; /* 取消底部 90px 的限制，由 Grid 欄位寬度自動決定 */
+  margin: 0 auto;
+}
+
+/* 避免頁面最底部內容被 Fixed 導覽列遮擋 */
 body {
   padding-bottom: 60px;
 }
