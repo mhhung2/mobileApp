@@ -152,8 +152,14 @@ class BottomBarNav {
         acc[groupName].push(item);
         return acc;
       }, {});
+	  
+	  const groupKeys = Object.keys(groupedItems).sort((a, b) => {
+        if (a === '其他' || a === '其他功能') return 1;  // a 是「其他」，排在後面
+        if (b === '其他' || b === '其他功能') return -1; // b 是「其他」，a 排在前面
+        return 0; // 其他組別維持原本順序
+      });
 
-      Object.keys(groupedItems).forEach(groupName => {
+      groupKeys.forEach(groupName => {
         const groupSection = document.createElement('div');
         groupSection.className = 'bottom-bar-group-section';
 
