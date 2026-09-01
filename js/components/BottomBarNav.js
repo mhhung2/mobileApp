@@ -1,10 +1,10 @@
 /**
- * BottomBarNav - 固定底部導覽列類別
+ * BottomBarNav - 固定底部導覽列類別 (支援 Priority 排序與 Group 分組)
  */
 class BottomBarNav {
   constructor(config = {}) {
     this.items = config.items || [];
-    this.maxVisible = config.maxVisible || 5;
+    this.maxVisible = config.maxVisible || 5; // 底部列預設顯示 5 個圖標
     this.activeId = config.activeId || '';
     this.containerId = config.containerId || null;
     this.overlayEl = null;
@@ -15,24 +15,32 @@ class BottomBarNav {
 
   static MORE_ICON = `<svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm6 6h4v-4h-4v4z"/></svg>`;
 
-init() {
+  init() {
     const existing = document.getElementById('bottom-bar-nav-root');
     if (existing) existing.remove();
 
     const rootContainer = document.createElement('div');
     rootContainer.id = 'bottom-bar-nav-root';
 
-    let visibleItems = [];
-    let overflowItems = [];
+    // 1. 根據 priority 排序 items (數字越小越優先顯示在未展開底部列)
+    const sortedItems = [...this.items].sort((a, b) => {
+      const pA = a.priority !== undefined ? a.priority : 99;
+      const pB = b.priority !== undefined ? b.priority : 99;
+      return pA - pB;
+    });
 
-    if (this.items.length <= this.maxVisible) {
-      visibleItems = this.items;
+    let visibleItems = [];
+    let hasOverflow = false;
+
+    // 2. 判斷顯示數量：若超過 maxVisible，保留 1 個位置給「更多」按鈕，故顯示 (maxVisible - 1) 個常用項目
+    if (sortedItems.length <= this.maxVisible) {
+      visibleItems = sortedItems;
     } else {
-      visibleItems = this.items.slice(0, this.maxVisible - 1);
-      overflowItems = this.items.slice(this.maxVisible - 1);
+      visibleItems = sortedItems.slice(0, this.maxVisible - 1);
+      hasOverflow = true;
     }
 
-    // 1. 建立主導覽列 (只放頭幾個)
+    // 3. 建立主導覽列
     this.barEl = document.createElement('nav');
     this.barEl.className = 'bottom-bar-nav';
 
@@ -40,8 +48,8 @@ init() {
       this.barEl.appendChild(this.createItemBtn(item));
     });
 
-    // 2. 當有項目溢出時，加入「更多」按鈕
-    if (overflowItems.length > 0) {
+    // 當有溢出項目時，補上第 5 個圖標（「更多」按鈕）
+    if (hasOverflow) {
       const moreBtn = this.createItemBtn({
         id: '_more',
         label: '更多',
@@ -50,7 +58,7 @@ init() {
       });
       this.barEl.appendChild(moreBtn);
 
-      // 💡 關鍵修改：傳入完整的 this.items，讓「更多」彈出面板顯示所有選擇項目
+      // 建立「更多」彈出選單
       this.createMoreOverlay(this.items, rootContainer);
     }
 
@@ -68,8 +76,8 @@ init() {
 
     const iconWrapper = document.createElement('div');
     iconWrapper.className = 'bottom-bar-icon-wrapper';
-	// 💡 自動解析：如果是常用圖標名稱則從 UI_ICONS 抓，否則當作原始 SVG 字串
-	let iconContent = item.icon || '';
+    
+    let iconContent = item.icon || '';
     if (typeof UI_ICONS !== 'undefined' && UI_ICONS[item.icon]) {
       iconContent = UI_ICONS[item.icon];
     }
@@ -83,6 +91,9 @@ init() {
       } else {
         badgeEl.textContent = String(item.badge);
       }
+	  if (item.badgeColor) {
+		badgeEl.style.backgroundColor = item.badgeColor;
+	  }
       iconWrapper.appendChild(badgeEl);
     }
 
@@ -99,7 +110,6 @@ init() {
         this.toggleMoreMenu(false);
       }
       if (typeof item.onClick === 'function') {
-        // 如果 onClick傳入的是字串（例如全域函式名稱），自動幫忙執行
         if (typeof item.onClick === 'string' && typeof window[item.onClick] === 'function') {
           window[item.onClick](item, e);
         } else {
@@ -111,16 +121,61 @@ init() {
     return btn;
   }
 
-  createMoreOverlay(overflowItems, parentEl) {
+  /**
+   * 建立「更多」展開面板（含整列置中與智慧 Group 隱藏）
+   */
+  createMoreOverlay(allItems, parentEl) {
     this.overlayEl = document.createElement('div');
     this.overlayEl.className = 'bottom-bar-more-overlay';
 
     const menuEl = document.createElement('div');
     menuEl.className = 'bottom-bar-more-menu';
 
-    overflowItems.forEach(item => {
-      menuEl.appendChild(this.createItemBtn(item));
-    });
+    // 檢查是否有任何項目定義了 group 屬性
+    const hasDefinedGroups = allItems.some(item => item.group && String(item.group).trim() !== '');
+
+    if (!hasDefinedGroups) {
+      // 情況 A：所有項目都沒有定義 GROUP，直接平鋪網格，不顯示任何標題字樣
+      const singleGrid = document.createElement('div');
+      singleGrid.className = 'bottom-bar-group-grid';
+      allItems.forEach(item => {
+        singleGrid.appendChild(this.createItemBtn(item));
+      });
+      menuEl.appendChild(singleGrid);
+    } else {
+      // 情況 B：有定義 GROUP，按組別分類渲染
+      const groupedItems = allItems.reduce((acc, item) => {
+        const groupName = item.group || '其他';
+        if (!acc[groupName]) {
+          acc[groupName] = [];
+        }
+        acc[groupName].push(item);
+        return acc;
+      }, {});
+
+      Object.keys(groupedItems).forEach(groupName => {
+        const groupSection = document.createElement('div');
+        groupSection.className = 'bottom-bar-group-section';
+
+        // 僅在該組別有名字時才顯示標題
+        if (groupName) {
+          const groupTitle = document.createElement('div');
+          groupTitle.className = 'bottom-bar-group-title';
+          groupTitle.textContent = groupName;
+          groupSection.appendChild(groupTitle);
+        }
+
+        const groupGrid = document.createElement('div');
+        groupGrid.className = 'bottom-bar-group-grid';
+
+        groupedItems[groupName].forEach(item => {
+          groupGrid.appendChild(this.createItemBtn(item));
+        });
+
+        groupSection.appendChild(groupGrid);
+        menuEl.appendChild(groupSection);
+      });
+    }
 
     this.overlayEl.appendChild(menuEl);
 
@@ -159,8 +214,8 @@ init() {
     const itemObj = this.items.find(i => i.id === id);
     if (itemObj) itemObj.badge = badgeValue;
     
-    const btn = document.querySelector(`#bottom-bar-nav-root .bottom-bar-item[data-id="${id}"]`);
-    if (btn) {
+    const btns = document.querySelectorAll(`#bottom-bar-nav-root .bottom-bar-item[data-id="${id}"]`);
+    btns.forEach(btn => {
       const wrapper = btn.querySelector('.bottom-bar-icon-wrapper');
       let badgeEl = wrapper.querySelector('.bottom-bar-badge');
       
@@ -179,8 +234,15 @@ init() {
           badgeEl.className = 'bottom-bar-badge';
           badgeEl.textContent = String(badgeValue);
         }
+		
+		const currentColor = badgeColor || (itemObj && itemObj.badgeColor);
+		if (currentColor) {
+		  badgeEl.style.backgroundColor = currentColor;
+		} else {
+		  badgeEl.style.backgroundColor = '';
+		}
       }
-    }
+    });
   }
 }
 
